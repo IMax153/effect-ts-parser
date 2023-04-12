@@ -131,11 +131,10 @@ describe.concurrent("Regex", () => {
     expect(compiled.matches("123")).toBe(true)
   })
 
-  // TODO
-  // it.only("digits - matches the first few digits", () => {
-  //   const compiled = Regex.compile(Regex.digits)
-  //   expect(compiled.matches("123ABC")).toBe(false)
-  // })
+  it("digits - matches the first few digits", () => {
+    const compiled = Regex.compile(Regex.digits)
+    expect(compiled.matches("123ABC")).toBe(true)
+  })
 
   it("keywords - matches all keywords", () => {
     expect(keywordStrings.every((keyword) => keywords.matches(keyword))).toBe(true)
@@ -192,34 +191,32 @@ describe.concurrent("Regex", () => {
     )
   })
 
-  // TODO
-  // it("atMost", () => {
-  //   fc.assert(fc.property(fc.integer({ min: 0, max: 20 }), fc.integer({ min: 0, max: 20 }), (len, max) => {
-  //     const str = "abc".repeat(len)
-  //     const compiled = Regex.compile(Regex.atMost(Regex.string("abc"), max))
-  //     const expected = Math.min(len, max) * 3
-  //     expect(compiled.test(0, str)).toBe(expected)
-  //   }))
-  // })
+  it("atMost", () => {
+    fc.assert(fc.property(fc.integer({ min: 0, max: 20 }), fc.integer({ min: 0, max: 20 }), (len, max) => {
+      const str = "abc".repeat(len)
+      const compiled = Regex.compile(Regex.atMost(Regex.string("abc"), max))
+      const expected = Math.min(len, max) * 3
+      expect(compiled.test(0, str)).toBe(expected)
+    }))
+  })
 
-  // TODO
-  // it("between", () => {
-  //   fc.assert(
-  //     fc.property(
-  //       fc.integer({ min: 0, max: 20 }),
-  //       fc.integer({ min: 0, max: 20 }),
-  //       fc.integer({ min: 0, max: 20 }),
-  //       (len, a, b) => {
-  //         const max = Math.max(a, b)
-  //         const min = Math.min(a, b)
-  //         const str = "x".repeat(len)
-  //         const compiled = Regex.compile(Regex.between(Regex.string("x"), min, max))
-  //         const expected = len >= min ? Math.min(len, max) : Regex.needMoreInput
-  //         expect(compiled.test(0, str)).toBe(expected)
-  //       }
-  //     )
-  //   )
-  // })
+  it.only("between", () => {
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 20 }),
+        fc.integer({ min: 0, max: 20 }),
+        fc.integer({ min: 0, max: 20 }),
+        (len, a, b) => {
+          const max = Math.max(a, b)
+          const min = Math.min(a, b)
+          const str = "x".repeat(len)
+          const compiled = Regex.compile(Regex.between(Regex.string("x"), min, max))
+          const expected = len >= min ? Math.min(len, max) : Regex.needMoreInput
+          expect(compiled.test(0, str)).toBe(expected)
+        }
+      )
+    )
+  })
 
   it("end of stream - charIn(['a', 'b'])", () => {
     const compiled = Regex.compile(Regex.charIn(["a", "b"]))

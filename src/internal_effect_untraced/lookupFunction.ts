@@ -477,16 +477,16 @@ const compileLookupFunction = (self: Regex.Regex): LookupFunction => {
         const lookupFn = compileLookupFunction(self.regex)
         const start = min === 0
           ? empty
-          : ReadonlyArray.makeBy(min, () => lookupFn).reduce(sequence, lookupFn)
-        const tuple = ReadonlyArray.reduce(
-          ReadonlyArray.range(min, max),
-          [HashSet.make(start), start] as const,
-          ([choices, current], _) => {
-            const next = sequence(current, lookupFn)
-            return [HashSet.add(choices, next), next] as const
-          }
-        )
-        const choices = ReadonlyArray.fromIterable(tuple[0])
+          : Array.from({ length: Math.max(0, min - 1) }, () => lookupFn).reduce(sequence, lookupFn)
+        let i = min
+        let set = HashSet.make(start)
+        let curr = start
+        while (i < max) {
+          curr = sequence(curr, lookupFn)
+          set = HashSet.add(set, curr)
+          i = i + 1
+        }
+        const choices = ReadonlyArray.fromIterable(set)
         const head = choices[0]!
         const rest = choices.slice(1)
         return ReadonlyArray.reduce(rest, head, or)
