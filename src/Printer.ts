@@ -23,6 +23,12 @@ export const PrinterTypeId: unique symbol = internal.PrinterTypeId
 export type PrinterTypeId = typeof PrinterTypeId
 
 /**
+ * A `Printer` takes an input value of type `Input` and either produces a result
+ * of type `Output`, or fails with a custom error of type `Error`.
+ *
+ * `Printer`s can be combined with `Parser`s to get `Syntax`, or a `Parser` and
+ * a `Printer` can be built simultaneously by using the combinators of `Syntax`.
+ *
  * @since 1.0.0
  * @category models
  */
@@ -276,9 +282,9 @@ export const filterInput: {
  * @since 1.0.0
  * @category combinators
  */
-export const flattenInput: <Error, Output>(
+export const flatten: <Error, Output>(
   self: Printer<Chunk<string>, Error, Output>
-) => Printer<string, Error, Output> = internal.flattenInput
+) => Printer<string, Error, Output> = internal.flatten
 
 /**
  * A `Printer` computed using a function on the input value.

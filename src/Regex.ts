@@ -1,7 +1,6 @@
 /**
  * @since 1.0.0
  */
-
 import type { Chunk } from "@effect/data/Chunk"
 import type { Option } from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"

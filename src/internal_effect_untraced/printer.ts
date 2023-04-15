@@ -109,7 +109,7 @@ export interface MapError extends
 export interface OrElse extends
   Op<"OrElse", {
     readonly left: Primitive
-    readonly right: Primitive
+    readonly right: LazyArg<Primitive>
   }>
 {}
 
@@ -117,7 +117,7 @@ export interface OrElse extends
 export interface OrElseEither extends
   Op<"OrElseEither", {
     readonly left: Primitive
-    readonly right: Primitive
+    readonly right: LazyArg<Primitive>
   }>
 {}
 
@@ -353,7 +353,7 @@ export const filterInput = dual<
       ? Either.right(value)
       : Either.left(error)))
 
-export const flattenInput = <Error, Output>(
+export const flatten = <Error, Output>(
   self: Printer.Printer<Chunk.Chunk<string>, Error, Output>
 ): Printer.Printer<string, Error, Output> => contramap(self, Chunk.of)
 
@@ -892,7 +892,7 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
         const cont: PrinterCont = Either.match(
           () => {
             output.drop(capture)
-            return [right, input, Option.none()] as const
+            return [right(), input, Option.none()] as const
           },
           () => {
             output.emit(capture)
@@ -920,7 +920,7 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
           },
           (rightInput) => {
             input = rightInput
-            current = right
+            current = right()
             const cont: PrinterCont = Either.match(
               (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
               () => [unit() as Primitive, oldInput, Option.none()] as const
