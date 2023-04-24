@@ -253,7 +253,7 @@ export const except: <Output, Error = string>(
  * @since 1.0.0
  * @category constructors
  */
-export const fail: <Error>(error: Error) => Printer<never, Error, never> = internal.fail
+export const fail: <Error>(error: Error) => Printer<unknown, Error, never> = internal.fail
 
 /**
  * Specifies a filter `condition` that gets checked on the input value and in
@@ -565,7 +565,7 @@ export const string: <Input>(str: string, input: Input) => Printer<Input, never,
  * @since 1.0.0
  * @category constructors
  */
-export const succeed: <Input>(input: Input) => Printer<Input, never, never> = internal.succeed
+export const succeed: <Input>(input: Input) => Printer<unknown, never, never> = internal.succeed
 
 /**
  * Surround this printer the `other` printer which gets `void` as the value to

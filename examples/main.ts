@@ -1,5 +1,11 @@
-import * as Parser from "@effect/parser/Parser"
+import { pipe } from "@effect/data/Function"
+import * as Syntax from "@effect/parser/Syntax"
 
-const parser = Parser.string("foobar", void 0)
-
-console.log(Parser.parse(parser, "foobar"))
+pipe(
+  Syntax.char("a"),
+  Syntax.orElse(() => Syntax.char("b")),
+  Syntax.repeatWithSeparator1(Syntax.char(",")),
+  Syntax.captureString,
+  Syntax.zipLeft(Syntax.char("!")),
+  Syntax.parseStringWith("a,a,b,a,b,b!", "stack-safe")
+)

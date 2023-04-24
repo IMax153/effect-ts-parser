@@ -2,10 +2,10 @@ import * as Chunk from "@effect/data/Chunk"
 import * as Either from "@effect/data/Either"
 import type { LazyArg } from "@effect/data/Function"
 import { dual, pipe } from "@effect/data/Function"
-import * as List from "@effect/data/List"
 import * as Option from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"
-import * as common from "@effect/parser/internal_effect_untraced/common"
+import * as recursive from "@effect/parser/internal_effect_untraced/parser/recursive"
+import * as stackSafe from "@effect/parser/internal_effect_untraced/parser/stack-safe"
 import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
 import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as Parser from "@effect/parser/Parser"
@@ -574,6 +574,76 @@ export const orElseEither = dual<
 })
 
 /** @internal */
+export const parseString = dual<
+  (
+    input: string
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Either.Either<ParserError.ParserError<Error>, Result>,
+  <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>,
+    input: string
+  ) => Either.Either<ParserError.ParserError<Error>, Result>
+>(2, (self, input) => parseStringWith(self, input, "recursive"))
+
+/** @internal */
+class StringParserState extends recursive.ParserState<string> {
+  readonly length: number
+  constructor(readonly source: string) {
+    super()
+    this.length = source.length
+  }
+  at(position: number): string {
+    return this.source[position]
+  }
+  sliceToChunk(position: number, until: number): Chunk.Chunk<string> {
+    return Chunk.unsafeFromArray(this.source.slice(position, until).split(""))
+  }
+  sliceToString(position: number, until: number): string {
+    return this.source.slice(position, until)
+  }
+  regex(compiledRegex: Regex.Regex.Compiled): number {
+    return compiledRegex.test(this.position, this.source)
+  }
+}
+
+/** @internal */
+export const parseStringWith = dual<
+  (
+    input: string,
+    implementation: Parser.Parser.Implementation
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Either.Either<ParserError.ParserError<Error>, Result>,
+  <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>,
+    input: string,
+    implementation: Parser.Parser.Implementation
+  ) => Either.Either<ParserError.ParserError<Error>, Result>
+>(3, <Input, Error, Result>(
+  self: Parser.Parser<Input, Error, Result>,
+  input: string,
+  implementation: Parser.Parser.Implementation
+) => {
+  switch (implementation) {
+    case "stack-safe": {
+      return stackSafe.charParserExecutor(
+        stackSafe.compile(optimize(self) as Primitive),
+        input
+      ) as Either.Either<ParserError.ParserError<Error>, Result>
+    }
+    case "recursive": {
+      const state = new StringParserState(input)
+      const result = recursive.parseRecursive(optimize(self) as Primitive, state)
+      if (state.error !== undefined) {
+        return Either.left(state.error as ParserError.ParserError<Error>)
+      }
+      return Either.right(result as Result)
+    }
+  }
+})
+
+/** @internal */
 export const regex = <Error>(regex: Regex.Regex, error: Error): Parser.Parser<string, Error, Chunk.Chunk<string>> => {
   const op = Object.create(proto)
   op._tag = "ParseRegex"
@@ -610,6 +680,22 @@ export const repeat1 = <Input, Error, Result>(
   self: Parser.Parser<Input, Error, Result>
 ): Parser.Parser<Input, Error, Chunk.NonEmptyChunk<Result>> =>
   atLeast(self, 1) as Parser.Parser<Input, Error, Chunk.NonEmptyChunk<Result>>
+
+/** @internal */
+export const repeatUntil = dual<
+  <Input2, Error2>(
+    stopCondition: Parser.Parser<Input2, Error2, void>
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Parser.Parser<Input & Input2, Error | Error2, Chunk.Chunk<Result>>,
+  <Input, Error, Result, Input2, Error2>(
+    self: Parser.Parser<Input, Error, Result>,
+    stopCondition: Parser.Parser<Input2, Error2, void>
+  ) => Parser.Parser<Input & Input2, Error | Error2, Chunk.Chunk<Result>>
+>(2, <Input, Error, Result, Input2, Error2>(
+  self: Parser.Parser<Input, Error, Result>,
+  stopCondition: Parser.Parser<Input2, Error2, void>
+) => manualBacktracking(repeat(zipRight(not(stopCondition, void 0 as Error2), self))))
 
 /** @internal */
 export const repeatWithSeparator = dual<
@@ -710,7 +796,7 @@ export const transformEither = dual<
 >(2, (self, f) => {
   const op = Object.create(proto)
   op._tag = "TransformEither"
-  op.printer = self
+  op.parser = self
   op.to = f
   return op
 })
@@ -766,13 +852,7 @@ export const zip = dual<
     self: Parser.Parser<Input, Error, Result>,
     that: Parser.Parser<Input2, Error2, Result2>
   ) => Parser.Parser<Input & Input2, Error | Error2, readonly [Result, Result2]>
->(2, (self, that) => {
-  const op = Object.create(proto)
-  op._tag = "Zip"
-  op.left = self
-  op.right = that
-  return op
-})
+>(2, (self, that) => zipWith(self, that, (left, right) => [left, right]))
 
 /** @internal */
 export const zipLeft = dual<
@@ -809,6 +889,28 @@ export const zipRight = dual<
   op._tag = "ZipRight"
   op.left = self
   op.right = that
+  return op
+})
+
+/** @internal */
+export const zipWith = dual<
+  <Input2, Error2, Result2, Result, Result3>(
+    that: Parser.Parser<Input2, Error2, Result2>,
+    zip: (left: Result, right: Result2) => Result3
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Parser.Parser<Input & Input2, Error | Error2, Result3>,
+  <Input, Error, Result, Input2, Error2, Result2, Result3>(
+    self: Parser.Parser<Input, Error, Result>,
+    that: Parser.Parser<Input2, Error2, Result2>,
+    zip: (left: Result, right: Result2) => Result3
+  ) => Parser.Parser<Input & Input2, Error | Error2, Result3>
+>(3, (self, that, zip) => {
+  const op = Object.create(proto)
+  op._tag = "ZipWith"
+  op.left = self
+  op.right = that
+  op.zip = zip
   return op
 })
 
@@ -852,384 +954,9 @@ export const unit = (): Parser.Parser<unknown, never, void> => succeed(void 0)
 /** @internal */
 export const whitespace: Parser.Parser<string, string, string> = regexChar(_regex.whitespace, `not a whitespace`)
 
-/**
- * The state of the recursive parser implementation.
- */
-abstract class ParserState<Input> {
-  abstract readonly length: number
-  abstract at(position: number): Input
-  abstract sliceToChunk(position: number, until: number): Chunk.Chunk<Input>
-  abstract sliceToString(position: number, until: number): string
-  abstract regex(compiledRegex: Regex.Regex.Compiled): number
-
-  public position = 0
-  public discard = false
-  public nameStack = List.empty<string>()
-  public error: ParserError.ParserError<unknown> | undefined = undefined
-
-  charAt(position: number): string {
-    return this.at(position) as string
-  }
-
-  pushName(name: string): void {
-    this.nameStack = List.prepend(this.nameStack, name)
-  }
-
-  popName(): void {
-    if (List.isCons(this.nameStack)) {
-      this.nameStack = this.nameStack.tail
-    }
-  }
-}
-
-class StringParserState extends ParserState<string> {
-  readonly length: number
-  constructor(readonly source: string) {
-    super()
-    this.length = source.length
-  }
-  at(position: number): string {
-    return this.source[position]
-  }
-  sliceToChunk(position: number, until: number): Chunk.Chunk<string> {
-    return Chunk.unsafeFromArray(this.source.slice(position, until).split(""))
-  }
-  sliceToString(position: number, until: number): string {
-    return this.source.slice(position, until)
-  }
-  regex(compiledRegex: Regex.Regex.Compiled): number {
-    return compiledRegex.test(this.position, this.source)
-  }
-}
-
-export const parse = <Input, Error, Result>(
-  self: Parser.Parser<Input, Error, Result>,
-  input: string
-): Either.Either<ParserError.ParserError<Error>, Result> => {
-  const state = new StringParserState(input)
-  const result = parseRecursive(optimize(self) as Primitive, state)
-  if (state.error !== undefined) {
-    return Either.left(state.error as ParserError.ParserError<Error>)
-  }
-  return Either.right(result as Result)
-}
-
-const parseRecursive: {
-  <Input>(state: ParserState<Input>): (self: Primitive) => unknown | undefined
-  <Input>(self: Primitive, state: ParserState<Input>): unknown | undefined
-} = dual<
-  <Input>(state: ParserState<Input>) => (self: Primitive) => unknown | undefined,
-  <Input>(self: Primitive, state: ParserState<Input>) => unknown | undefined
->(2, (self, state) => {
-  switch (self._tag) {
-    case "Backtrack": {
-      const position = state.position
-      const result = parseRecursive(self.parser, state)
-      if (state.error !== undefined) {
-        state.position = position
-      }
-      return result
-    }
-    case "CaptureString": {
-      const discard = state.discard
-      const startPosition = state.position
-      state.discard = true
-      parseRecursive(self.parser, state)
-      state.discard = discard
-      if (!discard && state.error === undefined) {
-        const endPosition = state.position
-        return state.sliceToString(startPosition, endPosition)
-      }
-      return undefined
-    }
-    case "End": {
-      if (state.position < state.length) {
-        state.error = parserError.notConsumedAll(Option.none())
-      }
-      return undefined
-    }
-    case "Fail": {
-      state.error = parserError.failure(state.nameStack, state.position, self.error)
-      return undefined
-    }
-    case "Failed": {
-      state.error = self.error
-      return undefined
-    }
-    case "FlatMap": {
-      const discard = state.discard
-      state.discard = false
-      const result = parseRecursive(self.parser, state)
-      state.discard = discard
-      if (state.error === undefined) {
-        const next = self.f(result)
-        return parseRecursive(next, state)
-      }
-      return undefined
-    }
-    case "Ignore": {
-      const discard = state.discard
-      state.discard = true
-      parseRecursive(self.parser, state)
-      state.discard = discard
-      return self.to
-    }
-    case "Index": {
-      return state.position
-    }
-    case "MapError": {
-      const result = parseRecursive(self.parser, state)
-      if (state.error !== undefined) {
-        state.error = self.mapError(state.error)
-      }
-      return result
-    }
-    case "Named": {
-      state.pushName(self.name)
-      const result = parseRecursive(self.parser, state)
-      state.popName()
-      return result
-    }
-    case "Not": {
-      const discard = state.discard
-      state.discard = true
-      parseRecursive(self.parser, state)
-      state.discard = discard
-      if (state.error === undefined) {
-        state.error = parserError.failure(state.nameStack, state.position, self.error)
-      } else {
-        state.error = undefined
-      }
-      return undefined
-    }
-    case "Optional": {
-      const startPosition = state.position
-      const result = parseRecursive(self.parser, state)
-      if (state.error === undefined) {
-        if (!state.discard) {
-          return Option.some(result)
-        }
-        return undefined
-      }
-      if (state.position !== startPosition) {
-        return undefined
-      }
-      state.error = undefined
-      return Option.none()
-    }
-    case "OrElse": {
-      const startPosition = state.position
-      const leftResult = parseRecursive(self.left, state)
-      if (state.error === undefined) {
-        if (!state.discard) {
-          return Either.left(leftResult)
-        }
-        return undefined
-      }
-      if (state.position === startPosition) {
-        const leftFailure = state.error
-        state.error = undefined
-        const rightResult = parseRecursive(self.right(), state)
-        if (state.error === undefined) {
-          if (!state.discard) {
-            return Either.right(rightResult)
-          }
-          return undefined
-        }
-        state.error = parserError.addFailedBranch(leftFailure, state.error)
-        return undefined
-      }
-      return undefined
-    }
-    case "OrElseEither": {
-      const startPosition = state.position
-      const leftResult = parseRecursive(self.left, state)
-      if (state.error === undefined) {
-        if (!state.discard) {
-          return Either.left(leftResult)
-        }
-        return undefined
-      }
-      if (state.position === startPosition) {
-        const leftFailure = state.error
-        state.error = undefined
-        const rightResult = parseRecursive(self.right(), state)
-        if (state.error === undefined) {
-          if (!state.discard) {
-            return Either.right(rightResult)
-          }
-          return undefined
-        }
-        state.error = parserError.addFailedBranch(leftFailure, state.error)
-        return undefined
-      }
-      return undefined
-    }
-    case "ParseRegex": {
-      const position = state.position
-      const result = state.regex(_regex.compile(self.regex))
-      if (result === common.needMoreInput) {
-        state.error = parserError.unexpectedEndOfInput
-        return undefined
-      }
-      if (result === common.notMatched) {
-        state.error = getParserError(position, state.nameStack, self.onFailure)
-        return undefined
-      }
-      state.position = result
-      if (!state.discard) {
-        return state.sliceToChunk(position, result)
-      }
-      return undefined
-    }
-    case "ParseRegexLastChar": {
-      const position = state.position
-      const result = state.regex(_regex.compile(self.regex))
-      if (result === common.needMoreInput) {
-        state.error = parserError.unexpectedEndOfInput
-        return undefined
-      }
-      if (result === common.notMatched) {
-        state.error = getParserError(position, state.nameStack, self.onFailure)
-        return undefined
-      }
-      state.position = result
-      if (!state.discard) {
-        return state.charAt(result - 1)
-      }
-      return undefined
-    }
-    case "Passthrough": {
-      if (state.position < state.length) {
-        const result = state.at(state.position)
-        state.position = state.position + 1
-        return result
-      }
-      state.error = parserError.unexpectedEndOfInput
-      return undefined
-    }
-    case "Repeat": {
-      const maxCount = Option.getOrElse(self.max, () => Infinity)
-      const discard = state.discard
-      const builder: Array<unknown> | undefined = discard ? undefined : []
-      let count = 0
-      let lastItemStart = -1
-      const sourceLength = state.length
-      while (state.error === undefined && count < maxCount && lastItemStart < sourceLength) {
-        lastItemStart = state.position
-        const item = parseRecursive(self.parser, state)
-        if (state.error === undefined) {
-          count = count + 1
-          if (!discard) {
-            builder!.push(item)
-          }
-        }
-      }
-      if (count < self.min && state.error === undefined) {
-        state.error = parserError.unexpectedEndOfInput
-      } else {
-        if (count >= self.min) {
-          state.error = undefined
-        }
-      }
-      if (!discard && state.error === undefined) {
-        return Chunk.unsafeFromArray(builder!)
-      }
-      return undefined
-    }
-    case "SetAutoBacktrack": {
-      // optimize will always remove this node
-      return undefined
-    }
-    case "SkipRegex": {
-      const position = state.position
-      const result = state.regex(_regex.compile(self.regex))
-      if (result === common.needMoreInput) {
-        state.error = parserError.unexpectedEndOfInput
-      } else if (result === common.notMatched) {
-        state.error = getParserError(position, state.nameStack, self.onFailure)
-      } else {
-        state.position = result
-      }
-      return undefined
-    }
-    case "Succeed": {
-      return self.result
-    }
-    case "Suspend": {
-      return parseRecursive(self.parser(), state)
-    }
-    case "Transform": {
-      const result = parseRecursive(self.parser, state)
-      if (!state.discard && state.error === undefined) {
-        return self.to(result)
-      }
-      return undefined
-    }
-    case "TransformEither": {
-      // NOTE: cannot skip in discard mode, we need to detect failures
-      const discard = state.discard
-      state.discard = false
-      const innerResult = parseRecursive(self.parser, state)
-      state.discard = discard
-      if (state.error === undefined) {
-        const result = self.to(innerResult)
-        return Either.getOrElse(result, (error) => {
-          state.error = parserError.failure(state.nameStack, state.position, error)
-          return undefined
-        })
-      }
-      return undefined
-    }
-    case "ZipLeft": {
-      const left = parseRecursive(self.left, state)
-      if (state.error === undefined) {
-        const discard = state.discard
-        state.discard = true
-        parseRecursive(self.right, state)
-        state.discard = discard
-        if (state.error === undefined) {
-          return left
-        }
-      }
-      return undefined
-    }
-    case "ZipRight": {
-      const discard = state.discard
-      state.discard = true
-      parseRecursive(self.left, state)
-      state.discard = discard
-      if (state.error === undefined) {
-        const right = parseRecursive(self.right, state)
-        if (state.error === undefined) {
-          return right
-        }
-      }
-      return undefined
-    }
-    case "ZipWith": {
-      const left = parseRecursive(self.left, state)
-      if (state.error === undefined) {
-        const right = parseRecursive(self.right, state)
-        if (!state.discard && state.error === undefined) {
-          return self.zip(left, right)
-        }
-      }
-      return undefined
-    }
-  }
-})
-
-const getParserError = (
-  position: number,
-  nameStack: List.List<string>,
-  onFailure: Option.Option<unknown>
-): ParserError.ParserError<unknown> =>
-  Option.match(
-    onFailure,
-    () => parserError.unknownFailure(nameStack, position),
-    (error) => parserError.failure(nameStack, position, error)
-  )
+// -----------------------------------------------------------------------------
+// Optimization
+// -----------------------------------------------------------------------------
 
 interface OptimizerState {
   optimized: Map<Primitive, Primitive>
@@ -1375,7 +1102,7 @@ const optimizeNode = (
       } else {
         op._tag = "OrElse"
         op.left = optimizedLeft
-        op.right = optimizedRight
+        op.right = () => optimizedRight
       }
       state.optimized.set(self, op)
       return op
@@ -1387,7 +1114,7 @@ const optimizeNode = (
       const op = Object.create(proto)
       op._tag = "OrElseEither"
       op.left = optimizedLeft
-      op.right = optimizedRight
+      op.right = () => optimizedRight
       state.optimized.set(self, op)
       return op
     }
@@ -1512,8 +1239,7 @@ const needsBacktrack = (self: Primitive): boolean => {
     case "Named":
     case "Not":
     case "SetAutoBacktrack":
-    case "Transform":
-    case "TransformEither": {
+    case "Transform": {
       return needsBacktrack(self.parser)
     }
     case "OrElse":
@@ -1535,6 +1261,7 @@ const needsBacktrack = (self: Primitive): boolean => {
     case "FlatMap":
     case "Repeat":
     case "Suspend":
+    case "TransformEither":
     case "ZipLeft":
     case "ZipRight":
     case "ZipWith": {

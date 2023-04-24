@@ -10,11 +10,6 @@ import * as internal from "@effect/parser/internal_effect_untraced/parser"
 import type { ParserError } from "@effect/parser/ParserError"
 import type { Regex } from "@effect/parser/Regex"
 
-export const parse: <Input, Error, Result>(
-  self: Parser<Input, Error, Result>,
-  input: string
-) => Either<ParserError<Error>, Result> = internal.parse
-
 /**
  * @since 1.0.0
  * @category symbols
@@ -66,6 +61,12 @@ export declare namespace Parser {
       readonly _Result: (_: never) => Result
     }
   }
+
+  /**
+   * @since 1.0.0
+   * @category models
+   */
+  export type Implementation = "stack-safe" | "recursive"
 }
 
 /**
@@ -468,6 +469,36 @@ export const orElseEither: {
 } = internal.orElseEither
 
 /**
+ * Run a `Parser` on the given `input` string.
+ *
+ * @since 1.0.0
+ * @category execution
+ */
+export const parseString: {
+  (input: string): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<ParserError<Error>, Result>
+  <Input, Error, Result>(self: Parser<Input, Error, Result>, input: string): Either<ParserError<Error>, Result>
+} = internal.parseString
+
+/**
+ * Run a `Parser` on the given `input` string using a specific parser
+ * implementation.
+ *
+ * @since 1.0.0
+ * @category execution
+ */
+export const parseStringWith: {
+  (
+    input: string,
+    implementation: Parser.Implementation
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<ParserError<Error>, Result>
+  <Input, Error, Result>(
+    self: Parser<Input, Error, Result>,
+    input: string,
+    implementation: Parser.Implementation
+  ): Either<ParserError<Error>, Result>
+} = internal.parseStringWith
+
+/**
  * Constructs a `Parser` that executes a regular expression on the input and
  * results in the chunk of the parsed characters, or fails with the specified
  * `error`.
@@ -524,6 +555,24 @@ export const repeat: <Input, Error, Result>(
 export const repeat1: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
 ) => Parser<Input, Error, NonEmptyChunk<Result>> = internal.repeat1
+
+/**
+ * Repeats this parser until the given `stopCondition` parser succeeds.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const repeatUntil: {
+  <Input2, Error2>(
+    stopCondition: Parser<Input2, Error2, void>
+  ): <Input, Error, Result>(
+    self: Parser<Input, Error, Result>
+  ) => Parser<Input & Input2, Error2 | Error, Chunk<Result>>
+  <Input, Error, Result, Input2, Error2>(
+    self: Parser<Input, Error, Result>,
+    stopCondition: Parser<Input2, Error2, void>
+  ): Parser<Input & Input2, Error | Error2, Chunk<Result>>
+} = internal.repeatUntil
 
 /**
  * Repeats this parser zero or more times and requires that between each
@@ -752,3 +801,24 @@ export const zipRight: {
     that: Parser<Input2, Error2, Result2>
   ): Parser<Input & Input2, Error | Error2, Result2>
 } = internal.zipRight
+
+/**
+ * Concatenates this parser with `that` parser. In case both parser succeeds,
+ * the result is computed using the specified `zip` function.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const zipWith: {
+  <Input2, Error2, Result2, Result, Result3>(
+    that: Parser<Input2, Error2, Result2>,
+    zip: (left: Result, right: Result2) => Result3
+  ): <Input, Error, Result>(
+    self: Parser<Input, Error, Result>
+  ) => Parser<Input & Input2, Error2 | Error, Result3>
+  <Input, Error, Result, Input2, Error2, Result2, Result3>(
+    self: Parser<Input, Error, Result>,
+    that: Parser<Input2, Error2, Result2>,
+    zip: (left: Result, right: Result2) => Result3
+  ): Parser<Input & Input2, Error | Error2, Result3>
+} = internal.zipWith

@@ -319,7 +319,7 @@ export const except = <Output, Error = string>(value: Output, error?: Error): Pr
   filterInput(anything(), (input) => !Equal.equals(input, value), error ?? (`cannot be '${value}'` as any))
 
 /** @internal */
-export const fail = <Error>(error: Error): Printer.Printer<never, Error, never> => {
+export const fail = <Error>(error: Error): Printer.Printer<unknown, Error, never> => {
   const op = Object.create(proto)
   op._tag = "Fail"
   op.error = error
@@ -415,7 +415,7 @@ export const orElse = dual<
   const op = Object.create(proto)
   op._tag = "OrElse"
   op.left = self
-  op.right = suspend(that)
+  op.right = () => suspend(that)
   return op
 })
 
@@ -434,7 +434,7 @@ export const orElseEither = dual<
   const op = Object.create(proto)
   op._tag = "OrElseEither"
   op.left = self
-  op.right = suspend(that)
+  op.right = () => suspend(that)
   return op
 })
 
@@ -608,7 +608,7 @@ export const repeatUntil = dual<
 >(2, (self, stopCondition) => zipLeft(repeat(self), stopCondition))
 
 /** @internal */
-export const succeed = <Input>(input: Input): Printer.Printer<Input, never, never> => {
+export const succeed = <Input>(input: Input): Printer.Printer<unknown, never, never> => {
   const op = Object.create(proto)
   op._tag = "Succeed"
   op.input = input
@@ -726,10 +726,14 @@ export const zip = dual<
   op._tag = "Zip"
   op.left = self
   op.right = that
-  op.unzip = (value: unknown) =>
-    Array.isArray(value)
-      ? [value.slice(0, value.length - 1), value[value.length - 1]]
-      : [void 0, value]
+  op.unzip = (value: unknown) => {
+    if (Array.isArray(value)) {
+      return value.length === 2
+        ? value
+        : [value.slice(0, value.length - 1), value[value.length - 1]]
+    }
+    throw new Error("BUG - received unzippable value")
+  }
   return op
 })
 
@@ -809,6 +813,7 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
   }
 
   while (current !== undefined) {
+    console.log(current._tag)
     switch (current._tag) {
       case "ContramapEither": {
         const oldInput = input
@@ -954,11 +959,11 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
         if (Option.isSome(current.onFailure)) {
           const compiled = _regex.compile(current.regex)
           const char = input as string
-          if (compiled.test(0, char) <= 0) {
-            finish(Either.left(current.onFailure.value))
-          } else {
+          if (compiled.test(0, char) > 0) {
             output.write(input as Output)
             finish(Either.right(void 0))
+          } else {
+            finish(Either.left(current.onFailure.value))
           }
         } else {
           output.write(input as Output)
@@ -984,11 +989,9 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       }
       case "Repeat": {
         const inputChunk = input as Chunk.Chunk<unknown>
-        if (Chunk.isEmpty(inputChunk)) {
-          finish(Either.right(void 0))
-        } else {
-          const head = Chunk.unsafeHead(inputChunk)
-          const tail = Chunk.drop(inputChunk, 1)
+        if (Chunk.isNonEmpty(inputChunk)) {
+          const head = Chunk.headNonEmpty(inputChunk)
+          const tail = Chunk.tailNonEmpty(inputChunk)
           current = current.printer
           input = head
           const cont: PrinterCont = Either.match(
@@ -996,7 +999,7 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
             () =>
               [
                 current as Primitive,
-                tail,
+                Chunk.join(tail as Chunk.Chunk<string>, ""),
                 Option.some(Either.match(
                   (failure) => [fail(failure) as Primitive, inputChunk, Option.none()] as const,
                   () => [unit() as Primitive, inputChunk, Option.none()] as const
@@ -1004,6 +1007,8 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
               ] as const
           )
           stack = List.cons(cont, stack)
+        } else {
+          finish(Either.right(void 0))
         }
         break
       }
@@ -1027,12 +1032,20 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       case "ZipLeft":
       case "ZipRight": {
         const oldInput = input
-        const right = current.right
+        const left: Primitive = current.left
+        const right: Primitive = current.right
+        let valueA: unknown | undefined = undefined
         let valueB: unknown | undefined = undefined
         if (current._tag === "Zip") {
           const tuple = current.unzip(input)
-          input = tuple[0]
+          valueA = tuple[0]
           valueB = tuple[1]
+        } else if (current._tag === "ZipLeft") {
+          valueA = input
+          valueB = void 0
+        } else {
+          valueA = void 0
+          valueB = input
         }
         const cont1: PrinterCont = Either.match(
           (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
@@ -1044,7 +1057,8 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
             return [right, valueB, Option.some(cont2)] as const
           }
         )
-        current = current.left
+        current = left
+        input = valueA
         stack = List.cons(cont1, stack)
         break
       }
