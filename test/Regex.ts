@@ -200,7 +200,7 @@ describe.concurrent("Regex", () => {
     }))
   })
 
-  it.only("between", () => {
+  it("between", () => {
     fc.assert(
       fc.property(
         fc.integer({ min: 0, max: 20 }),

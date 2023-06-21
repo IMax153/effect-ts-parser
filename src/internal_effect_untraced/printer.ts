@@ -813,7 +813,6 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
   }
 
   while (current !== undefined) {
-    console.log(current._tag)
     switch (current._tag) {
       case "ContramapEither": {
         const oldInput = input
@@ -992,18 +991,16 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
         if (Chunk.isNonEmpty(inputChunk)) {
           const head = Chunk.headNonEmpty(inputChunk)
           const tail = Chunk.tailNonEmpty(inputChunk)
+          const repeat = current
           current = current.printer
           input = head
           const cont: PrinterCont = Either.match(
-            (failure) => [fail(failure) as Primitive, inputChunk, Option.none()] as const,
+            () => [unit() as Primitive, inputChunk, Option.none()] as const,
             () =>
               [
-                current as Primitive,
-                Chunk.join(tail as Chunk.Chunk<string>, ""),
-                Option.some(Either.match(
-                  (failure) => [fail(failure) as Primitive, inputChunk, Option.none()] as const,
-                  () => [unit() as Primitive, inputChunk, Option.none()] as const
-                ))
+                repeat as Primitive,
+                tail,
+                Option.none()
               ] as const
           )
           stack = List.cons(cont, stack)

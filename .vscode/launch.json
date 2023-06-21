@@ -5,7 +5,6 @@
       "name": "Debug",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "/nix/store/zdf74z3sm9rxwankvpkiljmvs411zlhp-nodejs-16.19.1/bin/node",
       "runtimeArgs": ["--nolazy"],
       "args": [".vscode/debug.cjs"],
       "cwd": "${workspaceRoot}",
