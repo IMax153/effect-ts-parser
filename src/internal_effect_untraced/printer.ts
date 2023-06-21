@@ -813,7 +813,6 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
   }
 
   while (current !== undefined) {
-    console.log(current._tag)
     switch (current._tag) {
       case "ContramapEither": {
         const oldInput = input
