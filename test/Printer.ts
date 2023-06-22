@@ -216,7 +216,7 @@ describe("Printer", () => {
 
   printerTest(
     "repeat, once",
-    Syntax.repeat(charA),
+    Syntax.repeat1(charA),
     Chunk.of("a"),
     Either.right("a")
   )
@@ -237,9 +237,4 @@ describe("Printer", () => {
     Chunk.make("a", "b", "c"),
     Either.right("a-b-c")
   )
-  // suite("repeatWithSep")(
-  //   printerTest("repeatWithSep", Syntax.anyChar.repeatWithSep(Syntax.char('-')), Chunk('a', 'b', 'c'))(
-  //     isRight(equalTo("a-b-c"))
-  //   )
-  // ),
 })
