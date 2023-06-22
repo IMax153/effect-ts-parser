@@ -184,7 +184,7 @@ export interface Passthrough extends Op<"Passthrough"> {}
 export interface Repeat extends
   Op<"Repeat", {
     readonly parser: Primitive
-    readonly min: number
+    readonly min: Option.Option<number>
     readonly max: Option.Option<number>
   }>
 {}
@@ -292,6 +292,33 @@ export const asUnit = <Input, Error, Result>(
 ): Parser.Parser<Input, Error, void> => as(self, void 0)
 
 /** @internal */
+export const re = dual<
+  (
+    min: Option.Option<number>,
+    max: Option.Option<number>
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>,
+  <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>,
+    min: Option.Option<number>,
+    max: Option.Option<number>
+  ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>
+>(3, (self, min, max) => {
+  const op = Object.create(proto)
+  op._tag = "Repeat"
+  op.parser = self
+  op.min = min
+  op.max = max
+  return op
+})
+
+/** @internal */
+export const autoBacktracking = <Input, Error, Result>(
+  self: Parser.Parser<Input, Error, Result>
+): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, true)
+
+/** @internal */
 export const atLeast = dual<
   (
     min: number
@@ -302,19 +329,7 @@ export const atLeast = dual<
     self: Parser.Parser<Input, Error, Result>,
     min: number
   ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>
->(2, (self, min) => {
-  const op = Object.create(proto)
-  op._tag = "Repeat"
-  op.parser = self
-  op.min = min
-  op.max = Option.none()
-  return op
-})
-
-/** @internal */
-export const autoBacktracking = <Input, Error, Result>(
-  self: Parser.Parser<Input, Error, Result>
-): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, true)
+>(2, (self, min) => re(self, Option.some(min), Option.none()))
 
 /** @internal */
 export const backtrack = <Input, Error, Result>(
@@ -380,14 +395,7 @@ export const exactly = dual<
     self: Parser.Parser<Input, Error, Result>,
     times: number
   ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>
->(2, (self, times) => {
-  const op = Object.create(proto)
-  op._tag = "Repeat"
-  op.parser = self
-  op.min = times
-  op.max = Option.some(times)
-  return op
-})
+>(2, (self, times) => re(self, Option.some(times), Option.some(times)))
 
 /** @internal */
 export const fail = <Error>(error: Error): Parser.Parser<unknown, Error, never> => {
@@ -1123,13 +1131,17 @@ const optimizeNode = (
       const optimizedInner = optimizeNode(inner, state)
       const op = Object.create(proto)
       if (optimizedInner._tag === "ParseRegexLastChar") {
-        if (Option.isSome(self.max)) {
+        if (Option.isSome(self.min) && Option.isSome(self.max)) {
           op._tag = "ParseRegex"
-          op.regex = _regex.between(optimizedInner.regex, self.min, self.max.value)
+          op.regex = _regex.between(optimizedInner.regex, self.min.value, self.max.value)
           op.onFailure = optimizedInner.onFailure
-        } else {
+        } else if (Option.isSome(self.max)) {
           op._tag = "ParseRegex"
-          op.regex = _regex.atLeast(optimizedInner.regex, self.min)
+          op.regex = _regex.atMost(optimizedInner.regex, self.max.value)
+          op.onFailure = optimizedInner.onFailure
+        } else if (Option.isSome(self.min)) {
+          op._tag = "ParseRegex"
+          op.regex = _regex.atLeast(optimizedInner.regex, self.min.value)
           op.onFailure = optimizedInner.onFailure
         }
         state.optimized.set(self, op)

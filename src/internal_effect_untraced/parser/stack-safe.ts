@@ -304,7 +304,7 @@ export interface PushArray {
 export interface ProcessRepeatedElement {
   readonly _tag: "ProcessRepeatedElement"
   readonly parseElement: ParserOp
-  readonly min: number
+  readonly min: Option.Option<number>
   readonly max: Option.Option<number>
 }
 
@@ -961,6 +961,7 @@ export const charParserExecutor = (
           opStack = List.cons(op, opStack)
           op = op.parseElement
         } else {
+          const minCount = Option.getOrElse(op.min, () => 0)
           const builder = lastBuilder
           if (List.isCons(builderStack)) {
             lastBuilder = builderStack.head
@@ -968,7 +969,7 @@ export const charParserExecutor = (
           } else {
             lastBuilder = undefined
           }
-          if (builder!.length < op.min) {
+          if (builder!.length < minCount) {
             // not enough elements
             lastFailure1 = parserError.unexpectedEndOfInput
             popOpStack()

@@ -232,6 +232,7 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
     }
     case "Repeat": {
       const maxCount = Option.getOrElse(self.max, () => Infinity)
+      const minCount = Option.getOrElse(self.min, () => 0)
       const discard = state.discard
       const builder: Array<unknown> | undefined = discard ? undefined : []
       let count = 0
@@ -247,10 +248,10 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
           }
         }
       }
-      if (count < self.min && state.error === undefined) {
+      if (count < minCount && state.error === undefined) {
         state.error = parserError.unexpectedEndOfInput
       } else {
-        if (count >= self.min) {
+        if (count >= minCount) {
           state.error = undefined
         }
       }
