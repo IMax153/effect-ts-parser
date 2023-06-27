@@ -330,6 +330,16 @@ export const flatten: <Input, Error, Output>(
 ) => Syntax<Input, Error, Output, string> = internal.flatten
 
 /**
+ * Flattens a result of parsed strings to a single string.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const flattenNonEmpty: <Input, Error, Output>(
+  self: Syntax<Input, Error, Output, NonEmptyChunk<string>>
+) => Syntax<Input, Error, Output, string> = internal.flattenNonEmpty
+
+/**
  * Constructs a `Syntax` that in parser mode results in the current input
  * stream position.
  *
@@ -716,6 +726,16 @@ export const surroundedBy: {
     other: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 } = internal.surroundedBy
+
+/**
+ * Lazily constructs a `Syntax`.
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const suspend: <Input, Error, Output, Value>(
+  self: LazyArg<Syntax<Input, Error, Output, Value>>
+) => Syntax<Input, Error, Output, Value> = internal.suspend
 
 /**
  * Maps the parser's successful result with the given function `to`, and maps

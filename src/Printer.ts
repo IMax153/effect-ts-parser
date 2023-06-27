@@ -287,6 +287,16 @@ export const flatten: <Error, Output>(
 ) => Printer<string, Error, Output> = internal.flatten
 
 /**
+ * Concatenates an input `Chunk<string>` to a `string` to be printed.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const flattenNonEmpty: <Error, Output>(
+  self: Printer<NonEmptyChunk<string>, Error, Output>
+) => Printer<string, Error, Output> = internal.flattenNonEmpty
+
+/**
  * A `Printer` computed using a function on the input value.
  *
  * @since 1.0.0

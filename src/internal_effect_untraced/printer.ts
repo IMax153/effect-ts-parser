@@ -353,8 +353,14 @@ export const filterInput = dual<
       ? Either.right(value)
       : Either.left(error)))
 
+/** @internal */
 export const flatten = <Error, Output>(
   self: Printer.Printer<Chunk.Chunk<string>, Error, Output>
+): Printer.Printer<string, Error, Output> => contramap(self, Chunk.of)
+
+/** @internal */
+export const flattenNonEmpty = <Error, Output>(
+  self: Printer.Printer<Chunk.NonEmptyChunk<string>, Error, Output>
 ): Printer.Printer<string, Error, Output> => contramap(self, Chunk.of)
 
 /** @internal */

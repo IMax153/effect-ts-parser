@@ -57,7 +57,7 @@ describe("Printer", () => {
   )
 
   printerTest(
-    "filtered char, passing",
+    "filtered char, failing",
     pipe(
       Syntax.anyChar,
       Syntax.filter((char) => char === "h", "not 'h'")

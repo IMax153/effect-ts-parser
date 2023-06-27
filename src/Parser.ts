@@ -642,6 +642,16 @@ export const string: <Result>(str: string, result: Result) => Parser<string, str
 export const succeed: <Result>(result: Result) => Parser<unknown, never, Result> = internal.succeed
 
 /**
+ * Lazily constructs a `Parser`.
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const suspend: <Input, Error, Result>(
+  parser: LazyArg<Parser<Input, Error, Result>>
+) => Parser<Input, Error, Result> = internal.suspend
+
+/**
  * Surrounds this parser with the `other` parser. The result is this parser's
  * result.
  *

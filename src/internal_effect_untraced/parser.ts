@@ -783,6 +783,16 @@ export const surroundedBy = dual<
 >(2, (self, other) => zipRight(other, zipLeft(self, other)))
 
 /** @internal */
+export const suspend = <Input, Error, Result>(
+  parser: LazyArg<Parser.Parser<Input, Error, Result>>
+): Parser.Parser<Input, Error, Result> => {
+  const op = Object.create(proto)
+  op._tag = "Suspend"
+  op.parser = parser
+  return op
+}
+
+/** @internal */
 export const transformEither = dual<
   <Result, Error2, Result2>(
     f: (result: Result) => Either.Either<Error2, Result2>

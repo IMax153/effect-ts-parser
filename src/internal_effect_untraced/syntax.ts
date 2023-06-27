@@ -206,6 +206,11 @@ export const flatten = <Input, Error, Output>(
 ): Syntax.Syntax<Input, Error, Output, string> => transform(self, Chunk.join(""), Chunk.of)
 
 /** @internal */
+export const flattenNonEmpty = <Input, Error, Output>(
+  self: Syntax.Syntax<Input, Error, Output, Chunk.NonEmptyChunk<string>>
+): Syntax.Syntax<Input, Error, Output, string> => transform(self, Chunk.join(""), Chunk.of)
+
+/** @internal */
 export const manualBacktracking = <Input, Error, Output, Value>(
   self: Syntax.Syntax<Input, Error, Output, Value>
 ): Syntax.Syntax<Input, Error, Output, Value> =>
@@ -476,6 +481,12 @@ export const surroundedBy = dual<
     other: Syntax.Syntax<Input2, Error2, Output2, void>
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 >(2, (self, other) => zipRight(other, zipLeft(self, other)))
+
+/** @internal */
+export const suspend = <Input, Error, Output, Value>(
+  self: LazyArg<Syntax.Syntax<Input, Error, Output, Value>>
+): Syntax.Syntax<Input, Error, Output, Value> =>
+  make(_parser.suspend(() => self().parser), _printer.suspend(() => self().printer))
 
 /** @internal */
 export const transform = dual<
