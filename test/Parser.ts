@@ -703,8 +703,8 @@ describe.concurrent("Parser", () => {
       Syntax.captureString(Syntax.repeat1(Syntax.digit)),
       Syntax.zip(Syntax.captureString(Syntax.repeat1(Syntax.letter)))
     ),
-    "12345abcd",
-    Either.right(["12345", "abcd"] as const)
+    "12345aBcd",
+    Either.right(["12345", "aBcd"] as const)
   )
 
   parserTest(
