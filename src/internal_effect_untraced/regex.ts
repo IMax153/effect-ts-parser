@@ -121,7 +121,7 @@ const IS_DIGIT_REGEX = /^[0-9]$/
 /** @internal */
 export const anyDigit: Regex.Regex = filter((char) => IS_DIGIT_REGEX.test(char))
 
-const IS_LETTER_REGEX = /^[a-z]$/
+const IS_LETTER_REGEX = /^[a-z]$/i
 
 /** @internal */
 export const anyLetter: Regex.Regex = filter((char) => IS_LETTER_REGEX.test(char))

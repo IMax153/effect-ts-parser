@@ -638,11 +638,11 @@ export const zip = dual<
     that: Syntax.Syntax<Input2, Error2, Output2, Value2>
   ) => <Input, Error, Output, Value>(
     self: Syntax.Syntax<Input, Error, Output, Value>
-  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, readonly [Value, Value2]>,
+  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, [Value, Value2]>,
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
     that: Syntax.Syntax<Input2, Error2, Output2, Value2>
-  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, readonly [Value, Value2]>
+  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, [Value, Value2]>
 >(2, (self, that) =>
   make(
     _parser.zip(self.parser, that.parser),

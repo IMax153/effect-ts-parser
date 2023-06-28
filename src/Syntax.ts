@@ -943,9 +943,9 @@ export const zip: {
     that: Syntax<Input2, Error2, Output2, Value2>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, readonly [Value, Value2]>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, [Value, Value2]>
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     that: Syntax<Input2, Error2, Output2, Value2>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, readonly [Value, Value2]>
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, [Value, Value2]>
 } = internal.zip

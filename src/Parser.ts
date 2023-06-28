@@ -767,11 +767,11 @@ export const zip: {
     that: Parser<Input2, Error2, Result2>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, readonly [Result, Result2]>
+  ) => Parser<Input & Input2, Error2 | Error, [Result, Result2]>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     that: Parser<Input2, Error2, Result2>
-  ): Parser<Input & Input2, Error | Error2, readonly [Result, Result2]>
+  ): Parser<Input & Input2, Error | Error2, [Result, Result2]>
 } = internal.zip
 
 /**
