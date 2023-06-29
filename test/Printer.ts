@@ -129,7 +129,7 @@ describe("Printer", () => {
 
   printerTest(
     "zipLeft",
-    Syntax.zipLeft(Syntax.anyChar, Syntax.asPrinted(Syntax.anyChar, void 0, "?")),
+    Syntax.zipLeft(Syntax.anyChar, Syntax.asUnit(Syntax.anyChar, "?")),
     "x",
     Either.right("x?")
   )

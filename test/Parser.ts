@@ -193,7 +193,7 @@ describe.concurrent("Parser", () => {
 
   parserTest(
     "zipLeft",
-    Syntax.zipLeft(Syntax.anyChar, Syntax.asPrinted(Syntax.anyChar, void 0, "?")),
+    Syntax.zipLeft(Syntax.anyChar, Syntax.asUnit(Syntax.anyChar, "?")),
     "he",
     Either.right("h")
   )

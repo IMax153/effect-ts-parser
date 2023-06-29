@@ -1,4 +1,3 @@
-import { pipe } from "@effect/data/Function"
 import * as Syntax from "@effect/parser/Syntax"
 
 // const hello = Syntax.string("hello", "h")
@@ -6,12 +5,9 @@ import * as Syntax from "@effect/parser/Syntax"
 // const world = Syntax.string("world", "w")
 
 // const all = Syntax.string("all", "a")
+const charA = Syntax.as(Syntax.char("a"), "a")
+const grammar = Syntax.atLeast(charA, 1)
 
-const grammar = pipe(
-  Syntax.anyChar,
-  Syntax.repeatWithSeparator1(Syntax.char("-"))
-)
-
-const result = Syntax.printString(grammar, ["a", "b", "c"])
+const result = Syntax.parseStringWith(grammar, "bc", "stack-safe")
 
 console.log(result)
