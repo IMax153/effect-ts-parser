@@ -103,7 +103,7 @@ export const anyChar: Parser<string, never, string> = internal.anyChar
 export const anyString: Parser<string, never, string> = internal.anyString
 
 /**
- * Ignores the parser's successful result and result in 'result' instead
+ * Transforms a `Syntax` that results in `void` in a `Syntax` that results in `value`
  *
  * @since 1.0.0
  * @category combinators
@@ -121,7 +121,7 @@ export const as: {
 } = internal.as
 
 /**
- * Maps the result of this parser to the unit value.
+ * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `void`
  *
  * @since 1.0.0
  * @category combinators
@@ -767,11 +767,11 @@ export const zip: {
     that: Parser<Input2, Error2, Result2>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, [Result, Result2]>
+  ) => Parser<Input & Input2, Error2 | Error, readonly [Result, Result2]>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     that: Parser<Input2, Error2, Result2>
-  ): Parser<Input & Input2, Error | Error2, [Result, Result2]>
+  ): Parser<Input & Input2, Error | Error2, readonly [Result, Result2]>
 } = internal.zip
 
 /**

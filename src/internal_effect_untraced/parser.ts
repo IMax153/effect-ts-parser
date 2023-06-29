@@ -857,11 +857,11 @@ export const zip = dual<
     that: Parser.Parser<Input2, Error2, Result2>
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
-  ) => Parser.Parser<Input & Input2, Error | Error2, [Result, Result2]>,
+  ) => Parser.Parser<Input & Input2, Error | Error2, readonly [Result, Result2]>,
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser.Parser<Input, Error, Result>,
     that: Parser.Parser<Input2, Error2, Result2>
-  ) => Parser.Parser<Input & Input2, Error | Error2, [Result, Result2]>
+  ) => Parser.Parser<Input & Input2, Error | Error2, readonly [Result, Result2]>
 >(2, (self, that) => zipWith(self, that, (left, right) => [left, right]))
 
 /** @internal */

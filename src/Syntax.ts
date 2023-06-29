@@ -54,6 +54,10 @@ export declare namespace Syntax {
   }
 }
 
+export type V<S extends { readonly [SyntaxTypeId]: { _Value: (..._: any) => any } }> = Parameters<
+  S[SyntaxTypeId]["_Value"]
+>[0]
+
 /**
  * Constructs a `Syntax` for a single alpha-numeric character.
  *
@@ -87,15 +91,13 @@ export const anyChar: Syntax<string, never, string, string> = internal.anyChar
 export const anyString: Syntax<string, never, string, string> = internal.anyString
 
 /**
- * Ignores the `Syntax`'s successful result and result in `value` instead
+ * Transforms a `Syntax` that results in `void` in a `Syntax` that results in `value`
  *
  * @since 1.0.0
  * @category combinators
  */
 export const as: {
-  <Value2>(
-    value: Value2
-  ): <Input, Error, Output>(
+  <Value2>(value: Value2): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, void>
   ) => Syntax<Input, Error, Output, Value2>
   <Input, Error, Output, Value2>(
@@ -105,42 +107,35 @@ export const as: {
 } = internal.as
 
 /**
- * Sets the value of this `Syntax` to the specified `value` and the value to be
- * printed to `toPrint`.
+ * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `value`
  *
  * @since 1.0.0
  * @category combinators
  */
 export const asPrinted: {
-  <Value, Value2>(
-    value: Value2,
-    toPrint: Value
-  ): <Input, Error, Output>(
+  <Value, Value2>(value: Value2, from: Value): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input, Error, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     value: Value2,
-    toPrint: Value
+    from: Value
   ): Syntax<Input, Error, Output, Value2>
 } = internal.asPrinted
 
 /**
- * Returns a new `Syntax` from the provided syntax that does not consume any
- * input but prints `printed` and results in `void`.
+ * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `void`
  *
  * @since 1.0.0
  * @category combinators
  */
 export const asUnit: {
-  <Value>(
-    printed: Value
-  ): <Input, Error, Output>(
+  <Value>(from: Value): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input, Error, Output, void>
   <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>,
-    printed: Value
+    from: Value
   ): Syntax<Input, Error, Output, void>
 } = internal.asUnit
 
@@ -881,8 +876,8 @@ export const whitespace: Syntax<string, string, string, string> = internal.white
 /**
  * Concatenates this `Syntax` with `that` `Syntax`. If the parser of both
  * syntaxes succeeds, the result is the result of this `Syntax`. Otherwise the
- * `Syntax` fails. The printer passes the value to be printed to this printer,
- * and also executes `that` printer with `void` as the input value.
+ * `Syntax` fails. The printer executes `this` printer with `void` as the input value
+ * and also passes the value to be printed to that printer.
  *
  * Note that the right syntax must have `Value` defined as `void`, because there
  * is no way for the printer to reconstruct an arbitrary input for the right
@@ -892,14 +887,14 @@ export const whitespace: Syntax<string, string, string, string> = internal.white
  * @category combinators
  */
 export const zipLeft: {
-  <Input2, Error2, Output2, Value2>(
-    that: Syntax<Input2, Error2, Output2, Value2>
+  <Input2, Error2, Output2>(
+    that: Syntax<Input2, Error2, Output2, void>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Value>
-  <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
+  <Input, Error, Output, Value, Input2, Error2, Output2>(
     self: Syntax<Input, Error, Output, Value>,
-    that: Syntax<Input2, Error2, Output2, Value2>
+    that: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 } = internal.zipLeft
 
@@ -943,9 +938,9 @@ export const zip: {
     that: Syntax<Input2, Error2, Output2, Value2>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, [Value, Value2]>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, readonly [Value, Value2]>
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     that: Syntax<Input2, Error2, Output2, Value2>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, [Value, Value2]>
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, readonly [Value, Value2]>
 } = internal.zip

@@ -4,6 +4,7 @@ import type { LazyArg } from "@effect/data/Function"
 import { dual, pipe } from "@effect/data/Function"
 import * as Option from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"
+import { tuple } from "@effect/data/Tuple"
 import * as _parser from "@effect/parser/internal_effect_untraced/parser"
 import * as _printer from "@effect/parser/internal_effect_untraced/printer"
 import * as _regex from "@effect/parser/internal_effect_untraced/regex"
@@ -67,36 +68,36 @@ export const as = dual<
 export const asPrinted = dual<
   <Value, Value2>(
     value: Value2,
-    toPrint: Value
+    from: Value
   ) => <Input, Error, Output>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input, Error, Output, Value2>,
   <Input, Error, Output, Value, Value2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
     value: Value2,
-    toPrint: Value
+    from: Value
   ) => Syntax.Syntax<Input, Error, Output, Value2>
->(3, (self, value, toPrint) =>
+>(3, (self, value, from) =>
   make(
     _parser.as(self.parser, value),
-    _printer.asPrinted(self.printer, value, toPrint)
+    _printer.asPrinted(self.printer, value, from)
   ))
 
 /** @internal */
 export const asUnit = dual<
   <Value>(
-    printed: Value
+    from: Value
   ) => <Input, Error, Output>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input, Error, Output, void>,
   <Input, Error, Output, Value>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    printed: Value
+    from: Value
   ) => Syntax.Syntax<Input, Error, Output, void>
->(2, (self, printed) =>
+>(2, (self, from) =>
   make(
     _parser.asUnit(self.parser),
-    _printer.asPrinted(self.printer, void 0 as void, printed)
+    _printer.asPrinted(self.printer, void 0 as void, from)
   ))
 
 /** @internal */
@@ -415,11 +416,15 @@ export const repeatWithSeparator = dual<
         () => Chunk.empty(),
         ([head, tail]) => Chunk.prepend(tail, head)
       ),
-      (chunk) =>
-        Option.map(
-          Chunk.head(chunk),
-          (head) => [head, Chunk.drop(chunk, 1)] as const
-        )
+      (a) =>
+        Chunk.isNonEmpty(a) ?
+          Option.some(
+            tuple(
+              Chunk.headNonEmpty(a),
+              Chunk.drop(a, 1)
+            )
+          ) :
+          Option.none()
     )
   ))
 
@@ -440,8 +445,13 @@ export const repeatWithSeparator1 = dual<
 ) =>
   transform(
     zip(self, repeat(zipRight(separator, self))),
-    ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<Value>,
-    (chunk) => [Chunk.headNonEmpty(chunk), Chunk.tailNonEmpty(chunk)] as const
+    // readonly [Value, readonly Value[]] => => readonly Value[]
+    ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<Syntax.V<typeof self>>,
+    (a) =>
+      tuple(
+        Chunk.headNonEmpty(a),
+        Chunk.tailNonEmpty(a)
+      )
   ))
 
 /** @internal */
@@ -638,11 +648,11 @@ export const zip = dual<
     that: Syntax.Syntax<Input2, Error2, Output2, Value2>
   ) => <Input, Error, Output, Value>(
     self: Syntax.Syntax<Input, Error, Output, Value>
-  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, [Value, Value2]>,
+  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, readonly [Value, Value2]>,
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
     that: Syntax.Syntax<Input2, Error2, Output2, Value2>
-  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, [Value, Value2]>
+  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, readonly [Value, Value2]>
 >(2, (self, that) =>
   make(
     _parser.zip(self.parser, that.parser),

@@ -84,7 +84,7 @@ export const anyChar: Printer<string, never, string> = internal.anyChar
 export const anyString: Printer<string, never, string> = internal.anyString
 
 /**
- * Ignores the printer's result and input and use `matches` and `from` instead.
+ * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `value`
  *
  * @since 1.0.0
  * @category combinators

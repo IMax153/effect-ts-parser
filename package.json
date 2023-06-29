@@ -47,7 +47,6 @@
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "type": "module",
   "exports": {
     ".": {
       "require": "./build/cjs/index.js"
