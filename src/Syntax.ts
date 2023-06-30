@@ -335,16 +335,6 @@ export const flattenNonEmpty: <Input, Error, Output>(
 ) => Syntax<Input, Error, Output, string> = internal.flattenNonEmpty
 
 /**
- * Flattens a result of zipped strings to a single string.
- *
- * @since 1.0.0
- * @category combinators
- */
-export const flattenZippedStrings: <Input, Error, Output>(
-  self: Syntax<Input, Error, Output, readonly [string, string]>
-) => Syntax<Input, Error, Output, string> = internal.flattenZippedStrings
-
-/**
  * Constructs a `Syntax` that in parser mode results in the current input
  * stream position.
  *

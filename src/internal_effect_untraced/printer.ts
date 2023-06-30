@@ -6,7 +6,6 @@ import { constVoid, dual, pipe } from "@effect/data/Function"
 import * as List from "@effect/data/List"
 import * as Option from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"
-import { tuple } from "@effect/data/Tuple"
 import * as chunkTarget from "@effect/parser/internal_effect_untraced/chunkTarget"
 import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
 import * as _regex from "@effect/parser/internal_effect_untraced/regex"
@@ -363,11 +362,6 @@ export const flatten = <Error, Output>(
 export const flattenNonEmpty = <Error, Output>(
   self: Printer.Printer<Chunk.NonEmptyChunk<string>, Error, Output>
 ): Printer.Printer<string, Error, Output> => contramap(self, Chunk.of)
-
-/** @internal */
-export const flattenZippedStrings = <Error, Output>(
-  self: Printer.Printer<readonly [string, string], Error, Output>
-): Printer.Printer<string, Error, Output> => contramap(self, (from) => tuple(from[0], from.slice(1)))
 
 /** @internal */
 export const fromInput = <Input, Error, Output>(

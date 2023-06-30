@@ -3,6 +3,7 @@ import * as Either from "@effect/data/Either"
 import { pipe } from "@effect/data/Function"
 import * as List from "@effect/data/List"
 import * as Option from "@effect/data/Option"
+import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
 import { describe, expect, it } from "vitest"
@@ -14,7 +15,7 @@ const recursive: Syntax.Syntax<string, string, string, string> = pipe(
   Syntax.zip(
     pipe(Syntax.suspend(() => recursive), Syntax.orElse(() => Syntax.letter))
   ),
-  Syntax.flattenZippedStrings
+  Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
 )
 
 // TODO : not working
@@ -22,14 +23,14 @@ const recursive: Syntax.Syntax<string, string, string, string> = pipe(
   Syntax.digit,
   Syntax.zip(
     pipe(Syntax.letter, Syntax.orElse(() => recursive1)),
-  Syntax.flattenZippedStrings
+  Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
   )
 
   const recursive2: Syntax.Syntax<string, string, string, string> = pipe(
   Syntax.digit,
   Syntax.zip(
     pipe(Syntax.letter, Syntax.orElse(() => Syntax.suspend(() => recursive2))),
-  Syntax.flattenZippedStrings
+   Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
   )
 )
 
@@ -759,13 +760,6 @@ describe.concurrent("Parser", () => {
     pipe(charA, Syntax.repeat1, Syntax.flattenNonEmpty),
     "aaabc",
     Either.right("aaa")
-  )
-
-  parserTest(
-    "flattenZippedStrings",
-    pipe(charA, Syntax.zip(charB), Syntax.flattenZippedStrings),
-    "ab",
-    Either.right("ab")
   )
 
   parserTest(

@@ -2,6 +2,7 @@ import * as Chunk from "@effect/data/Chunk"
 import * as Either from "@effect/data/Either"
 import { pipe } from "@effect/data/Function"
 import * as Option from "@effect/data/Option"
+import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as Printer from "@effect/parser/Printer"
 import * as Syntax from "@effect/parser/Syntax"
 import { describe, expect, it } from "vitest"
@@ -21,7 +22,7 @@ const recursive: Syntax.Syntax<string, string, string, string> = pipe(
   Syntax.zip(
     pipe(Syntax.suspend(() => recursive), Syntax.orElse(() => Syntax.letter))
   ),
-  Syntax.flattenZippedStrings
+  Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
 )
 
 const printerTest = <Input, Error, Value>(
@@ -276,13 +277,6 @@ describe("Printer", () => {
     pipe(charA, Syntax.repeat1, Syntax.flattenNonEmpty),
     "aaa",
     Either.right("aaa")
-  )
-
-  printerTest(
-    "flattenZippedStrings",
-    pipe(charA, Syntax.zip(charB), Syntax.flattenZippedStrings),
-    "ab",
-    Either.right("ab")
   )
 
   printerTest(

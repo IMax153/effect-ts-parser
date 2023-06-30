@@ -4,7 +4,6 @@ import type { LazyArg } from "@effect/data/Function"
 import { dual, pipe } from "@effect/data/Function"
 import * as Option from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as recursive from "@effect/parser/internal_effect_untraced/parser/recursive"
 import * as stackSafe from "@effect/parser/internal_effect_untraced/parser/stack-safe"
 import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
@@ -445,11 +444,6 @@ export const flatten = <Input, Error>(
 export const flattenNonEmpty = <Input, Error>(
   self: Parser.Parser<Input, Error, Chunk.NonEmptyChunk<string>>
 ): Parser.Parser<Input, Error, string> => map(self, Chunk.join(""))
-
-/** @internal */
-export const flattenZippedStrings = <Input, Error>(
-  self: Parser.Parser<Input, Error, readonly [string, string]>
-): Parser.Parser<Input, Error, string> => map(self, ReadonlyArray.join(""))
 
 /** @internal */
 export const manualBacktracking = <Input, Error, Result>(
