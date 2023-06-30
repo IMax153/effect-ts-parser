@@ -215,7 +215,8 @@ export const flattenNonEmpty = <Input, Error, Output>(
 /** @internal */
 export const flattenZippedStrings = <Input, Error, Output>(
   self: Syntax.Syntax<Input, Error, Output, readonly [string, string]>
-): Syntax.Syntax<Input, Error, Output, string> => transform(self, ReadonlyArray.join(""), (from) => tuple("", from))
+): Syntax.Syntax<Input, Error, Output, string> =>
+  transform(self, ReadonlyArray.join(""), (from) => tuple(from[0], from.slice(1)))
 
 /** @internal */
 export const manualBacktracking = <Input, Error, Output, Value>(

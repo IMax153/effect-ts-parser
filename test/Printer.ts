@@ -16,6 +16,14 @@ const world = Syntax.string("world", "w")
 
 const all = Syntax.string("all", "a")
 
+const recursive: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zip(
+    pipe(Syntax.suspend(() => recursive), Syntax.orElse(() => Syntax.letter))
+  ),
+  Syntax.flattenZippedStrings
+)
+
 const printerTest = <Input, Error, Value>(
   name: string,
   syntax: Syntax.Syntax<Input, Error, string, Value>,
@@ -229,6 +237,20 @@ describe("Printer", () => {
   )
 
   printerTest(
+    "repeat1, once",
+    Syntax.repeat1(charA),
+    Chunk.of("a"),
+    Either.right("a")
+  )
+
+  printerTest(
+    "repeat1, many",
+    Syntax.repeat1(charA),
+    Chunk.make("a", "a", "a"),
+    Either.right("aaa")
+  )
+
+  printerTest(
     "repeatWithSeparator",
     pipe(
       Syntax.anyChar,
@@ -242,4 +264,31 @@ describe("Printer", () => {
   //     isRight(equalTo("a-b-c"))
   //   )
   // ),
+  printerTest(
+    "flatten",
+    pipe(charA, Syntax.repeat, Syntax.flatten),
+    "aaa",
+    Either.right("aaa")
+  )
+
+  printerTest(
+    "flattenNonEmpty",
+    pipe(charA, Syntax.repeat1, Syntax.flattenNonEmpty),
+    "aaa",
+    Either.right("aaa")
+  )
+
+  printerTest(
+    "flattenZippedStrings",
+    pipe(charA, Syntax.zip(charB), Syntax.flattenZippedStrings),
+    "ab",
+    Either.right("ab")
+  )
+
+  printerTest(
+    "Recursive with suspend",
+    recursive,
+    "123A",
+    Either.right("123A")
+  )
 })

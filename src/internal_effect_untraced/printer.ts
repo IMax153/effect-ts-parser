@@ -367,7 +367,7 @@ export const flattenNonEmpty = <Error, Output>(
 /** @internal */
 export const flattenZippedStrings = <Error, Output>(
   self: Printer.Printer<readonly [string, string], Error, Output>
-): Printer.Printer<string, Error, Output> => contramap(self, (from) => tuple("", from))
+): Printer.Printer<string, Error, Output> => contramap(self, (from) => tuple(from[0], from.slice(1)))
 
 /** @internal */
 export const fromInput = <Input, Error, Output>(

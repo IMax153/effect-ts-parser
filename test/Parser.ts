@@ -9,6 +9,31 @@ import { describe, expect, it } from "vitest"
 
 const charA = Syntax.as(Syntax.char("a"), "a")
 const charB = Syntax.as(Syntax.char("b"), "b")
+const recursive: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zip(
+    pipe(Syntax.suspend(() => recursive), Syntax.orElse(() => Syntax.letter))
+  ),
+  Syntax.flattenZippedStrings
+)
+
+// TODO : not working
+/* const recursive1: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zip(
+    pipe(Syntax.letter, Syntax.orElse(() => recursive1)),
+  Syntax.flattenZippedStrings
+  )
+
+  const recursive2: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zip(
+    pipe(Syntax.letter, Syntax.orElse(() => Syntax.suspend(() => recursive2))),
+  Syntax.flattenZippedStrings
+  )
+)
+
+)*/
 
 const parserTest = <Error, Result>(
   name: string,
@@ -741,5 +766,12 @@ describe.concurrent("Parser", () => {
     pipe(charA, Syntax.zip(charB), Syntax.flattenZippedStrings),
     "ab",
     Either.right("ab")
+  )
+
+  parserTest(
+    "Recursive with suspend",
+    recursive,
+    "123A",
+    Either.right("123A")
   )
 })
