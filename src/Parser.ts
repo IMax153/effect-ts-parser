@@ -303,6 +303,26 @@ export const flatten: <Input, Error>(self: Parser<Input, Error, Chunk<string>>) 
   internal.flatten
 
 /**
+ * Flattens a result of parsed strings to a single string.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const flattenNonEmpty: <Input, Error>(
+  self: Parser<Input, Error, NonEmptyChunk<string>>
+) => Parser<Input, Error, string> = internal.flattenNonEmpty
+
+/**
+ * Flattens a result of zipped strings to a single string.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const flattenZippedStrings: <Input, Error>(
+  self: Parser<Input, Error, readonly [string, string]>
+) => Parser<Input, Error, string> = internal.flattenZippedStrings
+
+/**
  * Constructs `Parser` that results in the current input stream position.
  *
  * @since 1.0.0

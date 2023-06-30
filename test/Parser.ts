@@ -422,6 +422,7 @@ describe.concurrent("Parser", () => {
   //   "bc",
   //   Either.left(ParserError.failure(List.nil(), 0, "not 'a'"))
   // )
+  // It even fails with this more simple example
 
   parserTest(
     "atLeast - three passing",
@@ -719,5 +720,26 @@ describe.concurrent("Parser", () => {
     Syntax.not(Syntax.string("hello", void 0 as void), "it was hello"),
     "hello",
     Either.left(ParserError.failure(List.nil(), 5, "it was hello"))
+  )
+
+  parserTest(
+    "flatten",
+    pipe(charA, Syntax.repeat, Syntax.flatten),
+    "aaabc",
+    Either.right("aaa")
+  )
+
+  parserTest(
+    "flattenNonEmpty",
+    pipe(charA, Syntax.repeat1, Syntax.flattenNonEmpty),
+    "aaabc",
+    Either.right("aaa")
+  )
+
+  parserTest(
+    "flattenZippedStrings",
+    pipe(charA, Syntax.zip(charB), Syntax.flattenZippedStrings),
+    "ab",
+    Either.right("ab")
   )
 })

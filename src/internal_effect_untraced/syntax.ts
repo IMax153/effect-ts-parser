@@ -4,6 +4,7 @@ import type { LazyArg } from "@effect/data/Function"
 import { dual, pipe } from "@effect/data/Function"
 import * as Option from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"
+import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import { tuple } from "@effect/data/Tuple"
 import * as _parser from "@effect/parser/internal_effect_untraced/parser"
 import * as _printer from "@effect/parser/internal_effect_untraced/printer"
@@ -210,6 +211,11 @@ export const flatten = <Input, Error, Output>(
 export const flattenNonEmpty = <Input, Error, Output>(
   self: Syntax.Syntax<Input, Error, Output, Chunk.NonEmptyChunk<string>>
 ): Syntax.Syntax<Input, Error, Output, string> => transform(self, Chunk.join(""), Chunk.of)
+
+/** @internal */
+export const flattenZippedStrings = <Input, Error, Output>(
+  self: Syntax.Syntax<Input, Error, Output, readonly [string, string]>
+): Syntax.Syntax<Input, Error, Output, string> => transform(self, ReadonlyArray.join(""), (from) => tuple("", from))
 
 /** @internal */
 export const manualBacktracking = <Input, Error, Output, Value>(

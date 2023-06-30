@@ -297,6 +297,16 @@ export const flattenNonEmpty: <Error, Output>(
 ) => Printer<string, Error, Output> = internal.flattenNonEmpty
 
 /**
+ * Flattens a result of zipped strings to a single string.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const flattenZippedStrings: <Error, Output>(
+  self: Printer<readonly [string, string], Error, Output>
+) => Printer<string, Error, Output> = internal.flattenZippedStrings
+
+/**
  * A `Printer` computed using a function on the input value.
  *
  * @since 1.0.0
