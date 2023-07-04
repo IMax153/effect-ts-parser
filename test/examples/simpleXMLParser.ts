@@ -12,7 +12,7 @@ interface XmlNode {
   readonly children: ReadonlyArray<XmlNode>
 }
 
-const toParse = `<ROOT><A><B>u</B></A><C/></ROOT>`
+const toParse = "<ROOT><A><B >u</B></A><C/></ROOT>"
 
 const tagStartString = "<"
 const tagEndString = ">"
@@ -117,4 +117,8 @@ it("simpleXMLParser - recursive", () => {
     ],
     values: []
   }))
+  if (E.isRight(result)) {
+    const result1 = pipe(xmlNode, Syntax.printString(result.right))
+    expect(result1).toEqual(E.right("<ROOT><A><B>u</B></A><C></C></ROOT>"))
+  }
 })

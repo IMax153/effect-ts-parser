@@ -768,4 +768,12 @@ describe.concurrent("Parser", () => {
     "123A",
     Either.right("123A")
   )
+
+  // TODO: Enters in infinite loop
+  /*parserTest(
+    "regex with between",
+    Syntax.flatten(Syntax.regex(pipe(RegEx.anyDigit, RegEx.between(8, 8)), "8 digits expected")),
+    "20230704",
+    Either.right("20230705")
+  )*/
 })
