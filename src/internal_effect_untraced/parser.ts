@@ -441,6 +441,11 @@ export const flatten = <Input, Error>(
 ): Parser.Parser<Input, Error, string> => map(self, Chunk.join(""))
 
 /** @internal */
+export const flattenNonEmpty = <Input, Error>(
+  self: Parser.Parser<Input, Error, Chunk.NonEmptyChunk<string>>
+): Parser.Parser<Input, Error, string> => map(self, Chunk.join(""))
+
+/** @internal */
 export const manualBacktracking = <Input, Error, Result>(
   self: Parser.Parser<Input, Error, Result>
 ): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, false)
@@ -781,6 +786,16 @@ export const surroundedBy = dual<
     other: Parser.Parser<Input2, Error2, Result2>
   ) => Parser.Parser<Input & Input2, Error | Error2, Result>
 >(2, (self, other) => zipRight(other, zipLeft(self, other)))
+
+/** @internal */
+export const suspend = <Input, Error, Result>(
+  parser: LazyArg<Parser.Parser<Input, Error, Result>>
+): Parser.Parser<Input, Error, Result> => {
+  const op = Object.create(proto)
+  op._tag = "Suspend"
+  op.parser = parser
+  return op
+}
 
 /** @internal */
 export const transformEither = dual<

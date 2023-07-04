@@ -84,7 +84,7 @@ export const anyChar: Printer<string, never, string> = internal.anyChar
 export const anyString: Printer<string, never, string> = internal.anyString
 
 /**
- * Ignores the printer's result and input and use `matches` and `from` instead.
+ * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `value`
  *
  * @since 1.0.0
  * @category combinators
@@ -285,6 +285,16 @@ export const filterInput: {
 export const flatten: <Error, Output>(
   self: Printer<Chunk<string>, Error, Output>
 ) => Printer<string, Error, Output> = internal.flatten
+
+/**
+ * Concatenates an input `Chunk<string>` to a `string` to be printed.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const flattenNonEmpty: <Error, Output>(
+  self: Printer<NonEmptyChunk<string>, Error, Output>
+) => Printer<string, Error, Output> = internal.flattenNonEmpty
 
 /**
  * A `Printer` computed using a function on the input value.

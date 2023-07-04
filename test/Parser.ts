@@ -3,12 +3,38 @@ import * as Either from "@effect/data/Either"
 import { pipe } from "@effect/data/Function"
 import * as List from "@effect/data/List"
 import * as Option from "@effect/data/Option"
+import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
 import { describe, expect, it } from "vitest"
 
 const charA = Syntax.as(Syntax.char("a"), "a")
 const charB = Syntax.as(Syntax.char("b"), "b")
+const recursive: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zip(
+    pipe(Syntax.suspend(() => recursive), Syntax.orElse(() => Syntax.letter))
+  ),
+  Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
+)
+
+// TODO : not working
+/* const recursive1: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zip(
+    pipe(Syntax.letter, Syntax.orElse(() => recursive1)),
+  Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
+  )
+
+  const recursive2: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zip(
+    pipe(Syntax.letter, Syntax.orElse(() => Syntax.suspend(() => recursive2))),
+   Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
+  )
+)
+
+)*/
 
 const parserTest = <Error, Result>(
   name: string,
@@ -193,7 +219,7 @@ describe.concurrent("Parser", () => {
 
   parserTest(
     "zipLeft",
-    Syntax.zipLeft(Syntax.anyChar, Syntax.asPrinted(Syntax.anyChar, void 0, "?")),
+    Syntax.zipLeft(Syntax.anyChar, Syntax.asUnit(Syntax.anyChar, "?")),
     "he",
     Either.right("h")
   )
@@ -422,6 +448,7 @@ describe.concurrent("Parser", () => {
   //   "bc",
   //   Either.left(ParserError.failure(List.nil(), 0, "not 'a'"))
   // )
+  // It even fails with this more simple example
 
   parserTest(
     "atLeast - three passing",
@@ -703,8 +730,8 @@ describe.concurrent("Parser", () => {
       Syntax.captureString(Syntax.repeat1(Syntax.digit)),
       Syntax.zip(Syntax.captureString(Syntax.repeat1(Syntax.letter)))
     ),
-    "12345abcd",
-    Either.right(["12345", "abcd"] as const)
+    "12345aBcd",
+    Either.right(["12345", "aBcd"] as const)
   )
 
   parserTest(
@@ -720,4 +747,33 @@ describe.concurrent("Parser", () => {
     "hello",
     Either.left(ParserError.failure(List.nil(), 5, "it was hello"))
   )
+
+  parserTest(
+    "flatten",
+    pipe(charA, Syntax.repeat, Syntax.flatten),
+    "aaabc",
+    Either.right("aaa")
+  )
+
+  parserTest(
+    "flattenNonEmpty",
+    pipe(charA, Syntax.repeat1, Syntax.flattenNonEmpty),
+    "aaabc",
+    Either.right("aaa")
+  )
+
+  parserTest(
+    "Recursive with suspend",
+    recursive,
+    "123A",
+    Either.right("123A")
+  )
+
+  // TODO: Enters in infinite loop
+  /*parserTest(
+    "regex with between",
+    Syntax.flatten(Syntax.regex(pipe(RegEx.anyDigit, RegEx.between(8, 8)), "8 digits expected")),
+    "20230704",
+    Either.right("20230705")
+  )*/
 })
