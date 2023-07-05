@@ -2,6 +2,7 @@ import * as Chunk from "@effect/data/Chunk"
 import * as Either from "@effect/data/Either"
 import { pipe } from "@effect/data/Function"
 import * as Option from "@effect/data/Option"
+import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as Printer from "@effect/parser/Printer"
 import * as Syntax from "@effect/parser/Syntax"
 import { describe, expect, it } from "vitest"
@@ -15,6 +16,14 @@ const hello = Syntax.string("hello", "h")
 const world = Syntax.string("world", "w")
 
 const all = Syntax.string("all", "a")
+
+const recursive: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zip(
+    pipe(Syntax.suspend(() => recursive), Syntax.orElse(() => Syntax.letter))
+  ),
+  Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
+)
 
 const printerTest = <Input, Error, Value>(
   name: string,
@@ -57,7 +66,7 @@ describe("Printer", () => {
   )
 
   printerTest(
-    "filtered char, passing",
+    "filtered char, failing",
     pipe(
       Syntax.anyChar,
       Syntax.filter((char) => char === "h", "not 'h'")
@@ -129,7 +138,7 @@ describe("Printer", () => {
 
   printerTest(
     "zipLeft",
-    Syntax.zipLeft(Syntax.anyChar, Syntax.asPrinted(Syntax.anyChar, void 0, "?")),
+    Syntax.zipLeft(Syntax.anyChar, Syntax.asUnit(Syntax.anyChar, "?")),
     "x",
     Either.right("x?")
   )
@@ -229,6 +238,20 @@ describe("Printer", () => {
   )
 
   printerTest(
+    "repeat1, once",
+    Syntax.repeat1(charA),
+    Chunk.of("a"),
+    Either.right("a")
+  )
+
+  printerTest(
+    "repeat1, many",
+    Syntax.repeat1(charA),
+    Chunk.make("a", "a", "a"),
+    Either.right("aaa")
+  )
+
+  printerTest(
     "repeatWithSeparator",
     pipe(
       Syntax.anyChar,
@@ -236,5 +259,30 @@ describe("Printer", () => {
     ),
     Chunk.make("a", "b", "c"),
     Either.right("a-b-c")
+  )
+  // suite("repeatWithSep")(
+  //   printerTest("repeatWithSep", Syntax.anyChar.repeatWithSep(Syntax.char('-')), Chunk('a', 'b', 'c'))(
+  //     isRight(equalTo("a-b-c"))
+  //   )
+  // ),
+  printerTest(
+    "flatten",
+    pipe(charA, Syntax.repeat, Syntax.flatten),
+    "aaa",
+    Either.right("aaa")
+  )
+
+  printerTest(
+    "flattenNonEmpty",
+    pipe(charA, Syntax.repeat1, Syntax.flattenNonEmpty),
+    "aaa",
+    Either.right("aaa")
+  )
+
+  printerTest(
+    "Recursive with suspend",
+    recursive,
+    "123A",
+    Either.right("123A")
   )
 })

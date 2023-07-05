@@ -103,7 +103,7 @@ export const anyChar: Parser<string, never, string> = internal.anyChar
 export const anyString: Parser<string, never, string> = internal.anyString
 
 /**
- * Ignores the parser's successful result and result in 'result' instead
+ * Transforms a `Syntax` that results in `void` in a `Syntax` that results in `value`
  *
  * @since 1.0.0
  * @category combinators
@@ -121,7 +121,7 @@ export const as: {
 } = internal.as
 
 /**
- * Maps the result of this parser to the unit value.
+ * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `void`
  *
  * @since 1.0.0
  * @category combinators
@@ -301,6 +301,16 @@ export const flatMap: {
  */
 export const flatten: <Input, Error>(self: Parser<Input, Error, Chunk<string>>) => Parser<Input, Error, string> =
   internal.flatten
+
+/**
+ * Flattens a result of parsed strings to a single string.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const flattenNonEmpty: <Input, Error>(
+  self: Parser<Input, Error, NonEmptyChunk<string>>
+) => Parser<Input, Error, string> = internal.flattenNonEmpty
 
 /**
  * Constructs `Parser` that results in the current input stream position.
@@ -640,6 +650,16 @@ export const string: <Result>(str: string, result: Result) => Parser<string, str
  * @category constructors
  */
 export const succeed: <Result>(result: Result) => Parser<unknown, never, Result> = internal.succeed
+
+/**
+ * Lazily constructs a `Parser`.
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const suspend: <Input, Error, Result>(
+  parser: LazyArg<Parser<Input, Error, Result>>
+) => Parser<Input, Error, Result> = internal.suspend
 
 /**
  * Surrounds this parser with the `other` parser. The result is this parser's

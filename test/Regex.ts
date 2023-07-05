@@ -6,8 +6,8 @@ import * as fc from "fast-check"
 import { describe, expect, it } from "vitest"
 
 const IS_DIGIT_REGEX = /^[0-9]$/
-const IS_LETTER_REGEX = /^[a-z]$/
-const IS_LETTER_OR_DIGIT_REGEX = /^[a-z0-9]$/
+const IS_LETTER_REGEX = /^[a-z]$/i
+const IS_LETTER_OR_DIGIT_REGEX = /^[a-z0-9]$/i
 const IS_WHITESPACE_REGEX = /^\s$/
 
 const keywordStrings: ReadonlyArray<string> = [
