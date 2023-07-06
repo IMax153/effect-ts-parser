@@ -160,6 +160,10 @@ export const char = <Error = string>(char: string, error?: Error): Syntax.Syntax
   regexDiscard(_regex.charIn([char]), error ?? (`not '${char}'` as any), [char])
 
 /** @internal */
+export const charNot = <Error>(char: string, error: Error): Syntax.Syntax<string, Error, string, string> =>
+  regexChar(_regex.charNotIn([char]), error)
+
+/** @internal */
 export const charIn = (chars: Iterable<string>): Syntax.Syntax<string, string, string, string> =>
   regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
 
@@ -264,10 +268,6 @@ export const not = dual<
 >(2, (self, error) => make(_parser.not(self.parser, error), _printer.unit()))
 
 /** @internal */
-export const notChar = <Error>(char: string, error: Error): Syntax.Syntax<string, Error, string, string> =>
-  regexChar(_regex.charNotIn([char]), error)
-
-/** @internal */
 export const orElse = dual<
   <Input2, Error2, Output2, Value>(
     that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
@@ -368,10 +368,10 @@ export const regexDiscard = <Error>(
   make(_parser.regexDiscard(regex, error), _printer.regexDiscard(regex, chars))
 
 /** @internal */
-export const repeat = <Input, Error, Output, Value>(
+export const repeat0 = <Input, Error, Output, Value>(
   self: Syntax.Syntax<Input, Error, Output, Value>
 ): Syntax.Syntax<Input, Error, Output, Chunk.Chunk<Value>> =>
-  make(_parser.repeat(self.parser), _printer.repeat(self.printer))
+  make(_parser.repeat0(self.parser), _printer.repeat(self.printer))
 
 /** @internal */
 export const repeat1 = <Input, Error, Output, Value>(
@@ -409,7 +409,7 @@ export const repeatWithSeparator = dual<
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk.Chunk<Value>>
 >(2, (self, separator) =>
   pipe(
-    zip(self, repeat(zipRight(separator, self))),
+    zip(self, repeat0(zipRight(separator, self))),
     optional,
     transform(
       Option.match(
@@ -444,7 +444,7 @@ export const repeatWithSeparator1 = dual<
   separator: Syntax.Syntax<Input2, Error2, Output2, void>
 ) =>
   transform(
-    zip(self, repeat(zipRight(separator, self))),
+    zip(self, repeat0(zipRight(separator, self))),
     // readonly [Value, readonly Value[]] => => readonly Value[]
     ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<Syntax.V<typeof self>>,
     (a) =>
@@ -490,7 +490,7 @@ export const surroundedBy = dual<
     self: Syntax.Syntax<Input, Error, Output, Value>,
     other: Syntax.Syntax<Input2, Error2, Output2, void>
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
->(2, (self, other) => zipRight(other, zipLeft(self, other)))
+>(2, (self, other) => between(self, other, other))
 
 /** @internal */
 export const suspend = <Input, Error, Output, Value>(

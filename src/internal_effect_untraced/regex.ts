@@ -129,7 +129,7 @@ export const anyLetter: Regex.Regex = filter((char) => IS_LETTER_REGEX.test(char
 const IS_WHITESPACE_REGEX = /^\s$/
 
 /** @internal */
-export const anyWhitespace = filter((char) => IS_WHITESPACE_REGEX.test(char))
+export const anyWhitespace: Regex.Regex = filter((char) => IS_WHITESPACE_REGEX.test(char))
 
 /** @internal */
 export const anyAlphaNumeric: Regex.Regex = or(anyLetter, anyDigit)
@@ -189,7 +189,7 @@ const compileInternal = (self: Regex.Regex) =>
         if (index >= chars.length) {
           return common.needMoreInput
         }
-        if (self.bitset.some((bit) => bit === chars[index]!.charCodeAt(0))) {
+        if (self.bitset.some((bit) => bit === chars[index].charCodeAt(0))) {
           return index + 1
         }
         return common.notMatched
