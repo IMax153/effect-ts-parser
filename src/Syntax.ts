@@ -246,6 +246,15 @@ export const char: <Error = string>(char: string, error?: Error | undefined) => 
 export const charIn: (chars: Iterable<string>) => Syntax<string, string, string, string> = internal.charIn
 
 /**
+ * Parse or print a single character and fail with the specified `error` if the
+ * parsed character matches the specified character.
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const charNot: <Error>(char: string, error: Error) => Syntax<string, Error, string, string> = internal.charNot
+
+/**
  * Constructs a `Syntax` that parses/prints a single character if it **DOES
  * NOT** match one of the character in `chars`.
  *
@@ -344,7 +353,7 @@ export const flattenNonEmpty: <Input, Error, Output>(
 export const index: Syntax<unknown, never, never, number> = internal.index
 
 /**
- * Constructs a `Syntax` for a single digit.
+ * Constructs a `Syntax` for a single letter.
  *
  * @since 1.0.0
  * @category constructors
@@ -416,15 +425,6 @@ export const not: {
     error: Error2
   ): Syntax<Input, Error | Error2, Output, void>
 } = internal.not
-
-/**
- * Parse or print a single character and fail with the specified `error` if the
- * parsed character matches the specified character.
- *
- * @since 1.0.0
- * @category constructors
- */
-export const notChar: <Error>(char: string, error: Error) => Syntax<string, Error, string, string> = internal.notChar
 
 /**
  * Make this `Syntax` optional.
@@ -592,7 +592,7 @@ export const regexDiscard: <Error>(
  */
 export const repeat: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Chunk<Value>> = internal.repeat
+) => Syntax<Input, Error, Output, Chunk<Value>> = internal.repeat0
 
 /**
  * Repeats this `Syntax` at least one time.
