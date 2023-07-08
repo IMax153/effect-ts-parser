@@ -412,10 +412,10 @@ export const repeatWithSeparator = dual<
     zip(self, repeat0(zipRight(separator, self))),
     optional,
     transform(
-      Option.match(
-        () => Chunk.empty(),
-        ([head, tail]) => Chunk.prepend(tail, head)
-      ),
+      Option.match({
+        onNone: () => Chunk.empty(),
+        onSome: ([head, tail]) => Chunk.prepend(tail, head)
+      }),
       (a) =>
         Chunk.isNonEmpty(a) ?
           Option.some(
@@ -553,11 +553,19 @@ export const transformOption = dual<
   make(
     _parser.transformEither(
       self.parser,
-      (value) => Either.fromOption(to(value), () => Option.none())
+      (value) =>
+        Option.match(to(value), {
+          onNone: () => Either.left(Option.none()),
+          onSome: Either.right
+        })
     ),
     _printer.contramapEither(
       self.printer,
-      (value) => Either.fromOption(from(value), () => Option.none())
+      (value) =>
+        Option.match(from(value), {
+          onNone: () => Either.left(Option.none()),
+          onSome: Either.right
+        })
     )
   ))
 
@@ -586,11 +594,10 @@ export const transformTo = dual<
     self,
     (value) => Either.right(to(value)),
     (value) =>
-      Option.match(
-        from(value),
-        () => Either.left<Error | Error2>(error),
-        Either.right
-      )
+      Option.match(from(value), {
+        onNone: () => Either.left<Error | Error2>(error),
+        onSome: Either.right
+      })
   ))
 
 /** @internal */

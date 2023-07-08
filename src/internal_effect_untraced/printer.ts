@@ -304,11 +304,10 @@ export const contramapTo = dual<
   ) => Printer.Printer<Input2, Error2, Output>
 >(3, (self, from, error) =>
   contramapEither(self, (value) =>
-    Option.match(
-      from(value),
-      () => Either.left(error),
-      Either.right
-    )))
+    Option.match(from(value), {
+      onNone: () => Either.left(error),
+      onSome: Either.right
+    })))
 
 /** @internal */
 export const exactly = <Output, Error = string>(value: Output, error?: Error): Printer.Printer<Output, Error, Output> =>
@@ -655,7 +654,12 @@ export const transformOption = dual<
     self: Printer.Printer<Input, Error, Output>,
     from: (input: Input2) => Option.Option<Input>
   ) => Printer.Printer<Input2, Option.Option<Error>, Output>
->(2, (self, from) => contramapEither(self, (input) => Either.fromOption(from(input), () => Option.none())))
+>(2, (self, from) =>
+  contramapEither(self, (input) =>
+    Option.match(from(input), {
+      onNone: () => Either.left(Option.none()),
+      onSome: Either.right
+    })))
 
 /** @internal */
 export const unit = (): Printer.Printer<void, never, never> => succeed<void>(void 0)
@@ -823,19 +827,18 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       case "ContramapEither": {
         const oldInput = input
         const printer = current.printer
-        Either.match(
-          current.from(input),
-          (failure) => finish(Either.left(failure)),
-          (newInput) => {
+        Either.match(current.from(input), {
+          onLeft: (failure) => finish(Either.left(failure)),
+          onRight: (newInput) => {
             input = newInput
             current = printer
-            const cont: PrinterCont = Either.match(
-              (failure) => [fail(failure) as Primitive, oldInput, Option.none()],
-              () => [unit() as Primitive, oldInput, Option.none()]
-            )
+            const cont: PrinterCont = Either.match({
+              onLeft: (failure) => [fail(failure) as Primitive, oldInput, Option.none()],
+              onRight: () => [unit() as Primitive, oldInput, Option.none()]
+            })
             stack = List.cons(cont, stack)
           }
-        )
+        })
         break
       }
       case "Fail": {
@@ -855,10 +858,10 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
           const oldInput = input
           input = current.from
           current = current.printer
-          const cont: PrinterCont = Either.match(
-            (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
-            () => [unit() as Primitive, oldInput, Option.none()] as const
-          )
+          const cont: PrinterCont = Either.match({
+            onLeft: (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
+            onRight: () => [unit() as Primitive, oldInput, Option.none()] as const
+          })
           stack = List.cons(cont, stack)
         } else {
           // TODO
@@ -869,10 +872,10 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       case "MapError": {
         const map = current.map
         current = current.printer as Primitive
-        const cont: PrinterCont = Either.match(
-          (failure) => [fail(map(failure)) as Primitive, input, Option.none()] as const,
-          () => [unit() as Primitive, input, Option.none()] as const
-        )
+        const cont: PrinterCont = Either.match({
+          onLeft: (failure) => [fail(map(failure)) as Primitive, input, Option.none()] as const,
+          onRight: () => [unit() as Primitive, input, Option.none()] as const
+        })
         stack = List.cons(cont, stack)
         break
       }
@@ -880,35 +883,34 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
         const oldInput = input
         const optInput = input as Option.Option<unknown>
         const printer = current.printer
-        Option.match(
-          optInput,
-          () => finish(Either.right(void 0)),
-          (someInput) => {
+        Option.match(optInput, {
+          onNone: () => finish(Either.right(void 0)),
+          onSome: (someInput) => {
             input = someInput
             current = printer
-            const cont: PrinterCont = Either.match(
-              (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
-              () => [unit() as Primitive, oldInput, Option.none()] as const
-            )
+            const cont: PrinterCont = Either.match({
+              onLeft: (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
+              onRight: () => [unit() as Primitive, oldInput, Option.none()] as const
+            })
             stack = List.cons(cont, stack)
           }
-        )
+        })
         break
       }
       case "OrElse": {
         const right = current.right
         current = current.left
         const capture = output.capture()
-        const cont: PrinterCont = Either.match(
-          () => {
+        const cont: PrinterCont = Either.match({
+          onLeft: () => {
             output.drop(capture)
             return [right(), input, Option.none()] as const
           },
-          () => {
+          onRight: () => {
             output.emit(capture)
             return [unit() as Primitive, input, Option.none()]
           }
-        )
+        })
         stack = List.cons(cont, stack)
         break
       }
@@ -917,27 +919,26 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
         const left = current.left
         const right = current.right
         const eitherInput = input as Either.Either<unknown, unknown>
-        Either.match(
-          eitherInput,
-          (leftInput) => {
+        Either.match(eitherInput, {
+          onLeft: (leftInput) => {
             input = leftInput
             current = left
-            const cont: PrinterCont = Either.match(
-              (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
-              () => [unit() as Primitive, oldInput, Option.none()] as const
-            )
+            const cont: PrinterCont = Either.match({
+              onLeft: (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
+              onRight: () => [unit() as Primitive, oldInput, Option.none()] as const
+            })
             stack = List.cons(cont, stack)
           },
-          (rightInput) => {
+          onRight: (rightInput) => {
             input = rightInput
             current = right()
-            const cont: PrinterCont = Either.match(
-              (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
-              () => [unit() as Primitive, oldInput, Option.none()] as const
-            )
+            const cont: PrinterCont = Either.match({
+              onLeft: (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
+              onRight: () => [unit() as Primitive, oldInput, Option.none()] as const
+            })
             stack = List.cons(cont, stack)
           }
-        )
+        })
         break
       }
       case "ParseRegex": {
@@ -985,10 +986,10 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
         const oldInput = input
         input = current.input
         current = current.printer as Primitive
-        const cont: PrinterCont = Either.match(
-          (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
-          () => [unit() as Primitive, oldInput, Option.none()] as const
-        )
+        const cont: PrinterCont = Either.match({
+          onLeft: (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
+          onRight: () => [unit() as Primitive, oldInput, Option.none()] as const
+        })
         stack = List.cons(cont, stack)
         break
       }
@@ -1000,15 +1001,15 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
           const repeat = current
           current = current.printer
           input = head
-          const cont: PrinterCont = Either.match(
-            () => [unit() as Primitive, inputChunk, Option.none()] as const,
-            () =>
+          const cont: PrinterCont = Either.match({
+            onLeft: () => [unit() as Primitive, inputChunk, Option.none()] as const,
+            onRight: () =>
               [
                 repeat as Primitive,
                 tail,
                 Option.none()
               ] as const
-          )
+          })
           stack = List.cons(cont, stack)
         } else {
           finish(Either.right(void 0))
@@ -1050,16 +1051,16 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
           valueA = void 0
           valueB = input
         }
-        const cont1: PrinterCont = Either.match(
-          (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
-          () => {
-            const cont2: PrinterCont = Either.match(
-              (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
-              () => [unit() as Primitive, oldInput, Option.none()] as const
-            )
+        const cont1: PrinterCont = Either.match({
+          onLeft: (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
+          onRight: () => {
+            const cont2: PrinterCont = Either.match({
+              onLeft: (failure) => [fail(failure) as Primitive, oldInput, Option.none()] as const,
+              onRight: () => [unit() as Primitive, oldInput, Option.none()] as const
+            })
             return [right, valueB, Option.some(cont2)] as const
           }
-        )
+        })
         current = left
         input = valueA
         stack = List.cons(cont1, stack)

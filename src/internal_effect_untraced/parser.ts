@@ -719,10 +719,10 @@ export const repeatWithSeparator = dual<
   pipe(
     zip(self, repeat0(zipRight(separator, self))),
     optional,
-    map(Option.match(
-      () => Chunk.empty(),
-      ([head, tail]) => Chunk.prepend(tail, head)
-    ))
+    map(Option.match({
+      onNone: () => Chunk.empty(),
+      onSome: ([head, tail]) => Chunk.prepend(tail, head)
+    }))
   ))
 
 /** @internal */
@@ -828,7 +828,12 @@ export const transformOption = dual<
     self: Parser.Parser<Input, Error, Result>,
     pf: (result: Result) => Option.Option<Result2>
   ) => Parser.Parser<Input, Option.Option<Error>, Result2>
->(2, (self, pf) => transformEither(self, (value) => Either.fromOption(pf(value), () => Option.none())))
+>(2, (self, pf) =>
+  transformEither(self, (value) =>
+    Option.match(pf(value), {
+      onNone: () => Either.left(Option.none()),
+      onSome: Either.right
+    })))
 
 /** @internal */
 export const unsafeRegex = (regex: Regex.Regex): Parser.Parser<string, never, Chunk.Chunk<string>> => {
@@ -1206,7 +1211,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.flatMap(inner.to(result), self.to)
+        op.to = (result: unknown) => Either.map(inner.to(result), self.to)
       } else if (inner._tag === "Transform") {
         op._tag = "TransformEither"
         op.parser = inner.parser

@@ -887,10 +887,13 @@ export const charParserExecutor = (
         if (result === common.needMoreInput) {
           lastFailure1 = parserError.unexpectedEndOfInput
         } else if (result === common.notMatched) {
-          Option.match(op.failAs, () => {
-            lastSuccess1 = Chunk.empty()
-          }, (error) => {
-            lastFailure1 = parserError.failure(nameStack, position, error)
+          Option.match(op.failAs, {
+            onNone: () => {
+              lastSuccess1 = Chunk.empty()
+            },
+            onSome: (error) => {
+              lastFailure1 = parserError.failure(nameStack, position, error)
+            }
           })
         } else {
           const oldPosition = position
@@ -1157,11 +1160,14 @@ export const charParserExecutor = (
       case "TransformResultEither": {
         if (lastSuccess1 !== null) {
           const either = op.f(lastSuccess1)
-          Either.match(either, (error) => {
-            lastSuccess1 = null
-            lastFailure1 = parserError.failure(nameStack, position, error)
-          }, (value) => {
-            lastSuccess1 = value
+          Either.match(either, {
+            onLeft: (error) => {
+              lastSuccess1 = null
+              lastFailure1 = parserError.failure(nameStack, position, error)
+            },
+            onRight: (value) => {
+              lastSuccess1 = value
+            }
           })
         }
         popOpStack()

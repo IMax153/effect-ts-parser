@@ -560,11 +560,11 @@ export const supportsEmpty = (self: LookupFunction): boolean => {
 const equalizeTables = (self: Table, that: Table): readonly [Table, Table] => {
   if (that.parseChar.length > self.parseChar.length) {
     const extension = Chunk.makeBy(that.parseChar.length - self.parseChar.length, () => errorStep)
-    return [new Table(Chunk.concat(self.parseChar, extension)), that]
+    return [new Table(Chunk.appendAll(self.parseChar, extension)), that]
   }
   if (self.parseChar.length > that.parseChar.length) {
     const extension = Chunk.makeBy(self.parseChar.length - that.parseChar.length, () => errorStep)
-    return [self, new Table(Chunk.concat(that.parseChar, extension))]
+    return [self, new Table(Chunk.appendAll(that.parseChar, extension))]
   }
   return [self, that]
 }

@@ -151,7 +151,7 @@ export const charNotIn = (chars: Iterable<string>): Regex.Regex =>
 
 const compileSequence = (self: Regex.Regex): Chunk.Chunk<Regex.Regex> =>
   self._tag === "Sequence"
-    ? Chunk.concat(compileSequence(self.left), compileSequence(self.right))
+    ? Chunk.appendAll(compileSequence(self.left), compileSequence(self.right))
     : Chunk.of(self)
 
 /** @internal */
@@ -255,7 +255,7 @@ export const toLiteral = (self: Regex.Regex): Option.Option<Chunk.Chunk<string>>
         (left) =>
           Option.map(
             toLiteral(self.right),
-            (right) => Chunk.concat(left, right)
+            (right) => Chunk.appendAll(left, right)
           )
       )
     }

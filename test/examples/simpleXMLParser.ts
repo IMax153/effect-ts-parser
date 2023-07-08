@@ -138,8 +138,8 @@ const xmlNode: Syntax.Syntax<string, string, string, XmlNode> = pipe(
         : E.right({
           name: to[0][0][0],
           attributes: to[0][0][1],
-          children: E.lefts(to[0][1]),
-          values: E.rights(to[0][1])
+          children: pipe(to[0][1], Chunk.filterMap(E.getLeft), Chunk.toReadonlyArray),
+          values: pipe(to[0][1], Chunk.filterMap(E.getRight), Chunk.toReadonlyArray)
         } as XmlNode),
     (from) =>
       E.right(
@@ -150,7 +150,7 @@ const xmlNode: Syntax.Syntax<string, string, string, XmlNode> = pipe(
               from.children,
               RA.map(E.left),
               Chunk.fromIterable,
-              (cs) => Chunk.concat(cs, pipe(from.values, RA.map(E.right), Chunk.fromIterable))
+              (cs) => Chunk.appendAll(cs, pipe(from.values, RA.map(E.right), Chunk.fromIterable))
             )
           ] as const,
           from.name
