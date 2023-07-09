@@ -184,7 +184,7 @@ export interface Passthrough extends Op<"Passthrough"> {}
 export interface Repeat extends
   Op<"Repeat", {
     readonly parser: Primitive
-    readonly min: number
+    readonly min: Option.Option<number>
     readonly max: Option.Option<number>
   }>
 {}
@@ -292,6 +292,33 @@ export const asUnit = <Input, Error, Result>(
 ): Parser.Parser<Input, Error, void> => as(self, void 0)
 
 /** @internal */
+const repeat = dual<
+  (
+    min: Option.Option<number>,
+    max: Option.Option<number>
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>,
+  <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>,
+    min: Option.Option<number>,
+    max: Option.Option<number>
+  ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>
+>(3, (self, min, max) => {
+  const op = Object.create(proto)
+  op._tag = "Repeat"
+  op.parser = self
+  op.min = min
+  op.max = max
+  return op
+})
+
+/** @internal */
+export const autoBacktracking = <Input, Error, Result>(
+  self: Parser.Parser<Input, Error, Result>
+): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, true)
+
+/** @internal */
 export const atLeast = dual<
   (
     min: number
@@ -302,19 +329,7 @@ export const atLeast = dual<
     self: Parser.Parser<Input, Error, Result>,
     min: number
   ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>
->(2, (self, min) => {
-  const op = Object.create(proto)
-  op._tag = "Repeat"
-  op.parser = self
-  op.min = min
-  op.max = Option.none()
-  return op
-})
-
-/** @internal */
-export const autoBacktracking = <Input, Error, Result>(
-  self: Parser.Parser<Input, Error, Result>
-): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, true)
+>(2, (self, min) => repeat(self, Option.some(min), Option.none()))
 
 /** @internal */
 export const backtrack = <Input, Error, Result>(
@@ -359,13 +374,7 @@ export const char = <Error = string>(char: string, error?: Error): Parser.Parser
 export const charIn = (chars: Iterable<string>): Parser.Parser<string, string, string> =>
   regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
 
-/**
- * Constructs a `Parser` that consumes a single character and succeeds with it
- * if it is **NOT** one of the specified characters.
- *
- * @since 1.0.0
- * @category constructors
- */
+/** @internal */
 export const charNotIn = (chars: Iterable<string>): Parser.Parser<string, string, string> =>
   regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
 
@@ -380,14 +389,7 @@ export const exactly = dual<
     self: Parser.Parser<Input, Error, Result>,
     times: number
   ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>
->(2, (self, times) => {
-  const op = Object.create(proto)
-  op._tag = "Repeat"
-  op.parser = self
-  op.min = times
-  op.max = Option.some(times)
-  return op
-})
+>(2, (self, times) => repeat(self, Option.some(times), Option.some(times)))
 
 /** @internal */
 export const fail = <Error>(error: Error): Parser.Parser<unknown, Error, never> => {
@@ -527,7 +529,7 @@ export const not = dual<
 })
 
 /** @internal */
-export const notChar = <Error = string>(char: string, error?: Error): Parser.Parser<string, Error, string> =>
+export const charNot = <Error = string>(char: string, error?: Error): Parser.Parser<string, Error, string> =>
   regexChar(_regex.charNotIn([char]), error ?? (`cannot be '${char}'` as any))
 
 /** @internal */
@@ -676,7 +678,7 @@ export const regexDiscard = <Error>(regex: Regex.Regex, error: Error): Parser.Pa
 }
 
 /** @internal */
-export const repeat = <Input, Error, Result>(
+export const repeat0 = <Input, Error, Result>(
   self: Parser.Parser<Input, Error, Result>
 ): Parser.Parser<Input, Error, Chunk.Chunk<Result>> => atLeast(self, 0)
 
@@ -700,7 +702,7 @@ export const repeatUntil = dual<
 >(2, <Input, Error, Result, Input2, Error2>(
   self: Parser.Parser<Input, Error, Result>,
   stopCondition: Parser.Parser<Input2, Error2, void>
-) => manualBacktracking(repeat(zipRight(not(stopCondition, void 0 as Error2), self))))
+) => manualBacktracking(repeat0(zipRight(not(stopCondition, void 0 as Error2), self))))
 
 /** @internal */
 export const repeatWithSeparator = dual<
@@ -715,12 +717,12 @@ export const repeatWithSeparator = dual<
   ) => Parser.Parser<Input & Input2, Error | Error2, Chunk.Chunk<Result>>
 >(2, (self, separator) =>
   pipe(
-    zip(self, repeat(zipRight(separator, self))),
+    zip(self, repeat0(zipRight(separator, self))),
     optional,
-    map(Option.match(
-      () => Chunk.empty(),
-      ([head, tail]) => Chunk.prepend(tail, head)
-    ))
+    map(Option.match({
+      onNone: () => Chunk.empty(),
+      onSome: ([head, tail]) => Chunk.prepend(tail, head)
+    }))
   ))
 
 /** @internal */
@@ -739,7 +741,7 @@ export const repeatWithSeparator1 = dual<
   separator: Parser.Parser<Input2, Error2, void>
 ) =>
   pipe(
-    zip(self, repeat(zipRight(separator, self))),
+    zip(self, repeat0(zipRight(separator, self))),
     map(([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<Result>)
   ))
 
@@ -785,8 +787,7 @@ export const surroundedBy = dual<
     self: Parser.Parser<Input, Error, Result>,
     other: Parser.Parser<Input2, Error2, Result2>
   ) => Parser.Parser<Input & Input2, Error | Error2, Result>
->(2, (self, other) => zipRight(other, zipLeft(self, other)))
-
+>(2, (self, other) => between(self, other, other))
 /** @internal */
 export const suspend = <Input, Error, Result>(
   parser: LazyArg<Parser.Parser<Input, Error, Result>>
@@ -827,7 +828,12 @@ export const transformOption = dual<
     self: Parser.Parser<Input, Error, Result>,
     pf: (result: Result) => Option.Option<Result2>
   ) => Parser.Parser<Input, Option.Option<Error>, Result2>
->(2, (self, pf) => transformEither(self, (value) => Either.fromOption(pf(value), () => Option.none())))
+>(2, (self, pf) =>
+  transformEither(self, (value) =>
+    Option.match(pf(value), {
+      onNone: () => Either.left(Option.none()),
+      onSome: Either.right
+    })))
 
 /** @internal */
 export const unsafeRegex = (regex: Regex.Regex): Parser.Parser<string, never, Chunk.Chunk<string>> => {
@@ -1138,13 +1144,17 @@ const optimizeNode = (
       const optimizedInner = optimizeNode(inner, state)
       const op = Object.create(proto)
       if (optimizedInner._tag === "ParseRegexLastChar") {
-        if (Option.isSome(self.max)) {
+        if (Option.isSome(self.min) && Option.isSome(self.max)) {
           op._tag = "ParseRegex"
-          op.regex = _regex.between(optimizedInner.regex, self.min, self.max.value)
+          op.regex = _regex.between(optimizedInner.regex, self.min.value, self.max.value)
           op.onFailure = optimizedInner.onFailure
-        } else {
+        } else if (Option.isSome(self.max)) {
           op._tag = "ParseRegex"
-          op.regex = _regex.atLeast(optimizedInner.regex, self.min)
+          op.regex = _regex.atMost(optimizedInner.regex, self.max.value)
+          op.onFailure = optimizedInner.onFailure
+        } else if (Option.isSome(self.min)) {
+          op._tag = "ParseRegex"
+          op.regex = _regex.atLeast(optimizedInner.regex, self.min.value)
           op.onFailure = optimizedInner.onFailure
         }
         state.optimized.set(self, op)
@@ -1201,7 +1211,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.flatMap(inner.to(result), self.to)
+        op.to = (result: unknown) => Either.map(inner.to(result), self.to)
       } else if (inner._tag === "Transform") {
         op._tag = "TransformEither"
         op.parser = inner.parser

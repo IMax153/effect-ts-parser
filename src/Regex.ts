@@ -137,8 +137,8 @@ export const needMoreInput: -2 = common.needMoreInput
 export const notMatched: -1 = common.notMatched
 
 /**
- * Composes this regex with the specified regex using intersection, returning
- * a regex that will match a prefix only if both this and the specified regex match it.
+ * Composes this `Regex` with the specified `Regex` using intersection,
+ * returning a `Regex` that will match a prefix only if both this and the specified one match it.
  *
  * @since 1.0.0
  * @category combinators
@@ -149,7 +149,7 @@ export const and: {
 } = internal.and
 
 /**
- * A regex that matches any single character.
+ * A `Regex` that matches any single character.
  *
  * @since 1.0.0
  * @category constructors
@@ -157,7 +157,7 @@ export const and: {
 export const anyChar: Regex = internal.anyChar
 
 /**
- * A regex that matches any single digit character.
+ * A `Regex` that matches any single digit character.
  *
  * @since 1.0.0
  * @category constructors
@@ -165,7 +165,7 @@ export const anyChar: Regex = internal.anyChar
 export const anyDigit: Regex = internal.anyDigit
 
 /**
- * A regex that matches any single letter character.
+ * A `Regex` that matches any single letter character.
  *
  * @since 1.0.0
  * @category constructors
@@ -173,7 +173,7 @@ export const anyDigit: Regex = internal.anyDigit
 export const anyLetter: Regex = internal.anyLetter
 
 /**
- * A regex that matches any single whitespace character.
+ * A `Regex` that matches any single whitespace character.
  *
  * @since 1.0.0
  * @category constructors
@@ -181,7 +181,7 @@ export const anyLetter: Regex = internal.anyLetter
 export const anyWhitespace: Regex = internal.anyWhitespace
 
 /**
- * A regex that matches a single letter or digit character.
+ * A `Regex` that matches a single letter or digit character.
  *
  * @since 1.0.0
  * @category constructors
@@ -189,7 +189,7 @@ export const anyWhitespace: Regex = internal.anyWhitespace
 export const anyAlphaNumeric: Regex = internal.anyAlphaNumeric
 
 /**
- * A regex that matches at least one letter or digit character.
+ * A `Regex` that matches at least one letter or digit character.
  *
  * @since 1.0.0
  * @category constructors
@@ -197,7 +197,7 @@ export const anyAlphaNumeric: Regex = internal.anyAlphaNumeric
 export const alphaNumerics: Regex = internal.alphaNumerics
 
 /**
- * Returns a new regex that matches at least `min` occurrences of this regex.
+ * Returns a new `Regex` that matches at least `min` occurrences of this `Regex`.
  *
  * @since 1.0.0
  * @category combinators
@@ -208,7 +208,7 @@ export const atLeast: {
 } = internal.atLeast
 
 /**
- * Returns a new regex that matches at most `max` occurrences of this regex.
+ * Returns a new `Regex` that matches at most `max` occurrences of this `Regex`.
  *
  * @since 1.0.0
  * @category combinators
@@ -219,8 +219,8 @@ export const atMost: {
 } = internal.atMost
 
 /**
- * Returns a new regex that matches between `min` and `max` occurrences of this
- * regex.
+ * Returns a new `Regex` that matches between `min` and `max` occurrences of this
+ * `Regex`.
  *
  * @since 1.0.0
  * @category combinators
@@ -231,7 +231,7 @@ export const between: {
 } = internal.between
 
 /**
- * A regex that matches the specified character.
+ * A `Regex` that matches the specified character.
  *
  * @since 1.0.0
  * @category constructors
@@ -239,7 +239,7 @@ export const between: {
 export const char: (char: string) => Regex = internal.char
 
 /**
- * A regex that matches one of the specified characters.
+ * A `Regex` that matches one of the specified characters.
  *
  * @since 1.0.0
  * @category constructors
@@ -247,7 +247,7 @@ export const char: (char: string) => Regex = internal.char
 export const charIn: (chars: Iterable<string>) => Regex = internal.charIn
 
 /**
- * A regex that matches any character except of the specified ones
+ * A `Regex` that matches any character except for the specified ones.
  *
  * @since 1.0.0
  * @category constructors
@@ -255,7 +255,7 @@ export const charIn: (chars: Iterable<string>) => Regex = internal.charIn
 export const charNotIn: (chars: Iterable<string>) => Regex = internal.charNotIn
 
 /**
- * Compiles the regex to a form that allows efficient execution on chunks of
+ * Compiles the `Regex` to a form that allows efficient execution on chunks of
  * characters.
  *
  * @since 1.0.0
@@ -264,7 +264,7 @@ export const charNotIn: (chars: Iterable<string>) => Regex = internal.charNotIn
 export const compile: (regex: Regex) => Regex.Compiled = internal.compile
 
 /**
- * A regex that matches one or more digit characters.
+ * A `Regex` that matches one or more digit characters.
  *
  * @since 1.0.0
  * @category constructors
@@ -272,7 +272,7 @@ export const compile: (regex: Regex) => Regex.Compiled = internal.compile
 export const digits: Regex = internal.digits
 
 /**
- * A regex that matches the empty string, which will always succeed.
+ * A `Regex` that matches the empty string, which will always succeed.
  *
  * @since 1.0.0
  * @category constructors
@@ -289,7 +289,7 @@ export const empty: Regex = internal.empty
 export const filter: (predicate: Predicate<string>) => Regex = internal.filter
 
 /**
- * A regex that matches any one or more letter characters.
+ * A `Regex` that matches one or more letter characters.
  *
  * @since 1.0.0
  * @category constructors
@@ -297,8 +297,8 @@ export const filter: (predicate: Predicate<string>) => Regex = internal.filter
 export const letters: Regex = internal.letters
 
 /**
- * Composes this regex with the specified regex using union, returning a regex
- * that will match a prefix only if either this or the specified regex match it.
+ * Composes this `Regex` with the specified `Regex` using union,
+ * returning a `Regex` that will match a prefix only if either this or the specified one matches it.
  *
  * @since 1.0.0
  * @category combinators
@@ -309,8 +309,8 @@ export const or: {
 } = internal.or
 
 /**
- * Sequentially composes this regex with the specified regex, returning a
- * regex that will first match this one, and then match the specified regex.
+ * Composes this `Regex` with the specified `Regex` sequentially,
+ * returning a `Regex` that will match this first, and then the specified one.
  *
  * @since 1.0.0
  * @category combinators
@@ -337,7 +337,7 @@ export const string: (string: string) => Regex = internal.string
 export const toLiteral: (self: Regex) => Option<Chunk<string>> = internal.toLiteral
 
 /**
- * A regex that matches zero or more whitespace characters.
+ * A `Regex` that matches zero or more whitespace characters.
  *
  * @since 1.0.0
  * @category constructors

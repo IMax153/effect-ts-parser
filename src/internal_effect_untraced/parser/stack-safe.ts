@@ -304,7 +304,7 @@ export interface PushArray {
 export interface ProcessRepeatedElement {
   readonly _tag: "ProcessRepeatedElement"
   readonly parseElement: ParserOp
-  readonly min: number
+  readonly min: Option.Option<number>
   readonly max: Option.Option<number>
 }
 
@@ -887,10 +887,13 @@ export const charParserExecutor = (
         if (result === common.needMoreInput) {
           lastFailure1 = parserError.unexpectedEndOfInput
         } else if (result === common.notMatched) {
-          Option.match(op.failAs, () => {
-            lastSuccess1 = Chunk.empty()
-          }, (error) => {
-            lastFailure1 = parserError.failure(nameStack, position, error)
+          Option.match(op.failAs, {
+            onNone: () => {
+              lastSuccess1 = Chunk.empty()
+            },
+            onSome: (error) => {
+              lastFailure1 = parserError.failure(nameStack, position, error)
+            }
           })
         } else {
           const oldPosition = position
@@ -961,6 +964,7 @@ export const charParserExecutor = (
           opStack = List.cons(op, opStack)
           op = op.parseElement
         } else {
+          const minCount = Option.getOrElse(op.min, () => 0)
           const builder = lastBuilder
           if (List.isCons(builderStack)) {
             lastBuilder = builderStack.head
@@ -968,7 +972,7 @@ export const charParserExecutor = (
           } else {
             lastBuilder = undefined
           }
-          if (builder!.length < op.min) {
+          if (builder!.length < minCount) {
             // not enough elements
             lastFailure1 = parserError.unexpectedEndOfInput
             popOpStack()
@@ -1156,11 +1160,14 @@ export const charParserExecutor = (
       case "TransformResultEither": {
         if (lastSuccess1 !== null) {
           const either = op.f(lastSuccess1)
-          Either.match(either, (error) => {
-            lastSuccess1 = null
-            lastFailure1 = parserError.failure(nameStack, position, error)
-          }, (value) => {
-            lastSuccess1 = value
+          Either.match(either, {
+            onLeft: (error) => {
+              lastSuccess1 = null
+              lastFailure1 = parserError.failure(nameStack, position, error)
+            },
+            onRight: (value) => {
+              lastSuccess1 = value
+            }
           })
         }
         popOpStack()

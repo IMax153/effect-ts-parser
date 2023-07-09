@@ -129,7 +129,7 @@ export const anyLetter: Regex.Regex = filter((char) => IS_LETTER_REGEX.test(char
 const IS_WHITESPACE_REGEX = /^\s$/
 
 /** @internal */
-export const anyWhitespace = filter((char) => IS_WHITESPACE_REGEX.test(char))
+export const anyWhitespace: Regex.Regex = filter((char) => IS_WHITESPACE_REGEX.test(char))
 
 /** @internal */
 export const anyAlphaNumeric: Regex.Regex = or(anyLetter, anyDigit)
@@ -151,7 +151,7 @@ export const charNotIn = (chars: Iterable<string>): Regex.Regex =>
 
 const compileSequence = (self: Regex.Regex): Chunk.Chunk<Regex.Regex> =>
   self._tag === "Sequence"
-    ? Chunk.concat(compileSequence(self.left), compileSequence(self.right))
+    ? Chunk.appendAll(compileSequence(self.left), compileSequence(self.right))
     : Chunk.of(self)
 
 /** @internal */
@@ -189,7 +189,7 @@ const compileInternal = (self: Regex.Regex) =>
         if (index >= chars.length) {
           return common.needMoreInput
         }
-        if (self.bitset.some((bit) => bit === chars[index]!.charCodeAt(0))) {
+        if (self.bitset.some((bit) => bit === chars[index].charCodeAt(0))) {
           return index + 1
         }
         return common.notMatched
@@ -255,7 +255,7 @@ export const toLiteral = (self: Regex.Regex): Option.Option<Chunk.Chunk<string>>
         (left) =>
           Option.map(
             toLiteral(self.right),
-            (right) => Chunk.concat(left, right)
+            (right) => Chunk.appendAll(left, right)
           )
       )
     }

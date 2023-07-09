@@ -232,6 +232,7 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
     }
     case "Repeat": {
       const maxCount = Option.getOrElse(self.max, () => Infinity)
+      const minCount = Option.getOrElse(self.min, () => 0)
       const discard = state.discard
       const builder: Array<unknown> | undefined = discard ? undefined : []
       let count = 0
@@ -247,10 +248,10 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
           }
         }
       }
-      if (count < self.min && state.error === undefined) {
+      if (count < minCount && state.error === undefined) {
         state.error = parserError.unexpectedEndOfInput
       } else {
-        if (count >= self.min) {
+        if (count >= minCount) {
           state.error = undefined
         }
       }
@@ -296,9 +297,12 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
       state.discard = discard
       if (state.error === undefined) {
         const result = self.to(innerResult)
-        return Either.getOrElse(result, (error) => {
-          state.error = parserError.failure(state.nameStack, state.position, error)
-          return undefined
+        return Either.match(result, {
+          onLeft: (error) => {
+            state.error = parserError.failure(state.nameStack, state.position, error)
+            return undefined
+          },
+          onRight: (value) => value
         })
       }
       return undefined
@@ -349,6 +353,8 @@ const getParserError = (
 ): ParserError.ParserError<unknown> =>
   Option.match(
     onFailure,
-    () => parserError.unknownFailure(nameStack, position),
-    (error) => parserError.failure(nameStack, position, error)
+    {
+      onNone: () => parserError.unknownFailure(nameStack, position),
+      onSome: (error) => parserError.failure(nameStack, position, error)
+    }
   )

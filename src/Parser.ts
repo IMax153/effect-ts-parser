@@ -208,6 +208,15 @@ export const captureString: <Error, Result>(self: Parser<string, Error, Result>)
 export const char: <Error = string>(char: string, error?: Error) => Parser<string, Error, void> = internal.char
 
 /**
+ * Constructs a `Parser` that consumes a single character and fails with the
+ * specified `error` if it matches the specified character.
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const charNot: <Error = string>(char: string, error?: Error) => Parser<string, Error, string> = internal.charNot
+
+/**
  * Constructs a `Parser` that consumes a single character and succeeds with it
  * if it is one of the specified characters.
  *
@@ -215,6 +224,15 @@ export const char: <Error = string>(char: string, error?: Error) => Parser<strin
  * @category constructors
  */
 export const charIn: (chars: Iterable<string>) => Parser<string, string, string> = internal.charIn
+
+/**
+ * Constructs a `Parser` that consumes a single character and succeeds with it
+ * if it is **NOT** one of the specified characters.
+ *
+ * @since 1.0.0
+ * @category constructors
+ */
+export const charNotIn: (chars: Iterable<string>) => Parser<string, string, string> = internal.charNotIn
 
 /**
  * Constructs a `Parser` of a single digit.
@@ -406,15 +424,6 @@ export const not: {
 } = internal.not
 
 /**
- * Constructs a `Parser` that consumes a single character and fails with the
- * specified `error` if it matches the specified character.
- *
- * @since 1.0.0
- * @category constructors
- */
-export const notChar: <Error = string>(char: string, error?: Error) => Parser<string, Error, string> = internal.notChar
-
-/**
  * Make this parser optional.
  *
  * Failure of this parser will be ignored. If auto-backtracking is enabled,
@@ -550,7 +559,7 @@ export const regexDiscard: <Error>(regex: Regex, error: Error) => Parser<string,
  */
 export const repeat: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, Chunk<Result>> = internal.repeat
+) => Parser<Input, Error, Chunk<Result>> = internal.repeat0
 
 /**
  * Repeats this parser at least once.

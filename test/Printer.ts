@@ -225,7 +225,7 @@ describe("Printer", () => {
 
   printerTest(
     "repeat, once",
-    Syntax.repeat(charA),
+    Syntax.repeat1(charA),
     Chunk.of("a"),
     Either.right("a")
   )
