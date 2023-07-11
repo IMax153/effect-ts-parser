@@ -24,3 +24,10 @@ export const tests = <Error, Result>(
     })
   }
 }
+
+tests(
+  "basic",
+  Syntax.charIn("A"),
+  "A",
+  Either.right("A")
+)
