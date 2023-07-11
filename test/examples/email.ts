@@ -1,7 +1,7 @@
 import * as Either from "@effect/data/Either"
 import { pipe } from "@effect/data/Function"
 import * as Syntax from "@effect/parser/Syntax"
-import { tests } from "@effect/parser/test/examples/url"
+import { tests } from "@effect/parser/test/examples/utils"
 
 const segment = pipe(
   Syntax.charNotIn(["@", " ", "\t", "\r", "\n"]),
@@ -15,19 +15,19 @@ const domain = pipe(
   Syntax.flattenNonEmpty
 )
 
+tests(
+  "domain",
+  domain,
+  "hello.net",
+  Either.right("hello.net")
+)
+
 /**
  * Simple email parser
  */
 const email = pipe(
   Syntax.zipLeft(segment, Syntax.char("@")),
   Syntax.zip(domain)
-)
-
-tests(
-  "domain",
-  domain,
-  "hello.net",
-  Either.right("hello.net")
 )
 
 tests(
