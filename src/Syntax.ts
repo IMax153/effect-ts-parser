@@ -54,10 +54,6 @@ export declare namespace Syntax {
   }
 }
 
-export type V<S extends { readonly [SyntaxTypeId]: { _Value: (..._: any) => any } }> = Parameters<
-  S[SyntaxTypeId]["_Value"]
->[0]
-
 /**
  * Constructs a `Syntax` for a single alpha-numeric character.
  *

@@ -428,6 +428,10 @@ export const repeatWithSeparator = dual<
     )
   ))
 
+type V<S extends { readonly [SyntaxTypeId]: { _Value: (..._: any) => any } }> = Parameters<
+  S[Syntax.SyntaxTypeId]["_Value"]
+>[0]
+
 /** @internal */
 export const repeatWithSeparator1 = dual<
   <Input2, Error2, Output2>(
@@ -446,7 +450,7 @@ export const repeatWithSeparator1 = dual<
   transform(
     zip(self, repeat0(zipRight(separator, self))),
     // readonly [Value, readonly Value[]] => => readonly Value[]
-    ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<Syntax.V<typeof self>>,
+    ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<V<typeof self>>,
     (a) =>
       tuple(
         Chunk.headNonEmpty(a),
