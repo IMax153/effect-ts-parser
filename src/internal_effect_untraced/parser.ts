@@ -1051,7 +1051,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.map(inner.to(result), () => self.to)
+        op.to = (result: unknown) => Either.mapRight(inner.to(result), () => self.to)
       } else if (inner._tag === "CaptureString" || inner._tag === "Ignore" || inner._tag === "Transform") {
         op._tag = "Ignore"
         op.parser = inner.parser
@@ -1192,7 +1192,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.map(inner.to(result), self.to)
+        op.to = (result: unknown) => Either.mapRight(inner.to(result), self.to)
       } else if (inner._tag === "Transform") {
         op._tag = "Transform"
         op.parser = inner.parser
@@ -1211,7 +1211,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.map(inner.to(result), self.to)
+        op.to = (result: unknown) => Either.mapRight(inner.to(result), self.to)
       } else if (inner._tag === "Transform") {
         op._tag = "TransformEither"
         op.parser = inner.parser
