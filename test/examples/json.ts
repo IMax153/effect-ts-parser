@@ -3,7 +3,7 @@ import * as Either from "@effect/data/Either"
 import { pipe } from "@effect/data/Function"
 import * as Option from "@effect/data/Option"
 import * as Syntax from "@effect/parser/Syntax"
-import { tests } from "./utils"
+import { hexDigit, tests } from "./utils"
 
 const whitespace = pipe(
   Syntax.charIn([" ", "\n", "\r", "\t"]),
@@ -36,20 +36,15 @@ const number = pipe(
   Syntax.zip(Syntax.optional(fraction)),
   Syntax.zip(Syntax.optional(exponent)),
   Syntax.captureString,
-  Syntax.transform(
-    (s) => parseFloat(s),
-    (v) => v.toString()
-  )
+  Syntax.transform(parseFloat, String)
 )
 tests("number", number, "-12.782E-2", Either.right(-0.12782))
 
-const hexDigit = Syntax.charIn("0123456789abcdefABCDEF")
-
 const hexToDecimal = pipe(
-  Syntax.repeat1(hexDigit),
+  pipe(hexDigit, Syntax.repeat1, Syntax.flattenNonEmpty),
   Syntax.transform(
-    (s) => parseInt(Chunk.join(s, ""), 16),
-    (n) => Chunk.of(n.toString(16))
+    (to) => parseInt(to, 16),
+    (from) => from.toString(16)
   )
 )
 
@@ -125,7 +120,7 @@ tests("string: empty", string, `""`, Either.right(""))
 tests("string: simple", string, `"hello, world!"`, Either.right("hello, world!"))
 tests("string: escape", string, `"hello, world! \\"yeah\\""`, Either.right(`hello, world! "yeah"`))
 tests("string: escape 2", string, `"yes\\\\no"`, Either.right(`yes\\no`)) // TODO: doesn't print correctly
-tests("string: unicode", string, `"\\u0041"`, Either.right(`A`))
+tests("string: unicode", string, `"\\u016f\\u017e"`, Either.right(`ůž`), Either.right(`"ůž"`))
 
 const object = pipe(
   string,

@@ -1,4 +1,5 @@
 import * as Either from "@effect/data/Either"
+import { pipe } from "@effect/data/Function"
 import type * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
 
@@ -31,3 +32,6 @@ tests(
   "A",
   Either.right("A")
 )
+
+export const hexDigit = Syntax.charIn("0123456789abcdefABCDEF")
+export const hexDigits = pipe(hexDigit, Syntax.repeat1)
