@@ -160,6 +160,24 @@ export const atLeast: {
 } = internal.atLeast
 
 /**
+ * Repeat this `Syntax` at most `max` number of times.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const atMost: {
+  (
+    max: number
+  ): <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>
+  ) => Syntax<Input, Error, Output, Chunk<Value>>
+  <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>,
+    max: number
+  ): Syntax<Input, Error, Output, Chunk<Value>>
+} = internal.atMost
+
+/**
  * Enables auto-backtracking for this syntax.
  *
  * @since 1.0.0

@@ -114,6 +114,19 @@ export const atLeast = dual<
 >(2, (self, min) => make(_parser.atLeast(self.parser, min), _printer.repeat(self.printer)))
 
 /** @internal */
+export const atMost = dual<
+  (
+    max: number
+  ) => <Input, Error, Output, Value>(
+    self: Syntax.Syntax<Input, Error, Output, Value>
+  ) => Syntax.Syntax<Input, Error, Output, Chunk.Chunk<Value>>,
+  <Input, Error, Output, Value>(
+    self: Syntax.Syntax<Input, Error, Output, Value>,
+    max: number
+  ) => Syntax.Syntax<Input, Error, Output, Chunk.Chunk<Value>>
+>(2, (self, max) => make(_parser.atMost(self.parser, max), _printer.repeat(self.printer)))
+
+/** @internal */
 export const autoBacktracking = <Input, Error, Output, Value>(
   self: Syntax.Syntax<Input, Error, Output, Value>
 ): Syntax.Syntax<Input, Error, Output, Value> =>
