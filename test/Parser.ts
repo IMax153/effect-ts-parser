@@ -461,6 +461,17 @@ describe.concurrent("Parser", () => {
     Either.right(["a", "a", "a"])
   )
 
+  parserTest(
+    "atMost - three passing",
+    Syntax.transform(
+      Syntax.atMost(charA, 2),
+      (chunk) => Array.from(chunk),
+      (array) => Chunk.unsafeFromArray(array)
+    ),
+    "aabc",
+    Either.right(["a", "a"])
+  )
+
   // TODO: With compiling to Regex it fails with `UnexpectedEndOfInput` - to be discussed
   // parserTest(
   //   "atLeast - three failing",

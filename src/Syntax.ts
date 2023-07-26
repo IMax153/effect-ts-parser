@@ -54,10 +54,6 @@ export declare namespace Syntax {
   }
 }
 
-export type V<S extends { readonly [SyntaxTypeId]: { _Value: (..._: any) => any } }> = Parameters<
-  S[SyntaxTypeId]["_Value"]
->[0]
-
 /**
  * Constructs a `Syntax` for a single alpha-numeric character.
  *
@@ -162,6 +158,24 @@ export const atLeast: {
     min: number
   ): Syntax<Input, Error, Output, Chunk<Value>>
 } = internal.atLeast
+
+/**
+ * Repeat this `Syntax` at most `max` number of times.
+ *
+ * @since 1.0.0
+ * @category combinators
+ */
+export const atMost: {
+  (
+    max: number
+  ): <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>
+  ) => Syntax<Input, Error, Output, Chunk<Value>>
+  <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>,
+    max: number
+  ): Syntax<Input, Error, Output, Chunk<Value>>
+} = internal.atMost
 
 /**
  * Enables auto-backtracking for this syntax.

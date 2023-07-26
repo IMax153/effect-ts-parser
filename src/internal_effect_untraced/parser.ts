@@ -314,11 +314,6 @@ const repeat = dual<
 })
 
 /** @internal */
-export const autoBacktracking = <Input, Error, Result>(
-  self: Parser.Parser<Input, Error, Result>
-): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, true)
-
-/** @internal */
 export const atLeast = dual<
   (
     min: number
@@ -332,51 +327,28 @@ export const atLeast = dual<
 >(2, (self, min) => repeat(self, Option.some(min), Option.none()))
 
 /** @internal */
-export const backtrack = <Input, Error, Result>(
+export const repeat0 = <Input, Error, Result>(
   self: Parser.Parser<Input, Error, Result>
-): Parser.Parser<Input, Error, Result> => {
-  const op = Object.create(proto)
-  op._tag = "Backtrack"
-  op.parser = self
-  return op
-}
+): Parser.Parser<Input, Error, Chunk.Chunk<Result>> => atLeast(self, 0)
 
 /** @internal */
-export const between = dual<
-  <Input2, Error2, Result2, Input3, Error3, Result3>(
-    left: Parser.Parser<Input2, Error2, Result2>,
-    right: Parser.Parser<Input3, Error3, Result3>
+export const repeat1 = <Input, Error, Result>(
+  self: Parser.Parser<Input, Error, Result>
+): Parser.Parser<Input, Error, Chunk.NonEmptyChunk<Result>> =>
+  atLeast(self, 1) as Parser.Parser<Input, Error, Chunk.NonEmptyChunk<Result>>
+
+/** @internal */
+export const atMost = dual<
+  (
+    max: number
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
-  ) => Parser.Parser<Input & Input2 & Input3, Error | Error2 | Error3, Result>,
-  <Input, Error, Result, Input2, Error2, Result2, Input3, Error3, Result3>(
+  ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>,
+  <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>,
-    left: Parser.Parser<Input2, Error2, Result2>,
-    right: Parser.Parser<Input3, Error3, Result3>
-  ) => Parser.Parser<Input & Input2 & Input3, Error | Error2 | Error3, Result>
->(3, (self, left, right) => zipRight(left, zipLeft(self, right)))
-
-/** @internal */
-export const captureString = <Error, Result>(
-  self: Parser.Parser<string, Error, Result>
-): Parser.Parser<string, Error, string> => {
-  const op = Object.create(proto)
-  op._tag = "CaptureString"
-  op.parser = self
-  return op
-}
-
-/** @internal */
-export const char = <Error = string>(char: string, error?: Error): Parser.Parser<string, Error, void> =>
-  regexDiscard(_regex.charIn(char), error ?? (`expected '${char}'` as any))
-
-/** @internal */
-export const charIn = (chars: Iterable<string>): Parser.Parser<string, string, string> =>
-  regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
-
-/** @internal */
-export const charNotIn = (chars: Iterable<string>): Parser.Parser<string, string, string> =>
-  regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
+    max: number
+  ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>
+>(2, (self, max) => repeat(self, Option.none(), Option.some(max)))
 
 /** @internal */
 export const exactly = dual<
@@ -390,6 +362,145 @@ export const exactly = dual<
     times: number
   ) => Parser.Parser<Input, Error, Chunk.Chunk<Result>>
 >(2, (self, times) => repeat(self, Option.some(times), Option.some(times)))
+
+/** @internal */
+export const setAutoBacktracking = dual<
+  (
+    enabled: boolean
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Parser.Parser<Input, Error, Result>,
+  <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>,
+    enabled: boolean
+  ) => Parser.Parser<Input, Error, Result>
+>(2, (self, enabled) => {
+  const op = Object.create(proto)
+  op._tag = "SetAutoBacktrack"
+  op.parser = self
+  op.enabled = enabled
+  return op
+})
+
+/** @internal */
+export const autoBacktracking = <Input, Error, Result>(
+  self: Parser.Parser<Input, Error, Result>
+): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, true)
+
+/** @internal */
+export const manualBacktracking = <Input, Error, Result>(
+  self: Parser.Parser<Input, Error, Result>
+): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, false)
+
+/** @internal */
+export const backtrack = <Input, Error, Result>(
+  self: Parser.Parser<Input, Error, Result>
+): Parser.Parser<Input, Error, Result> => {
+  const op = Object.create(proto)
+  op._tag = "Backtrack"
+  op.parser = self
+  return op
+}
+
+/** @internal */
+export const captureString = <Error, Result>(
+  self: Parser.Parser<string, Error, Result>
+): Parser.Parser<string, Error, string> => {
+  const op = Object.create(proto)
+  op._tag = "CaptureString"
+  op.parser = self
+  return op
+}
+
+/** @internal */
+export const regex = <Error>(regex: Regex.Regex, error: Error): Parser.Parser<string, Error, Chunk.Chunk<string>> => {
+  const op = Object.create(proto)
+  op._tag = "ParseRegex"
+  op.regex = regex
+  op.onFailure = Option.some(error)
+  return op
+}
+
+/** @internal */
+export const regexChar = <Error>(regex: Regex.Regex, error: Error): Parser.Parser<unknown, Error, string> => {
+  const op = Object.create(proto)
+  op._tag = "ParseRegexLastChar"
+  op.regex = regex
+  op.onFailure = Option.some(error)
+  return op
+}
+
+/** @internal */
+export const regexDiscard = <Error>(regex: Regex.Regex, error: Error): Parser.Parser<string, Error, void> => {
+  const op = Object.create(proto)
+  op._tag = "SkipRegex"
+  op.regex = regex
+  op.onFailure = Option.some(error)
+  return op
+}
+
+/** @internal */
+export const unsafeRegex = (regex: Regex.Regex): Parser.Parser<string, never, Chunk.Chunk<string>> => {
+  const op = Object.create(proto)
+  op._tag = "ParseRegex"
+  op.regex = regex
+  op.onFailure = Option.none()
+  return op
+}
+
+/** @internal */
+export const unsafeRegexChar = (regex: Regex.Regex): Parser.Parser<string, never, string> => {
+  const op = Object.create(proto)
+  op._tag = "ParseRegexLastChar"
+  op.regex = regex
+  op.onFailure = Option.none()
+  return op
+}
+
+/** @internal */
+export const unsafeRegexDiscard = (regex: Regex.Regex): Parser.Parser<string, never, void> => {
+  const op = Object.create(proto)
+  op._tag = "SkipRegex"
+  op.regex = regex
+  op.onFailure = Option.none()
+  return op
+}
+
+/** @internal */
+export const char = <Error = string>(char: string, error?: Error): Parser.Parser<string, Error, void> =>
+  regexDiscard(_regex.charIn(char), error ?? (`expected '${char}'` as any))
+
+/** @internal */
+export const charNot = <Error = string>(char: string, error?: Error): Parser.Parser<string, Error, string> =>
+  regexChar(_regex.charNotIn([char]), error ?? (`cannot be '${char}'` as any))
+
+/** @internal */
+export const charIn = (chars: Iterable<string>): Parser.Parser<string, string, string> =>
+  regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
+
+/** @internal */
+export const charNotIn = (chars: Iterable<string>): Parser.Parser<string, string, string> =>
+  regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
+
+/** @internal */
+export const anyChar: Parser.Parser<string, never, string> = unsafeRegexChar(_regex.anyChar)
+
+/** @internal */
+export const anyString: Parser.Parser<string, never, string> = captureString(
+  unsafeRegexDiscard(_regex.atLeast(_regex.anyChar, 0))
+)
+
+/** @internal */
+export const digit: Parser.Parser<string, string, string> = regexChar(_regex.anyDigit, `not a digit`)
+
+/** @internal */
+export const letter: Parser.Parser<string, string, string> = regexChar(_regex.anyLetter, `not a letter`)
+
+/** @internal */
+export const alphaNumeric: Parser.Parser<string, string, string> = regexChar(_regex.anyAlphaNumeric, `not alphanumeric`)
+
+/** @internal */
+export const whitespace: Parser.Parser<string, string, string> = regexChar(_regex.whitespace, `not a whitespace`)
 
 /** @internal */
 export const fail = <Error>(error: Error): Parser.Parser<unknown, Error, never> => {
@@ -438,21 +549,6 @@ export const flatMap = dual<
 })
 
 /** @internal */
-export const flatten = <Input, Error>(
-  self: Parser.Parser<Input, Error, Chunk.Chunk<string>>
-): Parser.Parser<Input, Error, string> => map(self, Chunk.join(""))
-
-/** @internal */
-export const flattenNonEmpty = <Input, Error>(
-  self: Parser.Parser<Input, Error, Chunk.NonEmptyChunk<string>>
-): Parser.Parser<Input, Error, string> => map(self, Chunk.join(""))
-
-/** @internal */
-export const manualBacktracking = <Input, Error, Result>(
-  self: Parser.Parser<Input, Error, Result>
-): Parser.Parser<Input, Error, Result> => setAutoBacktracking(self, false)
-
-/** @internal */
 export const map = dual<
   <Result, Result2>(
     f: (result: Result) => Result2
@@ -470,6 +566,16 @@ export const map = dual<
   op.to = f
   return op
 })
+
+/** @internal */
+export const flatten = <Input, Error>(
+  self: Parser.Parser<Input, Error, Chunk.Chunk<string>>
+): Parser.Parser<Input, Error, string> => map(self, Chunk.join(""))
+
+/** @internal */
+export const flattenNonEmpty = <Input, Error>(
+  self: Parser.Parser<Input, Error, Chunk.NonEmptyChunk<string>>
+): Parser.Parser<Input, Error, string> => map(self, Chunk.join(""))
 
 /** @internal */
 export const mapError = dual<
@@ -527,10 +633,6 @@ export const not = dual<
   op.error = error
   return op
 })
-
-/** @internal */
-export const charNot = <Error = string>(char: string, error?: Error): Parser.Parser<string, Error, string> =>
-  regexChar(_regex.charNotIn([char]), error ?? (`cannot be '${char}'` as any))
 
 /** @internal */
 export const optional = <Input, Error, Result>(
@@ -651,44 +753,6 @@ export const parseStringWith = dual<
 })
 
 /** @internal */
-export const regex = <Error>(regex: Regex.Regex, error: Error): Parser.Parser<string, Error, Chunk.Chunk<string>> => {
-  const op = Object.create(proto)
-  op._tag = "ParseRegex"
-  op.regex = regex
-  op.onFailure = Option.some(error)
-  return op
-}
-
-/** @internal */
-export const regexChar = <Error>(regex: Regex.Regex, error: Error): Parser.Parser<unknown, Error, string> => {
-  const op = Object.create(proto)
-  op._tag = "ParseRegexLastChar"
-  op.regex = regex
-  op.onFailure = Option.some(error)
-  return op
-}
-
-/** @internal */
-export const regexDiscard = <Error>(regex: Regex.Regex, error: Error): Parser.Parser<string, Error, void> => {
-  const op = Object.create(proto)
-  op._tag = "SkipRegex"
-  op.regex = regex
-  op.onFailure = Option.some(error)
-  return op
-}
-
-/** @internal */
-export const repeat0 = <Input, Error, Result>(
-  self: Parser.Parser<Input, Error, Result>
-): Parser.Parser<Input, Error, Chunk.Chunk<Result>> => atLeast(self, 0)
-
-/** @internal */
-export const repeat1 = <Input, Error, Result>(
-  self: Parser.Parser<Input, Error, Result>
-): Parser.Parser<Input, Error, Chunk.NonEmptyChunk<Result>> =>
-  atLeast(self, 1) as Parser.Parser<Input, Error, Chunk.NonEmptyChunk<Result>>
-
-/** @internal */
 export const repeatUntil = dual<
   <Input2, Error2>(
     stopCondition: Parser.Parser<Input2, Error2, void>
@@ -746,25 +810,6 @@ export const repeatWithSeparator1 = dual<
   ))
 
 /** @internal */
-export const setAutoBacktracking = dual<
-  (
-    enabled: boolean
-  ) => <Input, Error, Result>(
-    self: Parser.Parser<Input, Error, Result>
-  ) => Parser.Parser<Input, Error, Result>,
-  <Input, Error, Result>(
-    self: Parser.Parser<Input, Error, Result>,
-    enabled: boolean
-  ) => Parser.Parser<Input, Error, Result>
->(2, (self, enabled) => {
-  const op = Object.create(proto)
-  op._tag = "SetAutoBacktrack"
-  op.parser = self
-  op.enabled = enabled
-  return op
-})
-
-/** @internal */
 export const string = <Result>(str: string, result: Result): Parser.Parser<string, string, Result> =>
   as(regexDiscard(_regex.string(str), `not '${str}'`), result)
 
@@ -776,18 +821,6 @@ export const succeed = <Result>(result: Result): Parser.Parser<unknown, never, R
   return op
 }
 
-/** @internal */
-export const surroundedBy = dual<
-  <Input2, Error2, Result2>(
-    other: Parser.Parser<Input2, Error2, Result2>
-  ) => <Input, Error, Result>(
-    self: Parser.Parser<Input, Error, Result>
-  ) => Parser.Parser<Input & Input2, Error | Error2, Result>,
-  <Input, Error, Result, Input2, Error2, Result2>(
-    self: Parser.Parser<Input, Error, Result>,
-    other: Parser.Parser<Input2, Error2, Result2>
-  ) => Parser.Parser<Input & Input2, Error | Error2, Result>
->(2, (self, other) => between(self, other, other))
 /** @internal */
 export const suspend = <Input, Error, Result>(
   parser: LazyArg<Parser.Parser<Input, Error, Result>>
@@ -834,33 +867,6 @@ export const transformOption = dual<
       onNone: () => Either.left(Option.none()),
       onSome: Either.right
     })))
-
-/** @internal */
-export const unsafeRegex = (regex: Regex.Regex): Parser.Parser<string, never, Chunk.Chunk<string>> => {
-  const op = Object.create(proto)
-  op._tag = "ParseRegex"
-  op.regex = regex
-  op.onFailure = Option.none()
-  return op
-}
-
-/** @internal */
-export const unsafeRegexChar = (regex: Regex.Regex): Parser.Parser<string, never, string> => {
-  const op = Object.create(proto)
-  op._tag = "ParseRegexLastChar"
-  op.regex = regex
-  op.onFailure = Option.none()
-  return op
-}
-
-/** @internal */
-export const unsafeRegexDiscard = (regex: Regex.Regex): Parser.Parser<string, never, void> => {
-  const op = Object.create(proto)
-  op._tag = "SkipRegex"
-  op.regex = regex
-  op.onFailure = Option.none()
-  return op
-}
 
 /** @internal */
 export const zip = dual<
@@ -914,6 +920,34 @@ export const zipRight = dual<
 })
 
 /** @internal */
+export const between = dual<
+  <Input2, Error2, Result2, Input3, Error3, Result3>(
+    left: Parser.Parser<Input2, Error2, Result2>,
+    right: Parser.Parser<Input3, Error3, Result3>
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Parser.Parser<Input & Input2 & Input3, Error | Error2 | Error3, Result>,
+  <Input, Error, Result, Input2, Error2, Result2, Input3, Error3, Result3>(
+    self: Parser.Parser<Input, Error, Result>,
+    left: Parser.Parser<Input2, Error2, Result2>,
+    right: Parser.Parser<Input3, Error3, Result3>
+  ) => Parser.Parser<Input & Input2 & Input3, Error | Error2 | Error3, Result>
+>(3, (self, left, right) => zipRight(left, zipLeft(self, right)))
+
+/** @internal */
+export const surroundedBy = dual<
+  <Input2, Error2, Result2>(
+    other: Parser.Parser<Input2, Error2, Result2>
+  ) => <Input, Error, Result>(
+    self: Parser.Parser<Input, Error, Result>
+  ) => Parser.Parser<Input & Input2, Error | Error2, Result>,
+  <Input, Error, Result, Input2, Error2, Result2>(
+    self: Parser.Parser<Input, Error, Result>,
+    other: Parser.Parser<Input2, Error2, Result2>
+  ) => Parser.Parser<Input & Input2, Error | Error2, Result>
+>(2, (self, other) => between(self, other, other))
+
+/** @internal */
 export const zipWith = dual<
   <Input2, Error2, Result2, Result, Result3>(
     that: Parser.Parser<Input2, Error2, Result2>,
@@ -936,20 +970,6 @@ export const zipWith = dual<
 })
 
 /** @internal */
-export const alphaNumeric: Parser.Parser<string, string, string> = regexChar(_regex.anyAlphaNumeric, `not alphanumeric`)
-
-/** @internal */
-export const anyChar: Parser.Parser<string, never, string> = unsafeRegexChar(_regex.anyChar)
-
-/** @internal */
-export const anyString: Parser.Parser<string, never, string> = captureString(
-  unsafeRegexDiscard(_regex.atLeast(_regex.anyChar, 0))
-)
-
-/** @internal */
-export const digit: Parser.Parser<string, string, string> = regexChar(_regex.anyDigit, `not a digit`)
-
-/** @internal */
 export const end: Parser.Parser<unknown, never, void> = (() => {
   const op = Object.create(proto)
   op._tag = "End"
@@ -967,13 +987,7 @@ export const index: Parser.Parser<unknown, never, number> = (() => {
 })()
 
 /** @internal */
-export const letter: Parser.Parser<string, string, string> = regexChar(_regex.anyLetter, `not a letter`)
-
-/** @internal */
 export const unit = (): Parser.Parser<unknown, never, void> => succeed(void 0)
-
-/** @internal */
-export const whitespace: Parser.Parser<string, string, string> = regexChar(_regex.whitespace, `not a whitespace`)
 
 // -----------------------------------------------------------------------------
 // Optimization
@@ -1051,7 +1065,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.map(inner.to(result), () => self.to)
+        op.to = (result: unknown) => Either.mapRight(inner.to(result), () => self.to)
       } else if (inner._tag === "CaptureString" || inner._tag === "Ignore" || inner._tag === "Transform") {
         op._tag = "Ignore"
         op.parser = inner.parser
@@ -1144,19 +1158,9 @@ const optimizeNode = (
       const optimizedInner = optimizeNode(inner, state)
       const op = Object.create(proto)
       if (optimizedInner._tag === "ParseRegexLastChar") {
-        if (Option.isSome(self.min) && Option.isSome(self.max)) {
-          op._tag = "ParseRegex"
-          op.regex = _regex.between(optimizedInner.regex, self.min.value, self.max.value)
-          op.onFailure = optimizedInner.onFailure
-        } else if (Option.isSome(self.max)) {
-          op._tag = "ParseRegex"
-          op.regex = _regex.atMost(optimizedInner.regex, self.max.value)
-          op.onFailure = optimizedInner.onFailure
-        } else if (Option.isSome(self.min)) {
-          op._tag = "ParseRegex"
-          op.regex = _regex.atLeast(optimizedInner.regex, self.min.value)
-          op.onFailure = optimizedInner.onFailure
-        }
+        op._tag = "ParseRegex"
+        op.regex = _regex._repeat(optimizedInner.regex, self.min, self.max)
+        op.onFailure = optimizedInner.onFailure
         state.optimized.set(self, op)
         return op
       }
@@ -1192,7 +1196,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.map(inner.to(result), self.to)
+        op.to = (result: unknown) => Either.mapRight(inner.to(result), self.to)
       } else if (inner._tag === "Transform") {
         op._tag = "Transform"
         op.parser = inner.parser
@@ -1211,7 +1215,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.map(inner.to(result), self.to)
+        op.to = (result: unknown) => Either.mapRight(inner.to(result), self.to)
       } else if (inner._tag === "Transform") {
         op._tag = "TransformEither"
         op.parser = inner.parser
