@@ -142,7 +142,7 @@ export const asUnit: <Input, Error, Result>(self: Parser<Input, Error, Result>) 
 export const atLeast: {
   (min: number): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Chunk<Result>>
   <Input, Error, Result>(self: Parser<Input, Error, Result>, min: number): Parser<Input, Error, Chunk<Result>>
-} = internal.atLeast
+} = internal.repeatMin
 
 /**
  * Enables auto-backtracking for this parser.
@@ -187,7 +187,7 @@ export const between: {
     left: Parser<Input2, Error2, Result2>,
     right: Parser<Input3, Error3, Result3>
   ): Parser<Input & Input2 & Input3, Error | Error2 | Error3, Result>
-} = internal.between
+} = internal.zipBetween
 
 /**
  * Ignores this parser's result and instead capture the input string.
@@ -262,7 +262,7 @@ export const end: Parser<unknown, never, void> = internal.end
 export const exactly: {
   (times: number): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Chunk<Result>>
   <Input, Error, Result>(self: Parser<Input, Error, Result>, times: number): Parser<Input, Error, Chunk<Result>>
-} = internal.exactly
+} = internal.repeatExactly
 
 /**
  * Parser that always fails with the specified `error`.
@@ -559,7 +559,7 @@ export const regexDiscard: <Error>(regex: Regex, error: Error) => Parser<string,
  */
 export const repeat: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, Chunk<Result>> = internal.repeat0
+) => Parser<Input, Error, Chunk<Result>> = internal.repeatMin0
 
 /**
  * Repeats this parser at least once.
@@ -573,7 +573,7 @@ export const repeat: <Input, Error, Result>(
  */
 export const repeat1: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, NonEmptyChunk<Result>> = internal.repeat1
+) => Parser<Input, Error, NonEmptyChunk<Result>> = internal.repeatMin1
 
 /**
  * Repeats this parser until the given `stopCondition` parser succeeds.
@@ -687,7 +687,7 @@ export const surroundedBy: {
     self: Parser<Input, Error, Result>,
     other: Parser<Input2, Error2, Result2>
   ): Parser<Input & Input2, Error | Error2, Result>
-} = internal.surroundedBy
+} = internal.zipSurrounded
 
 /**
  * Maps the parser's successful result with the specified function that either
