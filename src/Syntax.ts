@@ -157,7 +157,7 @@ export const atLeast: {
     self: Syntax<Input, Error, Output, Value>,
     min: number
   ): Syntax<Input, Error, Output, Chunk<Value>>
-} = internal.atLeast
+} = internal.repeatMin
 
 /**
  * Repeat this `Syntax` at most `max` number of times.
@@ -175,7 +175,7 @@ export const atMost: {
     self: Syntax<Input, Error, Output, Value>,
     max: number
   ): Syntax<Input, Error, Output, Chunk<Value>>
-} = internal.atMost
+} = internal.repeatMax
 
 /**
  * Enables auto-backtracking for this syntax.
@@ -211,7 +211,7 @@ export const between: {
     left: Syntax<Input2, Error2, Output2, void>,
     right: Syntax<Input3, Error3, Output3, void>
   ): Syntax<Input & Input2 & Input3, Error | Error2 | Error3, Output | Output2 | Output3, Value>
-} = internal.between
+} = internal.zipBetween
 
 /**
  * Returns a new `Syntax` that resets the parsing position in case it fails.
@@ -606,7 +606,7 @@ export const regexDiscard: <Error>(
  */
 export const repeat: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Chunk<Value>> = internal.repeat0
+) => Syntax<Input, Error, Output, Chunk<Value>> = internal.repeatMin0
 
 /**
  * Repeats this `Syntax` at least one time.
@@ -622,7 +622,7 @@ export const repeat: <Input, Error, Output, Value>(
  */
 export const repeat1: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, NonEmptyChunk<Value>> = internal.repeat1
+) => Syntax<Input, Error, Output, NonEmptyChunk<Value>> = internal.repeatMin1
 
 /**
  * Repeats this `Syntax` until the `stopCondition`, which performed after each
@@ -734,7 +734,7 @@ export const surroundedBy: {
     self: Syntax<Input, Error, Output, Value>,
     other: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
-} = internal.surroundedBy
+} = internal.zipSurrounded
 
 /**
  * Lazily constructs a `Syntax`. Can be used to construct a recursive parser
