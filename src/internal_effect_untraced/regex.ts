@@ -22,13 +22,6 @@ const proto = {
 }
 
 /** @internal */
-export const succeed: Regex.Regex = (() => {
-  const op = Object.create(proto)
-  op._tag = "Succeed"
-  return op
-})()
-
-/** @internal */
 export const and = dual<
   (that: Regex.Regex) => (self: Regex.Regex) => Regex.Regex,
   (self: Regex.Regex, that: Regex.Regex) => Regex.Regex
@@ -39,6 +32,40 @@ export const and = dual<
   op.right = that
   return op
 })
+
+const oneOf = (bitset: BitSet.BitSet): Regex.Regex => {
+  const op = Object.create(proto)
+  op._tag = "OneOf"
+  op.bitset = bitset
+  return op
+}
+
+/** @internal */
+export const filter = (predicate: Predicate<string>): Regex.Regex =>
+  pipe(
+    bitset.all,
+    bitset.toChars,
+    ReadonlyArray.filter(predicate),
+    charIn
+  )
+
+/** @internal */
+export const anyChar: Regex.Regex = oneOf(bitset.all)
+
+const IS_DIGIT_REGEX = /^[0-9]$/
+
+/** @internal */
+export const anyDigit: Regex.Regex = filter((char) => IS_DIGIT_REGEX.test(char))
+
+const IS_LETTER_REGEX = /^[a-z]$/i
+
+/** @internal */
+export const anyLetter: Regex.Regex = filter((char) => IS_LETTER_REGEX.test(char))
+
+const IS_WHITESPACE_REGEX = /^\s$/
+
+/** @internal */
+export const anyWhitespace: Regex.Regex = filter((char) => IS_WHITESPACE_REGEX.test(char))
 
 /** @internal */
 export const or = dual<
@@ -52,12 +79,20 @@ export const or = dual<
   return op
 })
 
-const oneOf = (bitset: BitSet.BitSet): Regex.Regex => {
-  const op = Object.create(proto)
-  op._tag = "OneOf"
-  op.bitset = bitset
-  return op
-}
+/** @internal */
+export const anyAlphaNumeric: Regex.Regex = or(anyLetter, anyDigit)
+
+/** @internal */
+export const repeatMin = dual<
+  (min: number) => (self: Regex.Regex) => Regex.Regex,
+  (self: Regex.Regex, min: number) => Regex.Regex
+>(2, (self, min) => repeat(self, Option.some(min), Option.none()))
+
+/** @internal */
+export const alphaNumerics: Regex.Regex = repeatMin(anyAlphaNumeric, 1)
+
+/** @internal */
+export const char = (char: string): Regex.Regex => charIn([char])
 
 /** @internal */
 export const charIn = (chars: Iterable<string>): Regex.Regex =>
@@ -75,16 +110,26 @@ export const charNotIn = (chars: Iterable<string>): Regex.Regex =>
   )
 
 /** @internal */
-export const char = (char: string): Regex.Regex => charIn([char])
+export const repeat = (self: Regex.Regex, min: Option.Option<number>, max: Option.Option<number>): Regex.Regex => {
+  const op = Object.create(proto)
+  op._tag = "Repeat"
+  op.regex = self
+  op.min = min
+  op.max = max
+  return op
+}
 
 /** @internal */
-export const filter = (predicate: Predicate<string>): Regex.Regex =>
-  pipe(
-    bitset.all,
-    bitset.toChars,
-    ReadonlyArray.filter(predicate),
-    charIn
-  )
+export const repeatBetween = dual<
+  (min: number, max: number) => (self: Regex.Regex) => Regex.Regex,
+  (self: Regex.Regex, min: number, max: number) => Regex.Regex
+>(3, (self, min, max) => repeat(self, Option.some(min), Option.some(max)))
+
+/** @internal */
+export const repeatMax = dual<
+  (max: number) => (self: Regex.Regex) => Regex.Regex,
+  (self: Regex.Regex, max: number) => Regex.Regex
+>(2, (self, max) => repeat(self, Option.none(), Option.some(max)))
 
 /** @internal */
 export const sequence = dual<
@@ -102,65 +147,20 @@ export const sequence = dual<
 export const string = (string: string): Regex.Regex => string.split("").map(char).reduce(sequence, succeed)
 
 /** @internal */
-export const repeat = (self: Regex.Regex, min: Option.Option<number>, max: Option.Option<number>): Regex.Regex => {
+export const succeed: Regex.Regex = (() => {
   const op = Object.create(proto)
-  op._tag = "Repeat"
-  op.regex = self
-  op.min = min
-  op.max = max
+  op._tag = "Succeed"
   return op
-}
-
-/** @internal */
-export const repeatMin = dual<
-  (min: number) => (self: Regex.Regex) => Regex.Regex,
-  (self: Regex.Regex, min: number) => Regex.Regex
->(2, (self, min) => repeat(self, Option.some(min), Option.none()))
-
-/** @internal */
-export const repeatMax = dual<
-  (max: number) => (self: Regex.Regex) => Regex.Regex,
-  (self: Regex.Regex, max: number) => Regex.Regex
->(2, (self, max) => repeat(self, Option.none(), Option.some(max)))
-
-/** @internal */
-export const repeatBetween = dual<
-  (min: number, max: number) => (self: Regex.Regex) => Regex.Regex,
-  (self: Regex.Regex, min: number, max: number) => Regex.Regex
->(3, (self, min, max) => repeat(self, Option.some(min), Option.some(max)))
-
-/** @internal */
-export const anyChar: Regex.Regex = oneOf(bitset.all)
-
-const IS_DIGIT_REGEX = /^[0-9]$/
-
-/** @internal */
-export const anyDigit: Regex.Regex = filter((char) => IS_DIGIT_REGEX.test(char))
+})()
 
 /** @internal */
 export const digits: Regex.Regex = repeatMin(anyDigit, 1)
 
-const IS_LETTER_REGEX = /^[a-z]$/i
-
-/** @internal */
-export const anyLetter: Regex.Regex = filter((char) => IS_LETTER_REGEX.test(char))
-
 /** @internal */
 export const letters: Regex.Regex = repeatMin(anyLetter, 1)
 
-const IS_WHITESPACE_REGEX = /^\s$/
-
-/** @internal */
-export const anyWhitespace: Regex.Regex = filter((char) => IS_WHITESPACE_REGEX.test(char))
-
 /** @internal */
 export const whitespace: Regex.Regex = repeatMin(anyWhitespace, 0)
-
-/** @internal */
-export const anyAlphaNumeric: Regex.Regex = or(anyLetter, anyDigit)
-
-/** @internal */
-export const alphaNumerics: Regex.Regex = repeatMin(anyAlphaNumeric, 1)
 
 /** @internal */
 export const compile = (regex: Regex.Regex): Regex.Regex.Compiled => {

@@ -38,26 +38,26 @@ export type Op<Tag extends string, Body = {}> = Printer.Printer<unknown, never, 
 
 /** @internal */
 export type Primitive =
-  | Passthrough
-  | Succeed
+  | ContramapEither
   | Fail
   | Failed
+  | FlatMapInput
   | Ignore
+  | MapError
   | Optional
-  | Suspend
   | OrElse
   | OrElseEither
-  | ContramapEither
-  | FlatMapInput
-  | MapError
+  | Passthrough
+  | ParseRegex
+  | ParseRegexLastChar
+  | ProvideInput
+  | Repeat
+  | SkipRegex
+  | Succeed
+  | Suspend
   | Zip
   | ZipLeft
   | ZipRight
-  | Repeat
-  | ParseRegex
-  | ParseRegexLastChar
-  | SkipRegex
-  | ProvideInput
 
 /** @internal */
 export interface ContramapEither extends
@@ -219,31 +219,59 @@ export const anything = <Input>(): Printer.Printer<Input, never, Input> => {
 }
 
 /** @internal */
-export const succeed = <Input>(input: Input): Printer.Printer<unknown, never, never> => {
+export const regexChar = <Error>(regex: Regex.Regex, error: Error): Printer.Printer<string, Error, string> => {
   const op = Object.create(proto)
-  op._tag = "Succeed"
-  op.input = input
+  op._tag = "ParseRegexLastChar"
+  op.regex = regex
+  op.onFailure = Option.some(error)
   return op
 }
 
 /** @internal */
-export const unit = (): Printer.Printer<void, never, never> => succeed(void 0)
+export const alphaNumeric: Printer.Printer<string, string, string> = regexChar(
+  _regex.anyAlphaNumeric,
+  "not alphanumeric"
+)
 
 /** @internal */
-export const fail = <Error>(error: Error): Printer.Printer<unknown, Error, never> => {
+export const unsafeRegexChar = (regex: Regex.Regex): Printer.Printer<string, never, string> => {
   const op = Object.create(proto)
-  op._tag = "Fail"
-  op.error = error
+  op._tag = "ParseRegexLastChar"
+  op.regex = regex
+  op.onFailure = Option.none()
   return op
 }
 
 /** @internal */
-export const failed = <Error>(error: ParserError.ParserError<Error>): Printer.Printer<Error, never, unknown> => {
+export const anyChar: Printer.Printer<string, never, string> = unsafeRegexChar(_regex.anyChar)
+
+/** @internal */
+export const unsafeRegex = (regex: Regex.Regex): Printer.Printer<Chunk.Chunk<string>, never, string> => {
   const op = Object.create(proto)
-  op._tag = "Failed"
-  op.error = error
+  op._tag = "ParseRegex"
+  op.regex = regex
+  op.onFailure = Option.none()
   return op
 }
+
+/** @internal */
+export const contramap = dual<
+  <Input2, Input>(
+    from: (value: Input2) => Input
+  ) => <Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input2, Error, Output>,
+  <Input, Error, Output, Input2>(
+    self: Printer.Printer<Input, Error, Output>,
+    from: (value: Input2) => Input
+  ) => Printer.Printer<Input2, Error, Output>
+>(2, (self, from) => contramapEither(self, (value) => Either.right(from(value))))
+
+/** @internal */
+export const anyString: Printer.Printer<string, never, string> = pipe(
+  unsafeRegex(_regex.repeatMin(_regex.anyChar, 0)),
+  contramap((s) => Chunk.fromIterable(s))
+)
 
 /** @internal */
 export const asPrinted = dual<
@@ -268,22 +296,153 @@ export const asPrinted = dual<
 })
 
 /** @internal */
+export const char = (char: string): Printer.Printer<void, string, string> =>
+  regexDiscard(_regex.charIn([char]), Chunk.of(char))
+
+/** @internal */
+export const charIn = (chars: Iterable<string>): Printer.Printer<string, string, string> =>
+  regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
+
+/** @internal */
+export const charNot = <Error>(char: string, failure?: Error): Printer.Printer<string, Error, string> =>
+  regexChar(_regex.charNotIn([char]), failure ?? (`cannot be '${char}'` as any))
+
+/** @internal */
+export const charNotIn = (chars: Iterable<string>): Printer.Printer<string, string, string> =>
+  regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
+
+/** @internal */
+export const contramapEither = dual<
+  <Input2, Error2, Input>(
+    from: (value: Input2) => Either.Either<Error2, Input>
+  ) => <Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input2, Error2, Output>,
+  <Input, Error, Output, Input2, Error2>(
+    self: Printer.Printer<Input, Error, Output>,
+    from: (value: Input2) => Either.Either<Error2, Input>
+  ) => Printer.Printer<Input2, Error2, Output>
+>(2, (self, from) => {
+  const op = Object.create(proto)
+  op._tag = "ContramapEither"
+  op.printer = self
+  op.from = from
+  return op
+})
+
+/** @internal */
+export const contramapTo = dual<
+  <Input2, Input, Error2>(
+    from: (value: Input2) => Option.Option<Input>,
+    error: Error2
+  ) => <Error, Output>(self: Printer.Printer<Input, Error, Output>) => Printer.Printer<Input2, Error2, Output>,
+  <Input, Error, Output, Input2, Error2>(
+    self: Printer.Printer<Input, Error, Output>,
+    from: (value: Input2) => Option.Option<Input>,
+    error: Error2
+  ) => Printer.Printer<Input2, Error2, Output>
+>(3, (self, from, error) =>
+  contramapEither(self, (value) =>
+    Option.match(from(value), {
+      onNone: () => Either.left(error),
+      onSome: Either.right
+    })))
+
+/** @internal */
+export const digit: Printer.Printer<string, string, string> = regexChar(_regex.anyDigit, "not a digit")
+
+/** @internal */
+export const exactly = <Output, Error = string>(value: Output, error?: Error): Printer.Printer<Output, Error, Output> =>
+  filterInput(anything(), (input) => Equal.equals(input, value), error ?? (`expected '${value}'` as any))
+
+/** @internal */
+export const except = <Output, Error = string>(value: Output, error?: Error): Printer.Printer<Output, Error, Output> =>
+  filterInput(anything(), (input) => !Equal.equals(input, value), error ?? (`unexpected '${value}'` as any))
+
+/** @internal */
+export const fail = <Error>(error: Error): Printer.Printer<unknown, Error, never> => {
+  const op = Object.create(proto)
+  op._tag = "Fail"
+  op.error = error
+  return op
+}
+
+/** @internal */
+export const failed = <Error>(error: ParserError.ParserError<Error>): Printer.Printer<Error, never, unknown> => {
+  const op = Object.create(proto)
+  op._tag = "Failed"
+  op.error = error
+  return op
+}
+
+/** @internal */
+export const filterInput = dual<
+  <Input, Error2>(
+    condition: Predicate<Input>,
+    error: Error2
+  ) => <Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input, Error | Error2, Output>,
+  <Input, Error, Output, Error2>(
+    self: Printer.Printer<Input, Error, Output>,
+    condition: Predicate<Input>,
+    error: Error2
+  ) => Printer.Printer<Input, Error | Error2, Output>
+>(3, (self, condition, error) =>
+  contramapEither(self, (value) =>
+    condition(value)
+      ? Either.right(value)
+      : Either.left(error)))
+
+/** @internal */
+export const flatten = <Error, Output>(
+  self: Printer.Printer<Chunk.Chunk<string>, Error, Output>
+): Printer.Printer<string, Error, Output> => contramap(self, Chunk.of)
+
+/** @internal */
+export const flattenNonEmpty = <Error, Output>(
+  self: Printer.Printer<Chunk.NonEmptyChunk<string>, Error, Output>
+): Printer.Printer<string, Error, Output> => contramap(self, Chunk.of)
+
+/** @internal */
+export const fromInput = <Input, Error, Output>(
+  f: (input: Input) => Printer.Printer<never, Error, Output>
+): Printer.Printer<Input, Error, Output> => {
+  const op = Object.create(proto)
+  op._tag = "FlatMapInput"
+  op.f = f
+  return op
+}
+
+/** @internal */
+export const letter: Printer.Printer<string, string, string> = regexChar(_regex.anyLetter, "not a letter")
+
+/** @internal */
+export const mapError = dual<
+  <Error, Error2>(
+    f: (error: Error) => Error2
+  ) => <Input, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input, Error2, Output>,
+  <Input, Output, Error, Error2>(
+    self: Printer.Printer<Input, Error, Output>,
+    f: (error: Error) => Error2
+  ) => Printer.Printer<Input, Error2, Output>
+>(2, (self, f) => {
+  const op = Object.create(proto)
+  op._tag = "MapError"
+  op.printer = self
+  op.map = f
+  return op
+})
+
+/** @internal */
 export const optional = <Input, Error, Output>(
   self: Printer.Printer<Input, Error, Output>
 ): Printer.Printer<Option.Option<Input>, Error, Output> => {
   const op = Object.create(proto)
   op._tag = "Optional"
   op.printer = self
-  return op
-}
-
-/** @internal */
-export const suspend = <Input, Error, Output>(
-  printer: LazyArg<Printer.Printer<Input, Error, Output>>
-): Printer.Printer<Input, Error, Output> => {
-  const op = Object.create(proto)
-  op._tag = "Suspend"
-  op.printer = printer
   return op
 }
 
@@ -326,231 +485,92 @@ export const orElseEither = dual<
 })
 
 /** @internal */
-export const contramapEither = dual<
-  <Input2, Error2, Input>(
-    from: (value: Input2) => Either.Either<Error2, Input>
-  ) => <Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input2, Error2, Output>,
-  <Input, Error, Output, Input2, Error2>(
-    self: Printer.Printer<Input, Error, Output>,
-    from: (value: Input2) => Either.Either<Error2, Input>
-  ) => Printer.Printer<Input2, Error2, Output>
->(2, (self, from) => {
+export const output = <Output>(output: Output): Printer.Printer<never, never, Output> => {
   const op = Object.create(proto)
-  op._tag = "ContramapEither"
-  op.printer = self
-  op.from = from
-  return op
-})
-
-/** @internal */
-export const contramap = dual<
-  <Input2, Input>(
-    from: (value: Input2) => Input
-  ) => <Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input2, Error, Output>,
-  <Input, Error, Output, Input2>(
-    self: Printer.Printer<Input, Error, Output>,
-    from: (value: Input2) => Input
-  ) => Printer.Printer<Input2, Error, Output>
->(2, (self, from) => contramapEither(self, (value) => Either.right(from(value))))
-
-/** @internal */
-export const flatten = <Error, Output>(
-  self: Printer.Printer<Chunk.Chunk<string>, Error, Output>
-): Printer.Printer<string, Error, Output> => contramap(self, Chunk.of)
-
-/** @internal */
-export const flattenNonEmpty = <Error, Output>(
-  self: Printer.Printer<Chunk.NonEmptyChunk<string>, Error, Output>
-): Printer.Printer<string, Error, Output> => contramap(self, Chunk.of)
-
-/** @internal */
-export const transformOption = dual<
-  <Input2, Input>(
-    from: (input: Input2) => Option.Option<Input>
-  ) => <Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input2, Option.Option<Error>, Output>,
-  <Input, Error, Output, Input2>(
-    self: Printer.Printer<Input, Error, Output>,
-    from: (input: Input2) => Option.Option<Input>
-  ) => Printer.Printer<Input2, Option.Option<Error>, Output>
->(2, (self, from) =>
-  contramapEither(self, (input) =>
-    Option.match(from(input), {
-      onNone: () => Either.left(Option.none()),
-      onSome: Either.right
-    })))
-
-/** @internal */
-export const contramapTo = dual<
-  <Input2, Input, Error2>(
-    from: (value: Input2) => Option.Option<Input>,
-    error: Error2
-  ) => <Error, Output>(self: Printer.Printer<Input, Error, Output>) => Printer.Printer<Input2, Error2, Output>,
-  <Input, Error, Output, Input2, Error2>(
-    self: Printer.Printer<Input, Error, Output>,
-    from: (value: Input2) => Option.Option<Input>,
-    error: Error2
-  ) => Printer.Printer<Input2, Error2, Output>
->(3, (self, from, error) =>
-  contramapEither(self, (value) =>
-    Option.match(from(value), {
-      onNone: () => Either.left(error),
-      onSome: Either.right
-    })))
-
-/** @internal */
-export const filterInput = dual<
-  <Input, Error2>(
-    condition: Predicate<Input>,
-    error: Error2
-  ) => <Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input, Error | Error2, Output>,
-  <Input, Error, Output, Error2>(
-    self: Printer.Printer<Input, Error, Output>,
-    condition: Predicate<Input>,
-    error: Error2
-  ) => Printer.Printer<Input, Error | Error2, Output>
->(3, (self, condition, error) =>
-  contramapEither(self, (value) =>
-    condition(value)
-      ? Either.right(value)
-      : Either.left(error)))
-
-/** @internal */
-export const exactly = <Output, Error = string>(value: Output, error?: Error): Printer.Printer<Output, Error, Output> =>
-  filterInput(anything(), (input) => Equal.equals(input, value), error ?? (`expected '${value}'` as any))
-
-/** @internal */
-export const except = <Output, Error = string>(value: Output, error?: Error): Printer.Printer<Output, Error, Output> =>
-  filterInput(anything(), (input) => !Equal.equals(input, value), error ?? (`unexpected '${value}'` as any))
-
-/** @internal */
-export const fromInput = <Input, Error, Output>(
-  f: (input: Input) => Printer.Printer<never, Error, Output>
-): Printer.Printer<Input, Error, Output> => {
-  const op = Object.create(proto)
-  op._tag = "FlatMapInput"
-  op.f = f
+  op._tag = "ProvideInput"
+  op.printer = anything()
+  op.input = output
   return op
 }
 
 /** @internal */
-export const mapError = dual<
-  <Error, Error2>(
-    f: (error: Error) => Error2
-  ) => <Input, Output>(
+export const outputString = (input: string): Printer.Printer<never, never, string> => provideInput(anyString, input)
+
+/** @internal */
+export const printToChunk = dual<
+  <Input>(
+    input: Input
+  ) => <Error, Output>(
     self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input, Error2, Output>,
-  <Input, Output, Error, Error2>(
+  ) => Either.Either<Error, Chunk.Chunk<Output>>,
+  <Input, Error, Output>(
     self: Printer.Printer<Input, Error, Output>,
-    f: (error: Error) => Error2
-  ) => Printer.Printer<Input, Error2, Output>
->(2, (self, f) => {
+    input: Input
+  ) => Either.Either<Error, Chunk.Chunk<Output>>
+>(2, <Input, Error, Output>(self: Printer.Printer<Input, Error, Output>, input: Input) => {
+  const target = chunkTarget.make<Output>()
+  return Either.mapRight(interpret(self, input, target), () => target.result())
+})
+
+/** @internal */
+export const printToString = dual<
+  <Input>(value: Input) => <Error>(self: Printer.Printer<Input, Error, string>) => Either.Either<Error, string>,
+  <Input, Error>(self: Printer.Printer<Input, Error, string>, input: Input) => Either.Either<Error, string>
+>(2, (self, value) => Either.mapRight(printToChunk(self, value), Chunk.join("")))
+
+/** @internal */
+export const printToTarget = dual<
+  <Input, Output, T extends Target.Target<any, Output>>(
+    input: Input,
+    target: T
+  ) => <Error>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Either.Either<Error, void>,
+  <Input, Error, Output, T extends Target.Target<any, Output>>(
+    self: Printer.Printer<Input, Error, Output>,
+    input: Input,
+    target: T
+  ) => Either.Either<Error, void>
+>(3, (self, value, target) => interpret(self, value, target))
+
+export const provideInput = dual<
+  <Input>(
+    input: Input
+  ) => <Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<never, Error, Output>,
+  <Input, Error, Output>(
+    self: Printer.Printer<Input, Error, Output>,
+    input: Input
+  ) => Printer.Printer<never, Error, Output>
+>(2, (self, input) => {
   const op = Object.create(proto)
-  op._tag = "MapError"
+  op._tag = "ProvideInput"
   op.printer = self
-  op.map = f
+  op.input = input
   return op
 })
 
 /** @internal */
-export const zip = dual<
-  <Input2, Error2, Output2>(
-    that: Printer.Printer<Input2, Error2, Output2>
-  ) => <Input, Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<readonly [Input, Input2], Error | Error2, Output | Output2>,
-  <Input, Error, Output, Input2, Error2, Output2>(
-    self: Printer.Printer<Input, Error, Output>,
-    that: Printer.Printer<Input2, Error2, Output2>
-  ) => Printer.Printer<readonly [Input, Input2], Error | Error2, Output | Output2>
->(2, (self, that) => {
+export const regex = <Error>(regex: Regex.Regex, error: Error): Printer.Printer<Chunk.Chunk<string>, Error, string> => {
   const op = Object.create(proto)
-  op._tag = "Zip"
-  op.left = self
-  op.right = that
-  op.unzip = (value: unknown) => {
-    if (Array.isArray(value)) {
-      return value.length === 2
-        ? value
-        : [value.slice(0, value.length - 1), value[value.length - 1]]
-    }
-    throw new Error("BUG - received unzippable value")
-  }
+  op._tag = "ParseRegex"
+  op.regex = regex
+  op.onFailure = Option.some(error)
   return op
-})
+}
 
 /** @internal */
-export const zipLeft = dual<
-  <Input2, Error2, Output2>(
-    that: Printer.Printer<Input2, Error2, Output2>
-  ) => <Input, Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input, Error | Error2, Output | Output2>,
-  <Input, Error, Output, Input2, Error2, Output2>(
-    self: Printer.Printer<Input, Error, Output>,
-    that: Printer.Printer<Input2, Error2, Output2>
-  ) => Printer.Printer<Input, Error | Error2, Output | Output2>
->(2, (self, that) => {
+export const regexDiscard = (
+  regex: Regex.Regex,
+  characters: Iterable<string>
+): Printer.Printer<void, never, string> => {
   const op = Object.create(proto)
-  op._tag = "ZipLeft"
-  op.left = self
-  op.right = that
+  op._tag = "SkipRegex"
+  op.regex = regex
+  op.printAs = Chunk.isChunk(characters) ? characters : Chunk.fromIterable(characters)
   return op
-})
-
-/** @internal */
-export const zipRight = dual<
-  <Input2, Error2, Output2>(
-    that: Printer.Printer<Input2, Error2, Output2>
-  ) => <Input, Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input2, Error | Error2, Output | Output2>,
-  <Input, Error, Output, Input2, Error2, Output2>(
-    self: Printer.Printer<Input, Error, Output>,
-    that: Printer.Printer<Input2, Error2, Output2>
-  ) => Printer.Printer<Input2, Error | Error2, Output | Output2>
->(2, (self, that) => {
-  const op = Object.create(proto)
-  op._tag = "ZipRight"
-  op.left = self
-  op.right = that
-  return op
-})
-
-/** @internal */
-export const zipBetween = dual<
-  <Error2, Output2, Error3, Output3>(
-    left: Printer.Printer<void, Error2, Output2>,
-    right: Printer.Printer<void, Error3, Output3>
-  ) => <Input, Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input, Error | Error2 | Error3, Output | Output2 | Output3>,
-  <Input, Error, Output, Error2, Output2, Error3, Output3>(
-    self: Printer.Printer<Input, Error, Output>,
-    left: Printer.Printer<void, Error2, Output2>,
-    right: Printer.Printer<void, Error3, Output3>
-  ) => Printer.Printer<Input, Error | Error2 | Error3, Output | Output2 | Output3>
->(3, (self, left, right) => zipRight(left, zipLeft(self, right)))
-
-/** @internal */
-export const zipSurrounded = dual<
-  <Error2, Output2>(
-    other: Printer.Printer<void, Error2, Output2>
-  ) => <Input, Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input, Error | Error2, Output | Output2>,
-  <Input, Error, Output, Error2, Output2>(
-    self: Printer.Printer<Input, Error, Output>,
-    other: Printer.Printer<void, Error2, Output2>
-  ) => Printer.Printer<Input, Error | Error2, Output | Output2>
->(2, (self, other) => zipBetween(self, other, other))
+}
 
 /** @internal */
 export const repeat = <Input, Error, Output>(
@@ -631,52 +651,6 @@ export const repeatWithSeparator1 = dual<
   ))
 
 /** @internal */
-export const regex = <Error>(regex: Regex.Regex, error: Error): Printer.Printer<Chunk.Chunk<string>, Error, string> => {
-  const op = Object.create(proto)
-  op._tag = "ParseRegex"
-  op.regex = regex
-  op.onFailure = Option.some(error)
-  return op
-}
-
-/** @internal */
-export const regexChar = <Error>(regex: Regex.Regex, error: Error): Printer.Printer<string, Error, string> => {
-  const op = Object.create(proto)
-  op._tag = "ParseRegexLastChar"
-  op.regex = regex
-  op.onFailure = Option.some(error)
-  return op
-}
-
-/** @internal */
-export const regexDiscard = (
-  regex: Regex.Regex,
-  characters: Iterable<string>
-): Printer.Printer<void, never, string> => {
-  const op = Object.create(proto)
-  op._tag = "SkipRegex"
-  op.regex = regex
-  op.printAs = Chunk.isChunk(characters) ? characters : Chunk.fromIterable(characters)
-  return op
-}
-
-/** @internal */
-export const char = (char: string): Printer.Printer<void, string, string> =>
-  regexDiscard(_regex.charIn([char]), Chunk.of(char))
-
-/** @internal */
-export const charIn = (chars: Iterable<string>): Printer.Printer<string, string, string> =>
-  regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
-
-/** @internal */
-export const charNot = <Error>(char: string, failure?: Error): Printer.Printer<string, Error, string> =>
-  regexChar(_regex.charNotIn([char]), failure ?? (`cannot be '${char}'` as any))
-
-/** @internal */
-export const charNotIn = (chars: Iterable<string>): Printer.Printer<string, string, string> =>
-  regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
-
-/** @internal */
 export const string = <Input>(str: string, input: Input): Printer.Printer<Input, never, string> =>
   pipe(
     regexDiscard(_regex.string(str), Chunk.fromIterable(str)),
@@ -684,116 +658,141 @@ export const string = <Input>(str: string, input: Input): Printer.Printer<Input,
   )
 
 /** @internal */
-export const unsafeRegex = (regex: Regex.Regex): Printer.Printer<Chunk.Chunk<string>, never, string> => {
+export const succeed = <Input>(input: Input): Printer.Printer<unknown, never, never> => {
   const op = Object.create(proto)
-  op._tag = "ParseRegex"
-  op.regex = regex
-  op.onFailure = Option.none()
+  op._tag = "Succeed"
+  op.input = input
+  return op
+}
+/** @internal */
+export const suspend = <Input, Error, Output>(
+  printer: LazyArg<Printer.Printer<Input, Error, Output>>
+): Printer.Printer<Input, Error, Output> => {
+  const op = Object.create(proto)
+  op._tag = "Suspend"
+  op.printer = printer
   return op
 }
 
 /** @internal */
-export const unsafeRegexChar = (regex: Regex.Regex): Printer.Printer<string, never, string> => {
+export const transformOption = dual<
+  <Input2, Input>(
+    from: (input: Input2) => Option.Option<Input>
+  ) => <Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input2, Option.Option<Error>, Output>,
+  <Input, Error, Output, Input2>(
+    self: Printer.Printer<Input, Error, Output>,
+    from: (input: Input2) => Option.Option<Input>
+  ) => Printer.Printer<Input2, Option.Option<Error>, Output>
+>(2, (self, from) =>
+  contramapEither(self, (input) =>
+    Option.match(from(input), {
+      onNone: () => Either.left(Option.none()),
+      onSome: Either.right
+    })))
+
+/** @internal */
+export const unit = (): Printer.Printer<void, never, never> => succeed(void 0)
+
+/** @internal */
+export const zip = dual<
+  <Input2, Error2, Output2>(
+    that: Printer.Printer<Input2, Error2, Output2>
+  ) => <Input, Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<readonly [Input, Input2], Error | Error2, Output | Output2>,
+  <Input, Error, Output, Input2, Error2, Output2>(
+    self: Printer.Printer<Input, Error, Output>,
+    that: Printer.Printer<Input2, Error2, Output2>
+  ) => Printer.Printer<readonly [Input, Input2], Error | Error2, Output | Output2>
+>(2, (self, that) => {
   const op = Object.create(proto)
-  op._tag = "ParseRegexLastChar"
-  op.regex = regex
-  op.onFailure = Option.none()
+  op._tag = "Zip"
+  op.left = self
+  op.right = that
+  op.unzip = (value: unknown) => {
+    if (Array.isArray(value)) {
+      return value.length === 2
+        ? value
+        : [value.slice(0, value.length - 1), value[value.length - 1]]
+    }
+    throw new Error("BUG - received unzippable value")
+  }
   return op
-}
+})
 
 /** @internal */
-export const anyChar: Printer.Printer<string, never, string> = unsafeRegexChar(_regex.anyChar)
+export const zipBetween = dual<
+  <Error2, Output2, Error3, Output3>(
+    left: Printer.Printer<void, Error2, Output2>,
+    right: Printer.Printer<void, Error3, Output3>
+  ) => <Input, Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input, Error | Error2 | Error3, Output | Output2 | Output3>,
+  <Input, Error, Output, Error2, Output2, Error3, Output3>(
+    self: Printer.Printer<Input, Error, Output>,
+    left: Printer.Printer<void, Error2, Output2>,
+    right: Printer.Printer<void, Error3, Output3>
+  ) => Printer.Printer<Input, Error | Error2 | Error3, Output | Output2 | Output3>
+>(3, (self, left, right) => zipRight(left, zipLeft(self, right)))
 
 /** @internal */
-export const anyString: Printer.Printer<string, never, string> = pipe(
-  unsafeRegex(_regex.repeatMin(_regex.anyChar, 0)),
-  contramap((s) => Chunk.fromIterable(s))
-)
+export const zipLeft = dual<
+  <Input2, Error2, Output2>(
+    that: Printer.Printer<Input2, Error2, Output2>
+  ) => <Input, Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input, Error | Error2, Output | Output2>,
+  <Input, Error, Output, Input2, Error2, Output2>(
+    self: Printer.Printer<Input, Error, Output>,
+    that: Printer.Printer<Input2, Error2, Output2>
+  ) => Printer.Printer<Input, Error | Error2, Output | Output2>
+>(2, (self, that) => {
+  const op = Object.create(proto)
+  op._tag = "ZipLeft"
+  op.left = self
+  op.right = that
+  return op
+})
 
 /** @internal */
-export const digit: Printer.Printer<string, string, string> = regexChar(_regex.anyDigit, "not a digit")
+export const zipRight = dual<
+  <Input2, Error2, Output2>(
+    that: Printer.Printer<Input2, Error2, Output2>
+  ) => <Input, Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input2, Error | Error2, Output | Output2>,
+  <Input, Error, Output, Input2, Error2, Output2>(
+    self: Printer.Printer<Input, Error, Output>,
+    that: Printer.Printer<Input2, Error2, Output2>
+  ) => Printer.Printer<Input2, Error | Error2, Output | Output2>
+>(2, (self, that) => {
+  const op = Object.create(proto)
+  op._tag = "ZipRight"
+  op.left = self
+  op.right = that
+  return op
+})
 
 /** @internal */
-export const letter: Printer.Printer<string, string, string> = regexChar(_regex.anyLetter, "not a letter")
+export const zipSurrounded = dual<
+  <Error2, Output2>(
+    other: Printer.Printer<void, Error2, Output2>
+  ) => <Input, Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input, Error | Error2, Output | Output2>,
+  <Input, Error, Output, Error2, Output2>(
+    self: Printer.Printer<Input, Error, Output>,
+    other: Printer.Printer<void, Error2, Output2>
+  ) => Printer.Printer<Input, Error | Error2, Output | Output2>
+>(2, (self, other) => zipBetween(self, other, other))
 
 /** @internal */
 export const whitespace: Printer.Printer<string, string, string> = regexChar(
   _regex.whitespace,
   "not a whitespace character"
 )
-
-/** @internal */
-export const alphaNumeric: Printer.Printer<string, string, string> = regexChar(
-  _regex.anyAlphaNumeric,
-  "not alphanumeric"
-)
-
-/** @internal */
-export const output = <Output>(output: Output): Printer.Printer<never, never, Output> => {
-  const op = Object.create(proto)
-  op._tag = "ProvideInput"
-  op.printer = anything()
-  op.input = output
-  return op
-}
-
-/** @internal */
-export const outputString = (input: string): Printer.Printer<never, never, string> => provideInput(anyString, input)
-
-/** @internal */
-export const printToTarget = dual<
-  <Input, Output, T extends Target.Target<any, Output>>(
-    input: Input,
-    target: T
-  ) => <Error>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Either.Either<Error, void>,
-  <Input, Error, Output, T extends Target.Target<any, Output>>(
-    self: Printer.Printer<Input, Error, Output>,
-    input: Input,
-    target: T
-  ) => Either.Either<Error, void>
->(3, (self, value, target) => interpret(self, value, target))
-
-/** @internal */
-export const printToChunk = dual<
-  <Input>(
-    input: Input
-  ) => <Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Either.Either<Error, Chunk.Chunk<Output>>,
-  <Input, Error, Output>(
-    self: Printer.Printer<Input, Error, Output>,
-    input: Input
-  ) => Either.Either<Error, Chunk.Chunk<Output>>
->(2, <Input, Error, Output>(self: Printer.Printer<Input, Error, Output>, input: Input) => {
-  const target = chunkTarget.make<Output>()
-  return Either.mapRight(interpret(self, input, target), () => target.result())
-})
-
-/** @internal */
-export const printToString = dual<
-  <Input>(value: Input) => <Error>(self: Printer.Printer<Input, Error, string>) => Either.Either<Error, string>,
-  <Input, Error>(self: Printer.Printer<Input, Error, string>, input: Input) => Either.Either<Error, string>
->(2, (self, value) => Either.mapRight(printToChunk(self, value), Chunk.join("")))
-
-export const provideInput = dual<
-  <Input>(
-    input: Input
-  ) => <Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<never, Error, Output>,
-  <Input, Error, Output>(
-    self: Printer.Printer<Input, Error, Output>,
-    input: Input
-  ) => Printer.Printer<never, Error, Output>
->(2, (self, input) => {
-  const op = Object.create(proto)
-  op._tag = "ProvideInput"
-  op.printer = self
-  op.input = input
-  return op
-})
 
 /** @internal */
 type PrinterCont = (
