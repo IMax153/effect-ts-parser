@@ -255,6 +255,25 @@ export const unsafeRegex = (regex: Regex.Regex): Printer.Printer<Chunk.Chunk<str
 }
 
 /** @internal */
+export const contramapEither = dual<
+  <Input2, Error2, Input>(
+    from: (value: Input2) => Either.Either<Error2, Input>
+  ) => <Error, Output>(
+    self: Printer.Printer<Input, Error, Output>
+  ) => Printer.Printer<Input2, Error2, Output>,
+  <Input, Error, Output, Input2, Error2>(
+    self: Printer.Printer<Input, Error, Output>,
+    from: (value: Input2) => Either.Either<Error2, Input>
+  ) => Printer.Printer<Input2, Error2, Output>
+>(2, (self, from) => {
+  const op = Object.create(proto)
+  op._tag = "ContramapEither"
+  op.printer = self
+  op.from = from
+  return op
+})
+
+/** @internal */
 export const contramap = dual<
   <Input2, Input>(
     from: (value: Input2) => Input
@@ -310,25 +329,6 @@ export const charNot = <Error>(char: string, failure?: Error): Printer.Printer<s
 /** @internal */
 export const charNotIn = (chars: Iterable<string>): Printer.Printer<string, string, string> =>
   regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
-
-/** @internal */
-export const contramapEither = dual<
-  <Input2, Error2, Input>(
-    from: (value: Input2) => Either.Either<Error2, Input>
-  ) => <Error, Output>(
-    self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Input2, Error2, Output>,
-  <Input, Error, Output, Input2, Error2>(
-    self: Printer.Printer<Input, Error, Output>,
-    from: (value: Input2) => Either.Either<Error2, Input>
-  ) => Printer.Printer<Input2, Error2, Output>
->(2, (self, from) => {
-  const op = Object.create(proto)
-  op._tag = "ContramapEither"
-  op.printer = self
-  op.from = from
-  return op
-})
 
 /** @internal */
 export const contramapTo = dual<

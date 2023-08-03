@@ -41,6 +41,16 @@ const oneOf = (bitset: BitSet.BitSet): Regex.Regex => {
 }
 
 /** @internal */
+export const anyChar: Regex.Regex = oneOf(bitset.all)
+
+/** @internal */
+export const charIn = (chars: Iterable<string>): Regex.Regex =>
+  pipe(
+    bitset.fromChars(chars),
+    oneOf
+  )
+
+/** @internal */
 export const filter = (predicate: Predicate<string>): Regex.Regex =>
   pipe(
     bitset.all,
@@ -48,9 +58,6 @@ export const filter = (predicate: Predicate<string>): Regex.Regex =>
     ReadonlyArray.filter(predicate),
     charIn
   )
-
-/** @internal */
-export const anyChar: Regex.Regex = oneOf(bitset.all)
 
 const IS_DIGIT_REGEX = /^[0-9]$/
 
@@ -83,6 +90,16 @@ export const or = dual<
 export const anyAlphaNumeric: Regex.Regex = or(anyLetter, anyDigit)
 
 /** @internal */
+export const repeat = (self: Regex.Regex, min: Option.Option<number>, max: Option.Option<number>): Regex.Regex => {
+  const op = Object.create(proto)
+  op._tag = "Repeat"
+  op.regex = self
+  op.min = min
+  op.max = max
+  return op
+}
+
+/** @internal */
 export const repeatMin = dual<
   (min: number) => (self: Regex.Regex) => Regex.Regex,
   (self: Regex.Regex, min: number) => Regex.Regex
@@ -95,29 +112,12 @@ export const alphaNumerics: Regex.Regex = repeatMin(anyAlphaNumeric, 1)
 export const char = (char: string): Regex.Regex => charIn([char])
 
 /** @internal */
-export const charIn = (chars: Iterable<string>): Regex.Regex =>
-  pipe(
-    bitset.fromChars(chars),
-    oneOf
-  )
-
-/** @internal */
 export const charNotIn = (chars: Iterable<string>): Regex.Regex =>
   pipe(
     bitset.all,
     ReadonlyArray.difference(bitset.fromChars(chars)),
     oneOf
   )
-
-/** @internal */
-export const repeat = (self: Regex.Regex, min: Option.Option<number>, max: Option.Option<number>): Regex.Regex => {
-  const op = Object.create(proto)
-  op._tag = "Repeat"
-  op.regex = self
-  op.min = min
-  op.max = max
-  return op
-}
 
 /** @internal */
 export const repeatBetween = dual<
