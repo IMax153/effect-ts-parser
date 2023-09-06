@@ -122,7 +122,7 @@ export const between: {
     left: Printer<void, Error2, Output2>,
     right: Printer<void, Error3, Output3>
   ): Printer<Input, Error | Error2 | Error3, Output | Output2 | Output3>
-} = internal.between
+} = internal.zipBetween
 
 /**
  * A `Printer` that prints a given character.
@@ -342,7 +342,7 @@ export const mapError: {
  * @category constructors
  */
 export const notChar: <Error>(char: string, failure?: Error | undefined) => Printer<string, Error, string> =
-  internal.notChar
+  internal.charNot
 
 /**
  * A `Printer` which prints `Option` values.
@@ -485,7 +485,7 @@ export const regexChar: <Error>(regex: Regex, error: Error) => Printer<string, E
  */
 export const repeat: <Input, Error, Output>(
   self: Printer<Input, Error, Output>
-) => Printer<Chunk<Input>, Error, Output> = internal.repeat
+) => Printer<Chunk<Input>, Error, Output> = internal.repeatMin0
 
 /**
  * Repeats this printer for each element of the input chunk.
@@ -497,7 +497,7 @@ export const repeat: <Input, Error, Output>(
  */
 export const repeat1: <Input, Error, Output>(
   self: Printer<Input, Error, Output>
-) => Printer<NonEmptyChunk<Input>, Error, Output> = internal.repeat1
+) => Printer<NonEmptyChunk<Input>, Error, Output> = internal.repeatMin1
 
 /**
  * Repeats this printer for each element of the input chunk, separated by the
@@ -594,7 +594,7 @@ export const surroundedBy: {
     self: Printer<Input, Error, Output>,
     other: Printer<void, Error2, Output2>
   ): Printer<Input, Error | Error2, Output | Output2>
-} = internal.surroundedBy
+} = internal.zipSurrounded
 
 /**
  * Lazily constructs a `Printer`.

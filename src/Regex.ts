@@ -205,7 +205,7 @@ export const alphaNumerics: Regex = internal.alphaNumerics
 export const atLeast: {
   (min: number): (self: Regex) => Regex
   (self: Regex, min: number): Regex
-} = internal.atLeast
+} = internal.repeatMin
 
 /**
  * Returns a new `Regex` that matches at most `max` occurrences of this `Regex`.
@@ -216,7 +216,7 @@ export const atLeast: {
 export const atMost: {
   (max: number): (self: Regex) => Regex
   (self: Regex, max: number): Regex
-} = internal.atMost
+} = internal.repeatMax
 
 /**
  * Returns a new `Regex` that matches between `min` and `max` occurrences of this
@@ -228,7 +228,7 @@ export const atMost: {
 export const between: {
   (min: number, max: number): (self: Regex) => Regex
   (self: Regex, min: number, max: number): Regex
-} = internal.between
+} = internal.repeatBetween
 
 /**
  * A `Regex` that matches the specified character.
@@ -277,7 +277,7 @@ export const digits: Regex = internal.digits
  * @since 1.0.0
  * @category constructors
  */
-export const empty: Regex = internal.empty
+export const empty: Regex = internal.succeed
 
 /**
  * A regex that matches any single character for which the specified predicate

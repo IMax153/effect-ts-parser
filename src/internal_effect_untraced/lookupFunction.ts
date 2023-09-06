@@ -453,8 +453,8 @@ const compileLookupFunction = (self: Regex.Regex): LookupFunction => {
     }
     case "OneOf": {
       if (
-        self.bitset.length === bitset.allChars.length &&
-        ReadonlyArray.getEquivalence(Number.Equivalence)(self.bitset, bitset.allChars)
+        self.bitset.length === bitset.all.length &&
+        ReadonlyArray.getEquivalence(Number.Equivalence)(self.bitset, bitset.all)
       ) {
         return acceptAll
       }
