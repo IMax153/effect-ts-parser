@@ -509,14 +509,14 @@ export const printToChunk = dual<
   ) => Either.Either<Error, Chunk.Chunk<Output>>
 >(2, <Input, Error, Output>(self: Printer.Printer<Input, Error, Output>, input: Input) => {
   const target = chunkTarget.make<Output>()
-  return Either.mapRight(interpret(self, input, target), () => target.result())
+  return Either.map(interpret(self, input, target), () => target.result())
 })
 
 /** @internal */
 export const printToString = dual<
   <Input>(value: Input) => <Error>(self: Printer.Printer<Input, Error, string>) => Either.Either<Error, string>,
   <Input, Error>(self: Printer.Printer<Input, Error, string>, input: Input) => Either.Either<Error, string>
->(2, (self, value) => Either.mapRight(printToChunk(self, value), Chunk.join("")))
+>(2, (self, value) => Either.map(printToChunk(self, value), Chunk.join("")))
 
 /** @internal */
 export const printToTarget = dual<
@@ -1073,5 +1073,5 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       }
     }
   }
-  return Either.mapRight(result, constVoid) as Either.Either<Error, void>
+  return Either.map(result, constVoid) as Either.Either<Error, void>
 }
