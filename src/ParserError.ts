@@ -3,7 +3,7 @@
  */
 import type { List } from "@effect/data/List"
 import type { Option } from "@effect/data/Option"
-import * as internal from "@effect/parser/internal_effect_untraced/parserError"
+import * as internal from "@effect/parser/internal/parserError"
 
 /**
  * @since 1.0.0

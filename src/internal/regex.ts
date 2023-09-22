@@ -4,9 +4,9 @@ import * as Option from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"
 import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import type * as BitSet from "@effect/parser/BitSet"
-import * as bitset from "@effect/parser/internal_effect_untraced/bitset"
-import * as common from "@effect/parser/internal_effect_untraced/common"
-import * as lookupFunction from "@effect/parser/internal_effect_untraced/lookupFunction"
+import * as bitset from "@effect/parser/internal/bitset"
+import * as common from "@effect/parser/internal/common"
+import * as lookupFunction from "@effect/parser/internal/lookupFunction"
 import type * as Regex from "@effect/parser/Regex"
 
 /** @internal */

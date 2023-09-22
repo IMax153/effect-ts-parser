@@ -6,7 +6,7 @@ import type { Either } from "@effect/data/Either"
 import type { LazyArg } from "@effect/data/Function"
 import type { Option } from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"
-import * as internal from "@effect/parser/internal_effect_untraced/printer"
+import * as internal from "@effect/parser/internal/printer"
 import type { Regex } from "@effect/parser/Regex"
 import type { Target } from "@effect/parser/Target"
 

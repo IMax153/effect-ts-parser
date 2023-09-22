@@ -5,8 +5,8 @@ import type { Chunk } from "@effect/data/Chunk"
 import type { Option } from "@effect/data/Option"
 import type { Predicate } from "@effect/data/Predicate"
 import type { BitSet } from "@effect/parser/BitSet"
-import * as common from "@effect/parser/internal_effect_untraced/common"
-import * as internal from "@effect/parser/internal_effect_untraced/regex"
+import * as common from "@effect/parser/internal/common"
+import * as internal from "@effect/parser/internal/regex"
 
 /**
  * @since 1.0.0
