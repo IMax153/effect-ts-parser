@@ -1,14 +1,14 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk, NonEmptyChunk } from "@effect/data/Chunk"
-import type { Either } from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
 import * as internal from "@effect/parser/internal/parser"
 import type { ParserError } from "@effect/parser/ParserError"
 import type { Regex } from "@effect/parser/Regex"
+import type { Chunk, NonEmptyChunk } from "effect/Chunk"
+import type { Either } from "effect/Either"
+import type { LazyArg } from "effect/Function"
+import type { Option } from "effect/Option"
+import type { Predicate } from "effect/Predicate"
 
 /**
  * @since 1.0.0

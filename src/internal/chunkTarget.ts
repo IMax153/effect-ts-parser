@@ -1,7 +1,5 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as List from "@effect/data/List"
-import * as Cause from "@effect/io/Cause"
 import type * as ChunkTarget from "@effect/parser/Target/Chunk"
+import { Cause, Chunk, List } from "effect"
 
 /** @internal */
 export class ChunkTargetImpl<Output> implements ChunkTarget.ChunkTarget<Output> {

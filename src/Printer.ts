@@ -1,14 +1,14 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk, NonEmptyChunk } from "@effect/data/Chunk"
-import type { Either } from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
 import * as internal from "@effect/parser/internal/printer"
 import type { Regex } from "@effect/parser/Regex"
 import type { Target } from "@effect/parser/Target"
+import type { Chunk, NonEmptyChunk } from "effect/Chunk"
+import type { Either } from "effect/Either"
+import type { LazyArg } from "effect/Function"
+import type { Option } from "effect/Option"
+import type { Predicate } from "effect/Predicate"
 
 /**
  * @since 1.0.0
@@ -223,7 +223,7 @@ export const digit: Printer<string, string, string> = internal.digit
  * A `Printer` that emits the input if it is equals to the specified `value`,
  * otherwise fails with the specified `error` (if provided).
  *
- * **Note**: equality is checked using Equal.equals from `@effect/data`.
+ * **Note**: equality is checked using Equal.equals from `effect`.
  *
  * @since 1.0.0
  * @category constructors
@@ -237,7 +237,7 @@ export const exactly: <Output, Error = string>(
  * A `Printer` that emits the input unless it is equal to `value`, in which case
  * it fails with the specified `error` (if provided).
  *
- * **Note**: equality is checked using Equal.equals from `@effect/data`.
+ * **Note**: equality is checked using Equal.equals from `effect`.
  *
  * @since 1.0.0
  * @category constructors

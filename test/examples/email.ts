@@ -1,7 +1,7 @@
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
 import * as Syntax from "@effect/parser/Syntax"
 import { tests } from "@effect/parser/test/examples/utils"
+import { Either } from "effect"
+import { pipe } from "effect/Function"
 
 const segment = pipe(
   Syntax.charNotIn(["@", " ", "\t", "\r", "\n"]),

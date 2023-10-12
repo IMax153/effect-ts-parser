@@ -1,13 +1,11 @@
-import * as Chunk from "@effect/data/Chunk"
-import { dual, pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import type * as BitSet from "@effect/parser/BitSet"
 import * as bitset from "@effect/parser/internal/bitset"
 import * as common from "@effect/parser/internal/common"
 import * as lookupFunction from "@effect/parser/internal/lookupFunction"
 import type * as Regex from "@effect/parser/Regex"
+import { Chunk, Option, ReadonlyArray } from "effect"
+import { dual, pipe } from "effect/Function"
+import type { Predicate } from "effect/Predicate"
 
 /** @internal */
 const RegexSymbolKey = "@effect/parser/Regex"
@@ -59,12 +57,12 @@ export const filter = (predicate: Predicate<string>): Regex.Regex =>
     charIn
   )
 
-const IS_DIGIT_REGEX = /^[0-9]$/
+const IS_DIGIT_REGEX = new RegExp(/^[0-9]$/)
 
 /** @internal */
 export const anyDigit: Regex.Regex = filter((char) => IS_DIGIT_REGEX.test(char))
 
-const IS_LETTER_REGEX = /^[a-z]$/i
+const IS_LETTER_REGEX = new RegExp(/^[a-z]$/, "i")
 
 /** @internal */
 export const anyLetter: Regex.Regex = filter((char) => IS_LETTER_REGEX.test(char))

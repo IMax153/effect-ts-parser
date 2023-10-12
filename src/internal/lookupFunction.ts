@@ -1,15 +1,8 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Equal from "@effect/data/Equal"
-import { pipe } from "@effect/data/Function"
-import * as Hash from "@effect/data/Hash"
-import * as HashSet from "@effect/data/HashSet"
-import * as Number from "@effect/data/Number"
-import * as Option from "@effect/data/Option"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
-import * as Cause from "@effect/io/Cause"
 import * as bitset from "@effect/parser/internal/bitset"
 import * as common from "@effect/parser/internal/common"
 import type * as Regex from "@effect/parser/Regex"
+import { Cause, Chunk, Equal, Hash, HashSet, Number, Option, ReadonlyArray } from "effect"
+import { pipe } from "effect/Function"
 
 const LookupFunctionSymbolKey = "@effect/parser/LookupFunction"
 

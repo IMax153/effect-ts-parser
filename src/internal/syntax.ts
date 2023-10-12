@@ -1,10 +1,3 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import { dual, pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import { tuple } from "@effect/data/Tuple"
 import * as _parser from "@effect/parser/internal/parser"
 import * as _printer from "@effect/parser/internal/printer"
 import * as _regex from "@effect/parser/internal/regex"
@@ -13,9 +6,13 @@ import type * as ParserError from "@effect/parser/ParserError"
 import type * as Printer from "@effect/parser/Printer"
 import type * as Regex from "@effect/parser/Regex"
 import type * as Syntax from "@effect/parser/Syntax"
+import { Chunk, Either, Option, Tuple } from "effect"
+import type { LazyArg } from "effect/Function"
+import { dual, pipe } from "effect/Function"
+import type { Predicate } from "effect/Predicate"
 
 /** @internal */
-const SyntaxSymbolKey = "@effect/Syntax/Syntax"
+const SyntaxSymbolKey = "@effect/parser/Syntax"
 
 /** @internal */
 export const SyntaxTypeId: Syntax.SyntaxTypeId = Symbol.for(
@@ -465,7 +462,7 @@ export const repeatWithSeparator = dual<
       (a) =>
         Chunk.isNonEmpty(a) ?
           Option.some(
-            tuple(
+            Tuple.tuple(
               Chunk.headNonEmpty(a),
               Chunk.drop(a, 1)
             )
@@ -498,7 +495,7 @@ export const repeatWithSeparator1 = dual<
     // readonly [Value, readonly Value[]] => => readonly Value[]
     ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<V<typeof self>>,
     (a) =>
-      tuple(
+      Tuple.tuple(
         Chunk.headNonEmpty(a),
         Chunk.tailNonEmpty(a)
       )

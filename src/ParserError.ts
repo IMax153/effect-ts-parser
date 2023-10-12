@@ -1,9 +1,9 @@
 /**
  * @since 1.0.0
  */
-import type { List } from "@effect/data/List"
-import type { Option } from "@effect/data/Option"
 import * as internal from "@effect/parser/internal/parserError"
+import type { List } from "effect/List"
+import type { Option } from "effect/Option"
 
 /**
  * @since 1.0.0

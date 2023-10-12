@@ -1,11 +1,7 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
-import * as List from "@effect/data/List"
-import * as Option from "@effect/data/Option"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
+import { Chunk, Either, List, Option, ReadonlyArray } from "effect"
+import { pipe } from "effect/Function"
 import { describe, expect, it } from "vitest"
 
 const charA = Syntax.as(Syntax.char("a"), "a")

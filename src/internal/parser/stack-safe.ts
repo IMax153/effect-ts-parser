@@ -1,14 +1,11 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import * as List from "@effect/data/List"
-import * as Option from "@effect/data/Option"
 import * as common from "@effect/parser/internal/common"
 import type * as parser from "@effect/parser/internal/parser"
 import * as parserError from "@effect/parser/internal/parserError"
 import * as regex from "@effect/parser/internal/regex"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Regex from "@effect/parser/Regex"
+import { Chunk, Either, List, Option } from "effect"
+import type { LazyArg } from "effect/Function"
 
 /**
  * A `Parser` operation, the language that a `Parser` is precompiled to for

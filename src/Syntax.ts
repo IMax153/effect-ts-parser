@@ -1,16 +1,16 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk, NonEmptyChunk } from "@effect/data/Chunk"
-import type { Either } from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
 import * as internal from "@effect/parser/internal/syntax"
 import type { Parser } from "@effect/parser/Parser"
 import type { ParserError } from "@effect/parser/ParserError"
 import type { Printer } from "@effect/parser/Printer"
 import type { Regex } from "@effect/parser/Regex"
+import type { Chunk, NonEmptyChunk } from "effect/Chunk"
+import type { Either } from "effect/Either"
+import type { LazyArg } from "effect/Function"
+import type { Option } from "effect/Option"
+import type { Predicate } from "effect/Predicate"
 
 /**
  * @since 1.0.0
@@ -741,7 +741,7 @@ export const surroundedBy: {
  *
  * @example
  *
- * import { pipe } from "@effect/data/Function"
+ * import { pipe } from "effect/Function"
  * import * as Syntax from "@effect/parser/Syntax"
  *
  * const recursive: Syntax.Syntax<string, string, string, string> = pipe(

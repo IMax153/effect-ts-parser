@@ -1,8 +1,6 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
 import * as Syntax from "@effect/parser/Syntax"
+import { Chunk, Either, Option } from "effect"
+import { pipe } from "effect/Function"
 import { hexDigit, tests } from "./utils"
 
 const whitespace = pipe(
@@ -41,7 +39,7 @@ const number = pipe(
 tests("number", number, "-12.782E-2", Either.right(-0.12782))
 
 const hexToDecimal = pipe(
-  pipe(hexDigit, Syntax.repeat1, Syntax.flattenNonEmpty),
+  pipe(hexDigit, Syntax.atMost(4), Syntax.flatten),
   Syntax.transform(
     (to) => parseInt(to, 16),
     (from) => from.toString(16)

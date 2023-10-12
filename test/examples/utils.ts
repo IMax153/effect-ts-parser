@@ -1,7 +1,7 @@
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
 import type * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
+import { Either } from "effect"
+import { pipe } from "effect/Function"
 
 export const tests = <Error, Result>(
   name: string,

@@ -1,12 +1,12 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk } from "@effect/data/Chunk"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
 import type { BitSet } from "@effect/parser/BitSet"
 import * as common from "@effect/parser/internal/common"
 import * as internal from "@effect/parser/internal/regex"
+import type { Chunk } from "effect/Chunk"
+import type { Option } from "effect/Option"
+import type { Predicate } from "effect/Predicate"
 
 /**
  * @since 1.0.0
