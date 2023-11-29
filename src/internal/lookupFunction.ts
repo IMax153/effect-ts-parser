@@ -484,7 +484,7 @@ const compileLookupFunction = (self: Regex.Regex): LookupFunction => {
         const rest = choices.slice(1)
         return ReadonlyArray.reduce(rest, head, or)
       }
-      throw Cause.IllegalArgumentException("Cannot compile to DFA unbounded repetition")
+      throw new Cause.IllegalArgumentException("Cannot compile to DFA unbounded repetition")
     }
   }
 }

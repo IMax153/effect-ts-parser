@@ -30,7 +30,14 @@ export type ParserError<Error> =
   | UnexpectedEndOfInput
   | UnknownFailure
 
+/**
+ * @since 1.0.0
+ */
 export declare namespace ParserError {
+  /**
+   * @since 1.0.0
+   * @category models
+   */
   export interface Proto {
     readonly [ParserErrorTypeId]: ParserErrorTypeId
   }

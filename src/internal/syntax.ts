@@ -462,7 +462,7 @@ export const repeatWithSeparator = dual<
       (a) =>
         Chunk.isNonEmpty(a) ?
           Option.some(
-            Tuple.tuple(
+            Tuple.make(
               Chunk.headNonEmpty(a),
               Chunk.drop(a, 1)
             )
@@ -495,7 +495,7 @@ export const repeatWithSeparator1 = dual<
     // readonly [Value, readonly Value[]] => => readonly Value[]
     ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<V<typeof self>>,
     (a) =>
-      Tuple.tuple(
+      Tuple.make(
         Chunk.headNonEmpty(a),
         Chunk.tailNonEmpty(a)
       )
