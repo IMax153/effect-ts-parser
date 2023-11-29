@@ -1,6 +1,7 @@
 import * as Syntax from "@effect/parser/Syntax"
 import { Chunk, Either, Option, ReadonlyArray } from "effect"
 import { pipe } from "effect/Function"
+import { expect, it } from "vitest"
 
 // Parses XML without prolog and namespaces
 
