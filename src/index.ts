@@ -6,6 +6,11 @@ export * as BitSet from "./BitSet.js"
 /**
  * @since 1.0.0
  */
+export * as ChunkTarget from "./ChunkTarget.js"
+
+/**
+ * @since 1.0.0
+ */
 export * as Parser from "./Parser.js"
 
 /**
@@ -32,8 +37,3 @@ export * as Syntax from "./Syntax.js"
  * @since 1.0.0
  */
 export * as Target from "./Target.js"
-
-/**
- * @since 1.0.0
- */
-export * as Chunk from "./Target/Chunk.js"

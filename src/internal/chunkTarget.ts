@@ -1,4 +1,4 @@
-import type * as ChunkTarget from "@effect/parser/Target/Chunk"
+import type * as ChunkTarget from "@effect/parser/ChunkTarget"
 import { Cause, Chunk, List } from "effect"
 
 /** @internal */
