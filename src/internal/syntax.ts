@@ -9,6 +9,7 @@ import type * as Syntax from "@effect/parser/Syntax"
 import { Chunk, Either, Option, Tuple } from "effect"
 import type { LazyArg } from "effect/Function"
 import { dual, pipe } from "effect/Function"
+import { pipeArguments } from "effect/Pipeable"
 import type { Predicate } from "effect/Predicate"
 
 /** @internal */
@@ -26,6 +27,9 @@ const proto = {
     _Error: (_: never) => _,
     _Output: (_: never) => _,
     _Value: (_: never) => _
+  },
+  pipe() {
+    return pipeArguments(this, arguments)
   }
 }
 

@@ -10,6 +10,7 @@ import type { Chunk, NonEmptyChunk } from "effect/Chunk"
 import type { Either } from "effect/Either"
 import type { LazyArg } from "effect/Function"
 import type { Option } from "effect/Option"
+import type { Pipeable } from "effect/Pipeable"
 import type { Predicate } from "effect/Predicate"
 
 /**
@@ -31,7 +32,7 @@ export type SyntaxTypeId = typeof SyntaxTypeId
  * @since 1.0.0
  * @category models
  */
-export interface Syntax<Input, Error, Output, Value> extends Syntax.Variance<Input, Error, Output, Value> {
+export interface Syntax<Input, Error, Output, Value> extends Syntax.Variance<Input, Error, Output, Value>, Pipeable {
   readonly parser: Parser<Input, Error, Value>
   readonly printer: Printer<Value, Error, Output>
 }
