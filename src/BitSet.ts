@@ -1,7 +1,7 @@
 /**
  * @since 1.0.0
  */
-import * as internal from "@effect/parser/internal/bitset"
+import * as InternalBitSet from "./internal/bitset.js"
 
 /**
  * @since 1.0.0
@@ -13,10 +13,10 @@ export interface BitSet extends ReadonlyArray<number> {}
  * @since 1.0.0
  * @category constructors
  */
-export const allChars: BitSet = internal.all
+export const allChars: BitSet = InternalBitSet.all
 
 /**
  * @since 1.0.0
  * @category constructors
  */
-export const fromIterable: (bits: Iterable<number>) => BitSet = internal.fromIterable
+export const fromIterable: (bits: Iterable<number>) => BitSet = InternalBitSet.fromIterable

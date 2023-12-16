@@ -1,20 +1,20 @@
 /**
  * @since 1.0.0
  */
-import * as internal from "@effect/parser/internal/printer"
-import type { Regex } from "@effect/parser/Regex"
-import type { Target } from "@effect/parser/Target"
 import type { Chunk, NonEmptyChunk } from "effect/Chunk"
 import type { Either } from "effect/Either"
 import type { LazyArg } from "effect/Function"
 import type { Option } from "effect/Option"
 import type { Predicate } from "effect/Predicate"
+import * as InternalPrinter from "./internal/printer.js"
+import type { Regex } from "./Regex.js"
+import type { Target } from "./Target.js"
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export const PrinterTypeId: unique symbol = internal.PrinterTypeId
+export const PrinterTypeId: unique symbol = InternalPrinter.PrinterTypeId
 
 /**
  * @since 1.0.0
@@ -57,7 +57,7 @@ export declare namespace Printer {
  * @since 1.0.0
  * @category constructors
  */
-export const alphaNumeric: Printer<string, string, string> = internal.alphaNumeric
+export const alphaNumeric: Printer<string, string, string> = InternalPrinter.alphaNumeric
 
 /**
  * Constructs a `Printer` that just emits its input value.
@@ -65,7 +65,7 @@ export const alphaNumeric: Printer<string, string, string> = internal.alphaNumer
  * @since 1.0.0
  * @category constructors
  */
-export const anything: <Input>() => Printer<Input, never, Input> = internal.anything
+export const anything: <Input>() => Printer<Input, never, Input> = InternalPrinter.anything
 
 /**
  * A `Printer` that prints a single character provided as input.
@@ -73,7 +73,7 @@ export const anything: <Input>() => Printer<Input, never, Input> = internal.anyt
  * @since 1.0.0
  * @category constructors
  */
-export const anyChar: Printer<string, never, string> = internal.anyChar
+export const anyChar: Printer<string, never, string> = InternalPrinter.anyChar
 
 /**
  * A `Printer` that just prints the input string.
@@ -81,7 +81,7 @@ export const anyChar: Printer<string, never, string> = internal.anyChar
  * @since 1.0.0
  * @category constructors
  */
-export const anyString: Printer<string, never, string> = internal.anyString
+export const anyString: Printer<string, never, string> = InternalPrinter.anyString
 
 /**
  * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `value`
@@ -101,7 +101,7 @@ export const asPrinted: {
     matches: Input2,
     from: Input
   ): Printer<Input2, Error, Output>
-} = internal.asPrinted
+} = InternalPrinter.asPrinted
 
 /**
  * Surround this printer with `left` and `right`, each getting void as value to
@@ -122,7 +122,7 @@ export const between: {
     left: Printer<void, Error2, Output2>,
     right: Printer<void, Error3, Output3>
   ): Printer<Input, Error | Error2 | Error3, Output | Output2 | Output3>
-} = internal.zipBetween
+} = InternalPrinter.zipBetween
 
 /**
  * A `Printer` that prints a given character.
@@ -130,7 +130,7 @@ export const between: {
  * @since 1.0.0
  * @category constructors
  */
-export const char: (char: string) => Printer<void, string, string> = internal.char
+export const char: (char: string) => Printer<void, string, string> = InternalPrinter.char
 
 /**
  * A `Printer` that prints a single character if it matches any of the
@@ -139,7 +139,7 @@ export const char: (char: string) => Printer<void, string, string> = internal.ch
  * @since 1.0.0
  * @category constructors
  */
-export const charIn: (chars: Iterable<string>) => Printer<string, string, string> = internal.charIn
+export const charIn: (chars: Iterable<string>) => Printer<string, string, string> = InternalPrinter.charIn
 
 /**
  * A `Printer` that prints a single character if it does not match any of the
@@ -148,7 +148,7 @@ export const charIn: (chars: Iterable<string>) => Printer<string, string, string
  * @since 1.0.0
  * @category constructors
  */
-export const charNotIn: (chars: Iterable<string>) => Printer<string, string, string> = internal.charNotIn
+export const charNotIn: (chars: Iterable<string>) => Printer<string, string, string> = InternalPrinter.charNotIn
 
 /**
  * Maps the printer's input value with the specified function.
@@ -166,7 +166,7 @@ export const contramap: {
     self: Printer<Input, Error, Output>,
     from: (value: Input2) => Input
   ): Printer<Input2, Error, Output>
-} = internal.contramap
+} = InternalPrinter.contramap
 
 /**
  * Maps the printer's input value with the specified function which returns
@@ -185,7 +185,7 @@ export const contramapEither: {
     self: Printer<Input, Error, Output>,
     from: (value: Input2) => Either<Error2, Input>
   ): Printer<Input2, Error2, Output>
-} = internal.contramapEither
+} = InternalPrinter.contramapEither
 
 /**
  * Maps the value to be printed with the partial function `from`. If the partial
@@ -209,7 +209,7 @@ export const contramapTo: {
     from: (value: Input2) => Option<Input>,
     error: Error2
   ): Printer<Input2, Error2, Output>
-} = internal.contramapTo
+} = InternalPrinter.contramapTo
 
 /**
  * Prints a single digit.
@@ -217,7 +217,7 @@ export const contramapTo: {
  * @since 1.0.0
  * @category constructors
  */
-export const digit: Printer<string, string, string> = internal.digit
+export const digit: Printer<string, string, string> = InternalPrinter.digit
 
 /**
  * A `Printer` that emits the input if it is equals to the specified `value`,
@@ -231,7 +231,7 @@ export const digit: Printer<string, string, string> = internal.digit
 export const exactly: <Output, Error = string>(
   value: Output,
   error?: Error
-) => Printer<Output, Error, Output> = internal.exactly
+) => Printer<Output, Error, Output> = InternalPrinter.exactly
 
 /**
  * A `Printer` that emits the input unless it is equal to `value`, in which case
@@ -245,7 +245,7 @@ export const exactly: <Output, Error = string>(
 export const except: <Output, Error = string>(
   value: Output,
   error?: Error | undefined
-) => Printer<Output, Error, Output> = internal.except
+) => Printer<Output, Error, Output> = InternalPrinter.except
 
 /**
  * A `Printer` that does not print anything and fails with the specified `error`.
@@ -253,7 +253,7 @@ export const except: <Output, Error = string>(
  * @since 1.0.0
  * @category constructors
  */
-export const fail: <Error>(error: Error) => Printer<unknown, Error, never> = internal.fail
+export const fail: <Error>(error: Error) => Printer<unknown, Error, never> = InternalPrinter.fail
 
 /**
  * Specifies a filter `condition` that gets checked on the input value and in
@@ -274,7 +274,7 @@ export const filterInput: {
     condition: Predicate<Input>,
     error: Error2
   ): Printer<Input, Error | Error2, Output>
-} = internal.filterInput
+} = InternalPrinter.filterInput
 
 /**
  * Concatenates an input `Chunk<string>` to a `string` to be printed.
@@ -284,7 +284,7 @@ export const filterInput: {
  */
 export const flatten: <Error, Output>(
   self: Printer<Chunk<string>, Error, Output>
-) => Printer<string, Error, Output> = internal.flatten
+) => Printer<string, Error, Output> = InternalPrinter.flatten
 
 /**
  * Concatenates an input `Chunk<string>` to a `string` to be printed.
@@ -294,7 +294,7 @@ export const flatten: <Error, Output>(
  */
 export const flattenNonEmpty: <Error, Output>(
   self: Printer<NonEmptyChunk<string>, Error, Output>
-) => Printer<string, Error, Output> = internal.flattenNonEmpty
+) => Printer<string, Error, Output> = InternalPrinter.flattenNonEmpty
 
 /**
  * A `Printer` computed using a function on the input value.
@@ -304,7 +304,7 @@ export const flattenNonEmpty: <Error, Output>(
  */
 export const fromInput: <Input, Error, Output>(
   f: (input: Input) => Printer<never, Error, Output>
-) => Printer<Input, Error, Output> = internal.fromInput
+) => Printer<Input, Error, Output> = InternalPrinter.fromInput
 
 /**
  * Prints a single letter.
@@ -312,7 +312,7 @@ export const fromInput: <Input, Error, Output>(
  * @since 1.0.0
  * @category constructors
  */
-export const letter: Printer<string, string, string> = internal.letter
+export const letter: Printer<string, string, string> = InternalPrinter.letter
 
 /**
  * Maps over the error channel with the specified function.
@@ -330,7 +330,7 @@ export const mapError: {
     self: Printer<Input, Error, Output>,
     f: (error: Error) => Error2
   ): Printer<Input, Error2, Output>
-} = internal.mapError
+} = InternalPrinter.mapError
 
 /**
  * A `Printer` that prints the input character if it is not equal to the
@@ -342,7 +342,7 @@ export const mapError: {
  * @category constructors
  */
 export const notChar: <Error>(char: string, failure?: Error | undefined) => Printer<string, Error, string> =
-  internal.charNot
+  InternalPrinter.charNot
 
 /**
  * A `Printer` which prints `Option` values.
@@ -352,7 +352,7 @@ export const notChar: <Error>(char: string, failure?: Error | undefined) => Prin
  */
 export const optional: <Input, Error, Output>(
   self: Printer<Input, Error, Output>
-) => Printer<Option<Input>, Error, Output> = internal.optional
+) => Printer<Option<Input>, Error, Output> = InternalPrinter.optional
 
 /**
  * Prints `self` and if it fails, ignore the printed output and print `that`
@@ -371,7 +371,7 @@ export const orElse: {
     self: Printer<Input, Error, Output>,
     that: LazyArg<Printer<Input2, Error2, Output2>>
   ): Printer<Input | Input2, Error | Error2, Output | Output2>
-} = internal.orElse
+} = InternalPrinter.orElse
 
 /**
  * Prints `self` if the input is `Left`, or print `that` if the input is
@@ -390,7 +390,7 @@ export const orElseEither: {
     self: Printer<Input, Error, Output>,
     that: LazyArg<Printer<Input2, Error2, Output2>>
   ): Printer<Either<Input, Input2>, Error | Error2, Output | Output2>
-} = internal.orElseEither
+} = InternalPrinter.orElseEither
 
 /**
  * A `Printer` which outputs a specific value.
@@ -398,7 +398,7 @@ export const orElseEither: {
  * @since 1.0.0
  * @category constructors
  */
-export const output: <Output>(value: Output) => Printer<never, never, Output> = internal.output
+export const output: <Output>(value: Output) => Printer<never, never, Output> = InternalPrinter.output
 
 /**
  * A `Printer` which outputs a specific string.
@@ -406,7 +406,7 @@ export const output: <Output>(value: Output) => Printer<never, never, Output> = 
  * @since 1.0.0
  * @category constructors
  */
-export const outputString: (value: string) => Printer<never, never, string> = internal.outputString
+export const outputString: (value: string) => Printer<never, never, string> = InternalPrinter.outputString
 
 /**
  * Print the specified input value to a chunk of output elements.
@@ -417,7 +417,7 @@ export const outputString: (value: string) => Printer<never, never, string> = in
 export const printToChunk: {
   <Input>(input: Input): <Error, Output>(self: Printer<Input, Error, Output>) => Either<Error, Chunk<Output>>
   <Input, Error, Output>(self: Printer<Input, Error, Output>, input: Input): Either<Error, Chunk<Output>>
-} = internal.printToChunk
+} = InternalPrinter.printToChunk
 
 /**
  * Print the specified input value to a string.
@@ -428,7 +428,7 @@ export const printToChunk: {
 export const printToString: {
   <Input>(value: Input): <Error>(self: Printer<Input, Error, string>) => Either<Error, string>
   <Input, Error>(self: Printer<Input, Error, string>, input: Input): Either<Error, string>
-} = internal.printToString
+} = InternalPrinter.printToString
 
 /**
  * Print the specified input value to the given `target` implementation.
@@ -448,7 +448,7 @@ export const printToTarget: {
     input: Input,
     target: T
   ): Either<Error, void>
-} = internal.printToTarget
+} = InternalPrinter.printToTarget
 
 /**
  * A `Printer` that prints a series of characters provided as input, if it
@@ -457,7 +457,7 @@ export const printToTarget: {
  * @since 1.0.0
  * @category constructors
  */
-export const regex: <Error>(regex: Regex, error: Error) => Printer<Chunk<string>, Error, string> = internal.regex
+export const regex: <Error>(regex: Regex, error: Error) => Printer<Chunk<string>, Error, string> = InternalPrinter.regex
 
 /**
  * A `Printer` that prints the specified characters.
@@ -466,7 +466,7 @@ export const regex: <Error>(regex: Regex, error: Error) => Printer<Chunk<string>
  * @category constructors
  */
 export const regexDiscard: (regex: Regex, characters: Iterable<string>) => Printer<void, never, string> =
-  internal.regexDiscard
+  InternalPrinter.regexDiscard
 
 /**
  * A `Printer` that prints a single character if matches the given `regex`,
@@ -475,7 +475,8 @@ export const regexDiscard: (regex: Regex, characters: Iterable<string>) => Print
  * @since 1.0.0
  * @category constructors
  */
-export const regexChar: <Error>(regex: Regex, error: Error) => Printer<string, Error, string> = internal.regexChar
+export const regexChar: <Error>(regex: Regex, error: Error) => Printer<string, Error, string> =
+  InternalPrinter.regexChar
 
 /**
  * Repeats this printer for each element of the input chunk zero or more times.
@@ -485,7 +486,7 @@ export const regexChar: <Error>(regex: Regex, error: Error) => Printer<string, E
  */
 export const repeat: <Input, Error, Output>(
   self: Printer<Input, Error, Output>
-) => Printer<Chunk<Input>, Error, Output> = internal.repeatMin0
+) => Printer<Chunk<Input>, Error, Output> = InternalPrinter.repeatMin0
 
 /**
  * Repeats this printer for each element of the input chunk.
@@ -497,7 +498,7 @@ export const repeat: <Input, Error, Output>(
  */
 export const repeat1: <Input, Error, Output>(
   self: Printer<Input, Error, Output>
-) => Printer<NonEmptyChunk<Input>, Error, Output> = internal.repeatMin1
+) => Printer<NonEmptyChunk<Input>, Error, Output> = InternalPrinter.repeatMin1
 
 /**
  * Repeats this printer for each element of the input chunk, separated by the
@@ -518,7 +519,7 @@ export const repeatWithSeparator: {
     self: Printer<Input, Error, Output>,
     separator: Printer<void, Error2, Output2>
   ): Printer<Chunk<Input>, Error | Error2, Output | Output2>
-} = internal.repeatWithSeparator
+} = InternalPrinter.repeatWithSeparator
 
 /**
  * Repeats this printer for each element of the input chunk, separated by the
@@ -539,7 +540,7 @@ export const repeatWithSeparator1: {
     self: Printer<Input, Error, Output>,
     separator: Printer<void, Error2, Output2>
   ): Printer<NonEmptyChunk<Input>, Error | Error2, Output | Output2>
-} = internal.repeatWithSeparator1
+} = InternalPrinter.repeatWithSeparator1
 
 /**
  * Repeat this printer for each element of the input chunk, verifying the
@@ -558,7 +559,7 @@ export const repeatUntil: {
     self: Printer<Input, Error, Output>,
     stopCondition: Printer<void, Error2, Output2>
   ): Printer<Chunk<Input>, Error | Error2, Output | Output2>
-} = internal.repeatUntil
+} = InternalPrinter.repeatUntil
 
 /**
  * A `Printer` which prints the specified string and results in `value`.
@@ -566,7 +567,7 @@ export const repeatUntil: {
  * @since 1.0.0
  * @category constructors
  */
-export const string: <Input>(str: string, input: Input) => Printer<Input, never, string> = internal.string
+export const string: <Input>(str: string, input: Input) => Printer<Input, never, string> = InternalPrinter.string
 
 /**
  * A `Printer` that does not print anything and succeeds with the specified
@@ -575,7 +576,7 @@ export const string: <Input>(str: string, input: Input) => Printer<Input, never,
  * @since 1.0.0
  * @category constructors
  */
-export const succeed: <Input>(input: Input) => Printer<unknown, never, never> = internal.succeed
+export const succeed: <Input>(input: Input) => Printer<unknown, never, never> = InternalPrinter.succeed
 
 /**
  * Surround this printer the `other` printer which gets `void` as the value to
@@ -594,7 +595,7 @@ export const surroundedBy: {
     self: Printer<Input, Error, Output>,
     other: Printer<void, Error2, Output2>
   ): Printer<Input, Error | Error2, Output | Output2>
-} = internal.zipSurrounded
+} = InternalPrinter.zipSurrounded
 
 /**
  * Lazily constructs a `Printer`.
@@ -604,7 +605,7 @@ export const surroundedBy: {
  */
 export const suspend: <Input, Error, Output>(
   printer: LazyArg<Printer<Input, Error, Output>>
-) => Printer<Input, Error, Output> = internal.suspend
+) => Printer<Input, Error, Output> = InternalPrinter.suspend
 
 /**
  * Maps the printer's input value with `from`.
@@ -624,7 +625,7 @@ export const transformOption: {
     self: Printer<Input, Error, Output>,
     from: (input: Input2) => Option<Input>
   ): Printer<Input2, Option<Error>, Output>
-} = internal.transformOption
+} = InternalPrinter.transformOption
 
 /**
  * A `Printer` that does not print anything and succeeds with `undefined`.
@@ -632,7 +633,7 @@ export const transformOption: {
  * @since 1.0.0
  * @category constructors
  */
-export const unit: () => Printer<void, never, never> = internal.unit
+export const unit: () => Printer<void, never, never> = InternalPrinter.unit
 
 /**
  * A `Printer` that prints a series of characters provided as input, if it
@@ -641,7 +642,7 @@ export const unit: () => Printer<void, never, never> = internal.unit
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegex: (regex: Regex) => Printer<Chunk<string>, never, string> = internal.unsafeRegex
+export const unsafeRegex: (regex: Regex) => Printer<Chunk<string>, never, string> = InternalPrinter.unsafeRegex
 
 /**
  * A `Printer` that prints a single character if matches the given `regex`.
@@ -651,7 +652,7 @@ export const unsafeRegex: (regex: Regex) => Printer<Chunk<string>, never, string
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegexChar: (regex: Regex) => Printer<string, never, string> = internal.unsafeRegexChar
+export const unsafeRegexChar: (regex: Regex) => Printer<string, never, string> = InternalPrinter.unsafeRegexChar
 
 /**
  * Prints a single whitespace character.
@@ -659,7 +660,7 @@ export const unsafeRegexChar: (regex: Regex) => Printer<string, never, string> =
  * @since 1.0.0
  * @category constructors
  */
-export const whitespace: Printer<string, string, string> = internal.whitespace
+export const whitespace: Printer<string, string, string> = InternalPrinter.whitespace
 
 /**
  * Print `that` by providing the unit value to it after printing `self`. The
@@ -678,7 +679,7 @@ export const zipLeft: {
     self: Printer<Input, Error, Output>,
     that: Printer<Input2, Error2, Output2>
   ): Printer<Input, Error | Error2, Output | Output2>
-} = internal.zipLeft
+} = InternalPrinter.zipLeft
 
 /**
  * Print `that` by providing the unit value to it after printing `self`. The
@@ -697,7 +698,7 @@ export const zipRight: {
     self: Printer<Input, Error, Output>,
     that: Printer<Input2, Error2, Output2>
   ): Printer<Input2, Error | Error2, Output | Output2>
-} = internal.zipRight
+} = InternalPrinter.zipRight
 
 /**
  * Takes a pair to be printed and prints the left value with `self`, and the
@@ -716,4 +717,4 @@ export const zip: {
     self: Printer<Input, Error, Output>,
     that: Printer<Input2, Error2, Output2>
   ): Printer<readonly [Input, Input2], Error | Error2, Output | Output2>
-} = internal.zip
+} = InternalPrinter.zip

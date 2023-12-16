@@ -1,20 +1,20 @@
 /**
  * @since 1.0.0
  */
-import * as internal from "@effect/parser/internal/parser"
-import type { ParserError } from "@effect/parser/ParserError"
-import type { Regex } from "@effect/parser/Regex"
 import type { Chunk, NonEmptyChunk } from "effect/Chunk"
 import type { Either } from "effect/Either"
 import type { LazyArg } from "effect/Function"
 import type { Option } from "effect/Option"
 import type { Predicate } from "effect/Predicate"
+import * as InternalParser from "./internal/parser.js"
+import type { ParserError } from "./ParserError.js"
+import type { Regex } from "./Regex.js"
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export const ParserTypeId: unique symbol = internal.ParserTypeId
+export const ParserTypeId: unique symbol = InternalParser.ParserTypeId
 
 /**
  * @since 1.0.0
@@ -75,7 +75,7 @@ export declare namespace Parser {
  * @since 1.0.0
  * @category constructors
  */
-export const alphaNumeric: Parser<string, string, string> = internal.alphaNumeric
+export const alphaNumeric: Parser<string, string, string> = InternalParser.alphaNumeric
 
 /**
  * Constructs a `Parser` that just results with its input value.
@@ -83,7 +83,7 @@ export const alphaNumeric: Parser<string, string, string> = internal.alphaNumeri
  * @since 1.0.0
  * @category constructors
  */
-export const anything: <Input>() => Parser<Input, never, Input> = internal.anything
+export const anything: <Input>() => Parser<Input, never, Input> = InternalParser.anything
 
 /**
  * Constructs a `Parser` that consumes a single character and returns it.
@@ -91,7 +91,7 @@ export const anything: <Input>() => Parser<Input, never, Input> = internal.anyth
  * @since 1.0.0
  * @category constructors
  */
-export const anyChar: Parser<string, never, string> = internal.anyChar
+export const anyChar: Parser<string, never, string> = InternalParser.anyChar
 
 /**
  * Constructs a `Parser` that consumes the whole input and captures it as a
@@ -100,7 +100,7 @@ export const anyChar: Parser<string, never, string> = internal.anyChar
  * @since 1.0.0
  * @category constructors
  */
-export const anyString: Parser<string, never, string> = internal.anyString
+export const anyString: Parser<string, never, string> = InternalParser.anyString
 
 /**
  * Transforms a `Syntax` that results in `void` in a `Syntax` that results in `value`
@@ -118,7 +118,7 @@ export const as: {
     self: Parser<Input, Error, Result>,
     result: Result2
   ): Parser<Input, Error, Result2>
-} = internal.as
+} = InternalParser.as
 
 /**
  * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `void`
@@ -127,7 +127,7 @@ export const as: {
  * @category combinators
  */
 export const asUnit: <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, void> =
-  internal.asUnit
+  InternalParser.asUnit
 
 /**
  * Repeats this parser at least `min` times.
@@ -142,7 +142,7 @@ export const asUnit: <Input, Error, Result>(self: Parser<Input, Error, Result>) 
 export const atLeast: {
   (min: number): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Chunk<Result>>
   <Input, Error, Result>(self: Parser<Input, Error, Result>, min: number): Parser<Input, Error, Chunk<Result>>
-} = internal.repeatMin
+} = InternalParser.repeatMin
 
 /**
  * Enables auto-backtracking for this parser.
@@ -152,7 +152,7 @@ export const atLeast: {
  */
 export const autoBacktracking: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, Result> = internal.autoBacktracking
+) => Parser<Input, Error, Result> = InternalParser.autoBacktracking
 
 /**
  * Resets the parsing position if the specified parser fails.
@@ -165,7 +165,7 @@ export const autoBacktracking: <Input, Error, Result>(
  * @category combinators
  */
 export const backtrack: <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Result> =
-  internal.backtrack
+  InternalParser.backtrack
 
 /**
  * Concatenates the parsers `left`, then this, then `right`.
@@ -187,7 +187,7 @@ export const between: {
     left: Parser<Input2, Error2, Result2>,
     right: Parser<Input3, Error3, Result3>
   ): Parser<Input & Input2 & Input3, Error | Error2 | Error3, Result>
-} = internal.zipBetween
+} = InternalParser.zipBetween
 
 /**
  * Ignores this parser's result and instead capture the input string.
@@ -196,7 +196,7 @@ export const between: {
  * @category combinators
  */
 export const captureString: <Error, Result>(self: Parser<string, Error, Result>) => Parser<string, Error, string> =
-  internal.captureString
+  InternalParser.captureString
 
 /**
  * Constructs a `Parser` that consumes the exact character specified or fails
@@ -205,7 +205,7 @@ export const captureString: <Error, Result>(self: Parser<string, Error, Result>)
  * @since 1.0.0
  * @category constructors
  */
-export const char: <Error = string>(char: string, error?: Error) => Parser<string, Error, void> = internal.char
+export const char: <Error = string>(char: string, error?: Error) => Parser<string, Error, void> = InternalParser.char
 
 /**
  * Constructs a `Parser` that consumes a single character and fails with the
@@ -214,7 +214,8 @@ export const char: <Error = string>(char: string, error?: Error) => Parser<strin
  * @since 1.0.0
  * @category constructors
  */
-export const charNot: <Error = string>(char: string, error?: Error) => Parser<string, Error, string> = internal.charNot
+export const charNot: <Error = string>(char: string, error?: Error) => Parser<string, Error, string> =
+  InternalParser.charNot
 
 /**
  * Constructs a `Parser` that consumes a single character and succeeds with it
@@ -223,7 +224,7 @@ export const charNot: <Error = string>(char: string, error?: Error) => Parser<st
  * @since 1.0.0
  * @category constructors
  */
-export const charIn: (chars: Iterable<string>) => Parser<string, string, string> = internal.charIn
+export const charIn: (chars: Iterable<string>) => Parser<string, string, string> = InternalParser.charIn
 
 /**
  * Constructs a `Parser` that consumes a single character and succeeds with it
@@ -232,7 +233,7 @@ export const charIn: (chars: Iterable<string>) => Parser<string, string, string>
  * @since 1.0.0
  * @category constructors
  */
-export const charNotIn: (chars: Iterable<string>) => Parser<string, string, string> = internal.charNotIn
+export const charNotIn: (chars: Iterable<string>) => Parser<string, string, string> = InternalParser.charNotIn
 
 /**
  * Constructs a `Parser` of a single digit.
@@ -240,7 +241,7 @@ export const charNotIn: (chars: Iterable<string>) => Parser<string, string, stri
  * @since 1.0.0
  * @category constructors
  */
-export const digit: Parser<string, string, string> = internal.digit
+export const digit: Parser<string, string, string> = InternalParser.digit
 
 /**
  * Constructs a `Parser` that only succeeds if the input stream has been
@@ -251,7 +252,7 @@ export const digit: Parser<string, string, string> = internal.digit
  * @since 1.0.0
  * @category constructors
  */
-export const end: Parser<unknown, never, void> = internal.end
+export const end: Parser<unknown, never, void> = InternalParser.end
 
 /**
  * Repeats this parser exactly the specified number of `times`.
@@ -262,7 +263,7 @@ export const end: Parser<unknown, never, void> = internal.end
 export const exactly: {
   (times: number): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Chunk<Result>>
   <Input, Error, Result>(self: Parser<Input, Error, Result>, times: number): Parser<Input, Error, Chunk<Result>>
-} = internal.repeatExactly
+} = InternalParser.repeatExactly
 
 /**
  * Parser that always fails with the specified `error`.
@@ -270,7 +271,7 @@ export const exactly: {
  * @since 1.0.0
  * @category constructors
  */
-export const fail: <Error>(error: Error) => Parser<unknown, Error, never> = internal.fail
+export const fail: <Error>(error: Error) => Parser<unknown, Error, never> = InternalParser.fail
 
 /**
  * Checks the result of this parser with the specified `predicate`. If the
@@ -291,7 +292,7 @@ export const filter: {
     predicate: Predicate<Result>,
     error: Error2
   ): Parser<Input, Error | Error2, Result>
-} = internal.filter
+} = InternalParser.filter
 
 /**
  * Determines the continuation of the parser by the result of this parser.
@@ -309,7 +310,7 @@ export const flatMap: {
     self: Parser<Input, Error, Result>,
     f: (result: Result) => Parser<Input2, Error2, Result2>
   ): Parser<Input & Input2, Error | Error2, Result2>
-} = internal.flatMap
+} = InternalParser.flatMap
 
 /**
  * Flattens a result of parsed strings to a single string.
@@ -318,7 +319,7 @@ export const flatMap: {
  * @category combinators
  */
 export const flatten: <Input, Error>(self: Parser<Input, Error, Chunk<string>>) => Parser<Input, Error, string> =
-  internal.flatten
+  InternalParser.flatten
 
 /**
  * Flattens a result of parsed strings to a single string.
@@ -328,7 +329,7 @@ export const flatten: <Input, Error>(self: Parser<Input, Error, Chunk<string>>) 
  */
 export const flattenNonEmpty: <Input, Error>(
   self: Parser<Input, Error, NonEmptyChunk<string>>
-) => Parser<Input, Error, string> = internal.flattenNonEmpty
+) => Parser<Input, Error, string> = InternalParser.flattenNonEmpty
 
 /**
  * Constructs `Parser` that results in the current input stream position.
@@ -336,7 +337,7 @@ export const flattenNonEmpty: <Input, Error>(
  * @since 1.0.0
  * @category constructors
  */
-export const index: Parser<unknown, never, number> = internal.index
+export const index: Parser<unknown, never, number> = InternalParser.index
 
 /**
  * Constructs a `Parser` that consumes and discards all the remaining input.
@@ -344,7 +345,7 @@ export const index: Parser<unknown, never, number> = internal.index
  * @since 1.0.0
  * @category constructors
  */
-export const ignoreRest: Parser<string, never, void> = internal.ignoreRest
+export const ignoreRest: Parser<string, never, void> = InternalParser.ignoreRest
 
 /**
  * Constructs a `Parser` of a single letter.
@@ -352,7 +353,7 @@ export const ignoreRest: Parser<string, never, void> = internal.ignoreRest
  * @since 1.0.0
  * @category constructors
  */
-export const letter: Parser<string, string, string> = internal.letter
+export const letter: Parser<string, string, string> = InternalParser.letter
 
 /**
  * Disables auto-backtracking for this parser.
@@ -362,7 +363,7 @@ export const letter: Parser<string, string, string> = internal.letter
  */
 export const manualBacktracking: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, Result> = internal.manualBacktracking
+) => Parser<Input, Error, Result> = InternalParser.manualBacktracking
 
 /**
  * Maps the parser's successful result with the specified function.
@@ -380,7 +381,7 @@ export const map: {
     self: Parser<Input, Error, Result>,
     f: (result: Result) => Result2
   ): Parser<Input, Error, Result2>
-} = internal.map
+} = InternalParser.map
 
 /**
  * Maps the over the error channel of a parser with the specified function.
@@ -398,7 +399,7 @@ export const mapError: {
     self: Parser<Input, Error, Result>,
     f: (error: Error) => Error2
   ): Parser<Input, Error2, Result>
-} = internal.mapError
+} = InternalParser.mapError
 
 /**
  * Associates a name with this parser. The chain of named parsers are reported
@@ -410,7 +411,7 @@ export const mapError: {
 export const named: {
   (name: string): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Result>
   <Input, Error, Result>(self: Parser<Input, Error, Result>, name: string): Parser<Input, Error, Result>
-} = internal.named
+} = InternalParser.named
 
 /**
  * Fails the parser with the specified `error` if this parser succeeds.
@@ -421,7 +422,7 @@ export const named: {
 export const not: {
   <Error2>(error: Error2): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error2, void>
   <Input, Error, Result, Error2>(self: Parser<Input, Error, Result>, error: Error2): Parser<Input, Error2, void>
-} = internal.not
+} = InternalParser.not
 
 /**
  * Make this parser optional.
@@ -434,7 +435,7 @@ export const not: {
  */
 export const optional: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, Option<Result>> = internal.optional
+) => Parser<Input, Error, Option<Result>> = InternalParser.optional
 
 /**
  * Assigns `that` parser as a fallback of this parser.
@@ -457,7 +458,7 @@ export const orElse: {
     self: Parser<Input, Error, Result>,
     that: LazyArg<Parser<Input2, Error2, Result2>>
   ): Parser<Input & Input2, Error | Error2, Result | Result2>
-} = internal.orElse
+} = InternalParser.orElse
 
 /**
  * Assigns `that` parser as a fallback of this.
@@ -485,7 +486,7 @@ export const orElseEither: {
     self: Parser<Input, Error, Result>,
     that: LazyArg<Parser<Input2, Error2, Result2>>
   ): Parser<Input & Input2, Error | Error2, Either<Result, Result2>>
-} = internal.orElseEither
+} = InternalParser.orElseEither
 
 /**
  * Run a `Parser` on the given `input` string.
@@ -496,7 +497,7 @@ export const orElseEither: {
 export const parseString: {
   (input: string): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<ParserError<Error>, Result>
   <Input, Error, Result>(self: Parser<Input, Error, Result>, input: string): Either<ParserError<Error>, Result>
-} = internal.parseString
+} = InternalParser.parseString
 
 /**
  * Run a `Parser` on the given `input` string using a specific parser
@@ -515,7 +516,7 @@ export const parseStringWith: {
     input: string,
     implementation: Parser.Implementation
   ): Either<ParserError<Error>, Result>
-} = internal.parseStringWith
+} = InternalParser.parseStringWith
 
 /**
  * Constructs a `Parser` that executes a regular expression on the input and
@@ -525,7 +526,7 @@ export const parseStringWith: {
  * @since 1.0.0
  * @category constructors
  */
-export const regex: <Error>(regex: Regex, error: Error) => Parser<string, Error, Chunk<string>> = internal.regex
+export const regex: <Error>(regex: Regex, error: Error) => Parser<string, Error, Chunk<string>> = InternalParser.regex
 
 /**
  * Constructs a `Parser` that executes a regular expression on the input and
@@ -536,7 +537,7 @@ export const regex: <Error>(regex: Regex, error: Error) => Parser<string, Error,
  * @since 1.0.0
  * @category constructors
  */
-export const regexChar: <Error>(regex: Regex, error: Error) => Parser<unknown, Error, string> = internal.regexChar
+export const regexChar: <Error>(regex: Regex, error: Error) => Parser<unknown, Error, string> = InternalParser.regexChar
 
 /**
  * Constructs a `Parser` that executes a regular expression on the input but
@@ -545,7 +546,8 @@ export const regexChar: <Error>(regex: Regex, error: Error) => Parser<unknown, E
  * @since 1.0.0
  * @category constructors
  */
-export const regexDiscard: <Error>(regex: Regex, error: Error) => Parser<string, Error, void> = internal.regexDiscard
+export const regexDiscard: <Error>(regex: Regex, error: Error) => Parser<string, Error, void> =
+  InternalParser.regexDiscard
 
 /**
  * Repeats this parser zero or more times.
@@ -559,7 +561,7 @@ export const regexDiscard: <Error>(regex: Regex, error: Error) => Parser<string,
  */
 export const repeat: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, Chunk<Result>> = internal.repeatMin0
+) => Parser<Input, Error, Chunk<Result>> = InternalParser.repeatMin0
 
 /**
  * Repeats this parser at least once.
@@ -573,7 +575,7 @@ export const repeat: <Input, Error, Result>(
  */
 export const repeat1: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, NonEmptyChunk<Result>> = internal.repeatMin1
+) => Parser<Input, Error, NonEmptyChunk<Result>> = InternalParser.repeatMin1
 
 /**
  * Repeats this parser until the given `stopCondition` parser succeeds.
@@ -591,7 +593,7 @@ export const repeatUntil: {
     self: Parser<Input, Error, Result>,
     stopCondition: Parser<Input2, Error2, void>
   ): Parser<Input & Input2, Error | Error2, Chunk<Result>>
-} = internal.repeatUntil
+} = InternalParser.repeatUntil
 
 /**
  * Repeats this parser zero or more times and requires that between each
@@ -610,7 +612,7 @@ export const repeatWithSeparator: {
     self: Parser<Input, Error, Result>,
     separator: Parser<Input2, Error2, void>
   ): Parser<Input & Input2, Error | Error2, Chunk<Result>>
-} = internal.repeatWithSeparator
+} = InternalParser.repeatWithSeparator
 
 /**
  * Repeats this parser at least once and requires that between each element,
@@ -629,7 +631,7 @@ export const repeatWithSeparator1: {
     self: Parser<Input, Error, Result>,
     separator: Parser<Input2, Error2, void>
   ): Parser<Input & Input2, Error | Error2, NonEmptyChunk<Result>>
-} = internal.repeatWithSeparator1
+} = InternalParser.repeatWithSeparator1
 
 /**
  * Enables or disables auto-backtracking for this parser.
@@ -640,7 +642,7 @@ export const repeatWithSeparator1: {
 export const setAutoBacktracking: {
   (enabled: boolean): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Result>
   <Input, Error, Result>(self: Parser<Input, Error, Result>, enabled: boolean): Parser<Input, Error, Result>
-} = internal.setAutoBacktracking
+} = InternalParser.setAutoBacktracking
 
 /**
  * Constructs a `Parser` that parses the specified string and results in the
@@ -649,7 +651,7 @@ export const setAutoBacktracking: {
  * @since 1.0.0
  * @category constructors
  */
-export const string: <Result>(str: string, result: Result) => Parser<string, string, Result> = internal.string
+export const string: <Result>(str: string, result: Result) => Parser<string, string, Result> = InternalParser.string
 
 /**
  * Constructs a `Parser` that does not consume any input and succeeds with the
@@ -658,7 +660,7 @@ export const string: <Result>(str: string, result: Result) => Parser<string, str
  * @since 1.0.0
  * @category constructors
  */
-export const succeed: <Result>(result: Result) => Parser<unknown, never, Result> = internal.succeed
+export const succeed: <Result>(result: Result) => Parser<unknown, never, Result> = InternalParser.succeed
 
 /**
  * Lazily constructs a `Parser`.
@@ -668,7 +670,7 @@ export const succeed: <Result>(result: Result) => Parser<unknown, never, Result>
  */
 export const suspend: <Input, Error, Result>(
   parser: LazyArg<Parser<Input, Error, Result>>
-) => Parser<Input, Error, Result> = internal.suspend
+) => Parser<Input, Error, Result> = InternalParser.suspend
 
 /**
  * Surrounds this parser with the `other` parser. The result is this parser's
@@ -687,7 +689,7 @@ export const surroundedBy: {
     self: Parser<Input, Error, Result>,
     other: Parser<Input2, Error2, Result2>
   ): Parser<Input & Input2, Error | Error2, Result>
-} = internal.zipSurrounded
+} = InternalParser.zipSurrounded
 
 /**
  * Maps the parser's successful result with the specified function that either
@@ -706,7 +708,7 @@ export const transformEither: {
     self: Parser<Input, Error, Result>,
     f: (result: Result) => Either<Error2, Result2>
   ): Parser<Input, Error2, Result2>
-} = internal.transformEither
+} = InternalParser.transformEither
 
 /**
  * Maps the parser's successful result with the specified function that either
@@ -726,7 +728,7 @@ export const transformOption: {
     self: Parser<Input, Error, Result>,
     pf: (result: Result) => Option<Result2>
   ): Parser<Input, Option<Error>, Result2>
-} = internal.transformOption
+} = InternalParser.transformOption
 
 /**
  * Constructs a `Parser` that does not consume the input and results in unit.
@@ -734,7 +736,7 @@ export const transformOption: {
  * @since 1.0.0
  * @category constructors
  */
-export const unit: () => Parser<unknown, never, void> = internal.unit
+export const unit: () => Parser<unknown, never, void> = InternalParser.unit
 
 /**
  * Constructs a `Parser` that executes a regular expression on the input and
@@ -744,7 +746,7 @@ export const unit: () => Parser<unknown, never, void> = internal.unit
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegex: (regex: Regex) => Parser<string, never, Chunk<string>> = internal.unsafeRegex
+export const unsafeRegex: (regex: Regex) => Parser<string, never, Chunk<string>> = InternalParser.unsafeRegex
 
 /**
  * Constructs a `Parser` that executes a regular expression on the input and
@@ -755,7 +757,7 @@ export const unsafeRegex: (regex: Regex) => Parser<string, never, Chunk<string>>
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegexChar: (regex: Regex) => Parser<string, never, string> = internal.unsafeRegexChar
+export const unsafeRegexChar: (regex: Regex) => Parser<string, never, string> = InternalParser.unsafeRegexChar
 
 /**
  * Constructs a `Parser` that executes a regular expression on the input but
@@ -764,7 +766,7 @@ export const unsafeRegexChar: (regex: Regex) => Parser<string, never, string> = 
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegexDiscard: (regex: Regex) => Parser<string, never, void> = internal.unsafeRegexDiscard
+export const unsafeRegexDiscard: (regex: Regex) => Parser<string, never, void> = InternalParser.unsafeRegexDiscard
 
 /**
  * Constructs a `Parser` of a single whitespace character.
@@ -772,7 +774,7 @@ export const unsafeRegexDiscard: (regex: Regex) => Parser<string, never, void> =
  * @since 1.0.0
  * @category constructors
  */
-export const whitespace: Parser<string, string, string> = internal.whitespace
+export const whitespace: Parser<string, string, string> = InternalParser.whitespace
 
 /**
  * Concatenates this parser with `that` parser. In case both parser succeeds,
@@ -791,7 +793,7 @@ export const zip: {
     self: Parser<Input, Error, Result>,
     that: Parser<Input2, Error2, Result2>
   ): Parser<Input & Input2, Error | Error2, readonly [Result, Result2]>
-} = internal.zip
+} = InternalParser.zip
 
 /**
  * Concatenates this parser with `that` parser. In case both parser succeeds,
@@ -810,7 +812,7 @@ export const zipLeft: {
     self: Parser<Input, Error, Result>,
     that: Parser<Input2, Error2, Result2>
   ): Parser<Input & Input2, Error | Error2, Result>
-} = internal.zipLeft
+} = InternalParser.zipLeft
 
 /**
  * Concatenates this parser with `that` parser. In case both parser succeeds,
@@ -829,7 +831,7 @@ export const zipRight: {
     self: Parser<Input, Error, Result>,
     that: Parser<Input2, Error2, Result2>
   ): Parser<Input & Input2, Error | Error2, Result2>
-} = internal.zipRight
+} = InternalParser.zipRight
 
 /**
  * Concatenates this parser with `that` parser. In case both parser succeeds,
@@ -850,4 +852,4 @@ export const zipWith: {
     that: Parser<Input2, Error2, Result2>,
     zip: (left: Result, right: Result2) => Result3
   ): Parser<Input & Input2, Error | Error2, Result3>
-} = internal.zipWith
+} = InternalParser.zipWith
