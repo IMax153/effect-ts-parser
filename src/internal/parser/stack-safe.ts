@@ -1,11 +1,11 @@
-import * as common from "@effect/parser/internal/common"
-import type * as parser from "@effect/parser/internal/parser"
-import * as parserError from "@effect/parser/internal/parserError"
-import * as regex from "@effect/parser/internal/regex"
-import type * as ParserError from "@effect/parser/ParserError"
-import type * as Regex from "@effect/parser/Regex"
 import { Chunk, Either, List, Option } from "effect"
 import type { LazyArg } from "effect/Function"
+import type * as ParserError from "./../../ParserError.js"
+import type * as Regex from "./../../Regex.js"
+import * as InternalCommon from "./../common.js"
+import type * as InternalParser from "./../parser.js"
+import * as InternalParserError from "./../parserError.js"
+import * as InternalRegex from "./../regex.js"
 
 /**
  * A `Parser` operation, the language that a `Parser` is precompiled to for
@@ -358,18 +358,18 @@ export interface Zip {
 
 /** @internal */
 export interface CompilerState {
-  readonly optimized: Map<parser.Primitive, ParserOp>
-  readonly visited: Set<parser.Primitive>
+  readonly optimized: Map<InternalParser.Primitive, ParserOp>
+  readonly visited: Set<InternalParser.Primitive>
 }
 
 /** @internal */
-export const compile = (parser: parser.Primitive): InitialParser =>
+export const compile = (parser: InternalParser.Primitive): InitialParser =>
   toInitialParser(compileInternal(
     parser,
     { optimized: new Map(), visited: new Set() }
   ))
 
-const compileInternal = (parser: parser.Primitive, state: CompilerState): ParserOp => {
+const compileInternal = (parser: InternalParser.Primitive, state: CompilerState): ParserOp => {
   const alreadyOptimized = state.optimized.get(parser)
   if (alreadyOptimized !== undefined) {
     return alreadyOptimized
@@ -380,7 +380,7 @@ const compileInternal = (parser: parser.Primitive, state: CompilerState): Parser
   return compiled
 }
 
-const compileParserNode = (parser: parser.Primitive, state: CompilerState): ParserOp => {
+const compileParserNode = (parser: InternalParser.Primitive, state: CompilerState): ParserOp => {
   switch (parser._tag) {
     case "Backtrack": {
       return {
@@ -405,7 +405,7 @@ const compileParserNode = (parser: parser.Primitive, state: CompilerState): Pars
       return {
         _tag: "PushResult",
         success: void 0,
-        failure: parserError.failure(List.nil(), -1, parser.error),
+        failure: InternalParserError.failure(List.nil(), -1, parser.error),
         popFirst: false
       }
     }
@@ -470,7 +470,7 @@ const compileParserNode = (parser: parser.Primitive, state: CompilerState): Pars
         _tag: "PushOp2",
         first: {
           _tag: "TransformResultFlipped",
-          onSuccess: (position) => parserError.failure(List.nil(), position, parser.error),
+          onSuccess: (position) => InternalParserError.failure(List.nil(), position, parser.error),
           onFailure: () => void 0
         },
         second: inner,
@@ -508,7 +508,7 @@ const compileParserNode = (parser: parser.Primitive, state: CompilerState): Pars
     case "ParseRegex": {
       return {
         _tag: "MatchRegex",
-        regex: regex.compile(parser.regex),
+        regex: InternalRegex.compile(parser.regex),
         pushAs: "MatchedChunk",
         failAs: parser.onFailure
       }
@@ -516,7 +516,7 @@ const compileParserNode = (parser: parser.Primitive, state: CompilerState): Pars
     case "ParseRegexLastChar": {
       return {
         _tag: "MatchRegex",
-        regex: regex.compile(parser.regex),
+        regex: InternalRegex.compile(parser.regex),
         pushAs: "SingleChar",
         failAs: parser.onFailure
       }
@@ -540,7 +540,7 @@ const compileParserNode = (parser: parser.Primitive, state: CompilerState): Pars
     case "SkipRegex": {
       return {
         _tag: "MatchRegex",
-        regex: regex.compile(parser.regex),
+        regex: InternalRegex.compile(parser.regex),
         pushAs: "Ignored",
         failAs: parser.onFailure
       }
@@ -835,7 +835,7 @@ export const charParserExecutor = (
       case "CheckEnd": {
         if (position < source.length) {
           lastSuccess1 = null
-          lastFailure1 = parserError.notConsumedAll(Option.none())
+          lastFailure1 = InternalParserError.notConsumedAll(Option.none())
         } else {
           lastSuccess1 = undefined
           lastFailure1 = null
@@ -862,10 +862,10 @@ export const charParserExecutor = (
           if ((pos0 + pos) < source.length) {
             const item = source[pos0 + pos]
             if (item !== Chunk.unsafeGet(op.sequence, position)) {
-              failure = parserError.failure(nameStack, pos0 + pos, op.createParserFailure(pos, item))
+              failure = InternalParserError.failure(nameStack, pos0 + pos, op.createParserFailure(pos, item))
             }
           } else {
-            failure = parserError.unexpectedEndOfInput
+            failure = InternalParserError.unexpectedEndOfInput
           }
           pos = pos + 1
         }
@@ -881,15 +881,15 @@ export const charParserExecutor = (
       }
       case "MatchRegex": {
         const result = op.regex.test(position, source)
-        if (result === common.needMoreInput) {
-          lastFailure1 = parserError.unexpectedEndOfInput
-        } else if (result === common.notMatched) {
+        if (result === InternalCommon.needMoreInput) {
+          lastFailure1 = InternalParserError.unexpectedEndOfInput
+        } else if (result === InternalCommon.notMatched) {
           Option.match(op.failAs, {
             onNone: () => {
               lastSuccess1 = Chunk.empty()
             },
             onSome: (error) => {
-              lastFailure1 = parserError.failure(nameStack, position, error)
+              lastFailure1 = InternalParserError.failure(nameStack, position, error)
             }
           })
         } else {
@@ -971,7 +971,7 @@ export const charParserExecutor = (
           }
           if (builder!.length < minCount) {
             // not enough elements
-            lastFailure1 = parserError.unexpectedEndOfInput
+            lastFailure1 = InternalParserError.unexpectedEndOfInput
             popOpStack()
           } else {
             lastFailure1 = null
@@ -1052,7 +1052,7 @@ export const charParserExecutor = (
           position = position + 1
           lastSuccess1 = source[position - 1]
         } else {
-          lastFailure1 = parserError.unexpectedEndOfInput
+          lastFailure1 = InternalParserError.unexpectedEndOfInput
         }
         popOpStack()
         break
@@ -1119,7 +1119,7 @@ export const charParserExecutor = (
         } else {
           if (lastFailure2 !== null) {
             if (lastFailure1 !== null) {
-              lastFailure1 = parserError.addFailedBranch(lastFailure2, lastFailure1)
+              lastFailure1 = InternalParserError.addFailedBranch(lastFailure2, lastFailure1)
             } else {
               lastFailure1 = lastFailure2
             }
@@ -1160,7 +1160,7 @@ export const charParserExecutor = (
           Either.match(either, {
             onLeft: (error) => {
               lastSuccess1 = null
-              lastFailure1 = parserError.failure(nameStack, position, error)
+              lastFailure1 = InternalParserError.failure(nameStack, position, error)
             },
             onRight: (value) => {
               lastSuccess1 = value

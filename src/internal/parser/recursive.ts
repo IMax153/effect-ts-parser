@@ -1,10 +1,10 @@
-import * as common from "@effect/parser/internal/common"
-import type * as parser from "@effect/parser/internal/parser"
-import * as parserError from "@effect/parser/internal/parserError"
-import * as _regex from "@effect/parser/internal/regex"
-import type * as ParserError from "@effect/parser/ParserError"
-import type * as Regex from "@effect/parser/Regex"
 import { Chunk, Either, List, Option } from "effect"
+import type * as ParserError from "./../../ParserError.js"
+import type * as Regex from "./../../Regex.js"
+import * as InternalCommon from "./../common.js"
+import type * as InternalParser from "./../parser.js"
+import * as InternalParserError from "./../parserError.js"
+import * as InternalRegex from "./../regex.js"
 
 /**
  * The state of the recursive parser implementation.
@@ -39,7 +39,10 @@ export abstract class ParserState<Input> {
 }
 
 /** @internal */
-export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState<Input>): unknown | undefined => {
+export const parseRecursive = <Input>(
+  self: InternalParser.Primitive,
+  state: ParserState<Input>
+): unknown | undefined => {
   switch (self._tag) {
     case "Backtrack": {
       const position = state.position
@@ -63,12 +66,12 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
     }
     case "End": {
       if (state.position < state.length) {
-        state.error = parserError.notConsumedAll(Option.none())
+        state.error = InternalParserError.notConsumedAll(Option.none())
       }
       return undefined
     }
     case "Fail": {
-      state.error = parserError.failure(state.nameStack, state.position, self.error)
+      state.error = InternalParserError.failure(state.nameStack, state.position, self.error)
       return undefined
     }
     case "Failed": {
@@ -115,7 +118,7 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
       parseRecursive(self.parser, state)
       state.discard = discard
       if (state.error === undefined) {
-        state.error = parserError.failure(state.nameStack, state.position, self.error)
+        state.error = InternalParserError.failure(state.nameStack, state.position, self.error)
       } else {
         state.error = undefined
       }
@@ -155,7 +158,7 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
           }
           return undefined
         }
-        state.error = parserError.addFailedBranch(leftFailure, state.error)
+        state.error = InternalParserError.addFailedBranch(leftFailure, state.error)
         return undefined
       }
       return undefined
@@ -179,19 +182,19 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
           }
           return undefined
         }
-        state.error = parserError.addFailedBranch(leftFailure, state.error)
+        state.error = InternalParserError.addFailedBranch(leftFailure, state.error)
         return undefined
       }
       return undefined
     }
     case "ParseRegex": {
       const position = state.position
-      const result = state.regex(_regex.compile(self.regex))
-      if (result === common.needMoreInput) {
-        state.error = parserError.unexpectedEndOfInput
+      const result = state.regex(InternalRegex.compile(self.regex))
+      if (result === InternalCommon.needMoreInput) {
+        state.error = InternalParserError.unexpectedEndOfInput
         return undefined
       }
-      if (result === common.notMatched) {
+      if (result === InternalCommon.notMatched) {
         state.error = getParserError(position, state.nameStack, self.onFailure)
         return undefined
       }
@@ -203,12 +206,12 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
     }
     case "ParseRegexLastChar": {
       const position = state.position
-      const result = state.regex(_regex.compile(self.regex))
-      if (result === common.needMoreInput) {
-        state.error = parserError.unexpectedEndOfInput
+      const result = state.regex(InternalRegex.compile(self.regex))
+      if (result === InternalCommon.needMoreInput) {
+        state.error = InternalParserError.unexpectedEndOfInput
         return undefined
       }
-      if (result === common.notMatched) {
+      if (result === InternalCommon.notMatched) {
         state.error = getParserError(position, state.nameStack, self.onFailure)
         return undefined
       }
@@ -224,7 +227,7 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
         state.position = state.position + 1
         return result
       }
-      state.error = parserError.unexpectedEndOfInput
+      state.error = InternalParserError.unexpectedEndOfInput
       return undefined
     }
     case "Repeat": {
@@ -246,7 +249,7 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
         }
       }
       if (count < minCount && state.error === undefined) {
-        state.error = parserError.unexpectedEndOfInput
+        state.error = InternalParserError.unexpectedEndOfInput
       } else {
         if (count >= minCount) {
           state.error = undefined
@@ -263,10 +266,10 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
     }
     case "SkipRegex": {
       const position = state.position
-      const result = state.regex(_regex.compile(self.regex))
-      if (result === common.needMoreInput) {
-        state.error = parserError.unexpectedEndOfInput
-      } else if (result === common.notMatched) {
+      const result = state.regex(InternalRegex.compile(self.regex))
+      if (result === InternalCommon.needMoreInput) {
+        state.error = InternalParserError.unexpectedEndOfInput
+      } else if (result === InternalCommon.notMatched) {
         state.error = getParserError(position, state.nameStack, self.onFailure)
       } else {
         state.position = result
@@ -296,7 +299,7 @@ export const parseRecursive = <Input>(self: parser.Primitive, state: ParserState
         const result = self.to(innerResult)
         return Either.match(result, {
           onLeft: (error) => {
-            state.error = parserError.failure(state.nameStack, state.position, error)
+            state.error = InternalParserError.failure(state.nameStack, state.position, error)
             return undefined
           },
           onRight: (value) => value
@@ -351,7 +354,7 @@ const getParserError = (
   Option.match(
     onFailure,
     {
-      onNone: () => parserError.unknownFailure(nameStack, position),
-      onSome: (error) => parserError.failure(nameStack, position, error)
+      onNone: () => InternalParserError.unknownFailure(nameStack, position),
+      onSome: (error) => InternalParserError.failure(nameStack, position, error)
     }
   )

@@ -1,6 +1,6 @@
-import type * as BitSet from "@effect/parser/BitSet"
 import { Number, ReadonlyArray } from "effect"
 import { pipe } from "effect/Function"
+import type * as BitSet from "./../BitSet.js"
 
 /** @internal */
 export const fromIterable = (bits: Iterable<number>): BitSet.BitSet =>

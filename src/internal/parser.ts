@@ -1,14 +1,14 @@
-import * as recursive from "@effect/parser/internal/parser/recursive"
-import * as stackSafe from "@effect/parser/internal/parser/stack-safe"
-import * as parserError from "@effect/parser/internal/parserError"
-import * as _regex from "@effect/parser/internal/regex"
-import type * as Parser from "@effect/parser/Parser"
-import type * as ParserError from "@effect/parser/ParserError"
-import type * as Regex from "@effect/parser/Regex"
 import { Chunk, Either, Option } from "effect"
 import type { LazyArg } from "effect/Function"
 import { dual, pipe } from "effect/Function"
 import type { Predicate } from "effect/Predicate"
+import type * as Parser from "./../Parser.js"
+import type * as ParserError from "./../ParserError.js"
+import type * as Regex from "./../Regex.js"
+import * as InternalRecursive from "./parser/recursive.js"
+import * as InternalStackSafe from "./parser/stack-safe.js"
+import * as InternalParserError from "./parserError.js"
+import * as InternalRegex from "./regex.js"
 
 /** @internal */
 const ParserSymbolKey = "@effect/parser/Parser"
@@ -268,7 +268,10 @@ export const regexChar = <Error>(regex: Regex.Regex, error: Error): Parser.Parse
 }
 
 /** @internal */
-export const alphaNumeric: Parser.Parser<string, string, string> = regexChar(_regex.anyAlphaNumeric, `not alphanumeric`)
+export const alphaNumeric: Parser.Parser<string, string, string> = regexChar(
+  InternalRegex.anyAlphaNumeric,
+  `not alphanumeric`
+)
 
 /** @internal */
 export const anything = <Input>(): Parser.Parser<Input, never, Input> => {
@@ -311,7 +314,7 @@ export const unsafeRegexChar = (regex: Regex.Regex): Parser.Parser<string, never
 }
 
 /** @internal */
-export const anyChar: Parser.Parser<string, never, string> = unsafeRegexChar(_regex.anyChar)
+export const anyChar: Parser.Parser<string, never, string> = unsafeRegexChar(InternalRegex.anyChar)
 
 /** @internal */
 export const captureString = <Error, Result>(
@@ -334,7 +337,7 @@ export const unsafeRegexDiscard = (regex: Regex.Regex): Parser.Parser<string, ne
 
 /** @internal */
 export const anyString: Parser.Parser<string, never, string> = captureString(
-  unsafeRegexDiscard(_regex.repeatMin(_regex.anyChar, 0))
+  unsafeRegexDiscard(InternalRegex.repeatMin(InternalRegex.anyChar, 0))
 )
 
 /** @internal */
@@ -354,22 +357,22 @@ export const backtrack = <Input, Error, Result>(
 
 /** @internal */
 export const char = <Error = string>(char: string, error?: Error): Parser.Parser<string, Error, void> =>
-  regexDiscard(_regex.charIn(char), error ?? (`expected '${char}'` as any))
+  regexDiscard(InternalRegex.charIn(char), error ?? (`expected '${char}'` as any))
 
 /** @internal */
 export const charIn = (chars: Iterable<string>): Parser.Parser<string, string, string> =>
-  regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
+  regexChar(InternalRegex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
 
 /** @internal */
 export const charNot = <Error = string>(char: string, error?: Error): Parser.Parser<string, Error, string> =>
-  regexChar(_regex.charNotIn([char]), error ?? (`unexpected '${char}'` as any))
+  regexChar(InternalRegex.charNotIn([char]), error ?? (`unexpected '${char}'` as any))
 
 /** @internal */
 export const charNotIn = (chars: Iterable<string>): Parser.Parser<string, string, string> =>
-  regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
+  regexChar(InternalRegex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
 
 /** @internal */
-export const digit: Parser.Parser<string, string, string> = regexChar(_regex.anyDigit, `not a digit`)
+export const digit: Parser.Parser<string, string, string> = regexChar(InternalRegex.anyDigit, `not a digit`)
 
 /** @internal */
 export const end: Parser.Parser<unknown, never, void> = (() => {
@@ -435,7 +438,9 @@ export const flattenNonEmpty = <Input, Error>(
 ): Parser.Parser<Input, Error, string> => map(self, Chunk.join(""))
 
 /** @internal */
-export const ignoreRest: Parser.Parser<string, never, void> = unsafeRegexDiscard(_regex.repeatMin(_regex.anyChar, 0))
+export const ignoreRest: Parser.Parser<string, never, void> = unsafeRegexDiscard(
+  InternalRegex.repeatMin(InternalRegex.anyChar, 0)
+)
 
 /** @internal */
 export const index: Parser.Parser<unknown, never, number> = (() => {
@@ -445,7 +450,7 @@ export const index: Parser.Parser<unknown, never, number> = (() => {
 })()
 
 /** @internal */
-export const letter: Parser.Parser<string, string, string> = regexChar(_regex.anyLetter, `not a letter`)
+export const letter: Parser.Parser<string, string, string> = regexChar(InternalRegex.anyLetter, `not a letter`)
 
 /** @internal */
 export const manualBacktracking = <Input, Error, Result>(
@@ -486,7 +491,7 @@ export const mapError = dual<
   const op = Object.create(proto)
   op._tag = "MapError"
   op.parser = self
-  op.mapError = parserError.map(f)
+  op.mapError = InternalParserError.map(f)
   return op
 })
 
@@ -577,7 +582,10 @@ export const orElseEither = dual<
 })
 
 /** @internal */
-export const regex = <Error>(regex: Regex.Regex, error: Error): Parser.Parser<string, Error, Chunk.Chunk<string>> => {
+export const regex = <Error>(
+  regex: Regex.Regex,
+  error: Error
+): Parser.Parser<string, Error, Chunk.Chunk<string>> => {
   const op = Object.create(proto)
   op._tag = "ParseRegex"
   op.regex = regex
@@ -759,7 +767,7 @@ export const setAutoBacktracking = dual<
 
 /** @internal */
 export const string = <Result>(str: string, result: Result): Parser.Parser<string, string, Result> =>
-  as(regexDiscard(_regex.string(str), `not '${str}'`), result)
+  as(regexDiscard(InternalRegex.string(str), `not '${str}'`), result)
 
 /** @internal */
 export const succeed = <Result>(result: Result): Parser.Parser<unknown, never, Result> => {
@@ -828,7 +836,10 @@ export const unsafeRegex = (regex: Regex.Regex): Parser.Parser<string, never, Ch
 }
 
 /** @internal */
-export const whitespace: Parser.Parser<string, string, string> = regexChar(_regex.whitespace, `not a whitespace`)
+export const whitespace: Parser.Parser<string, string, string> = regexChar(
+  InternalRegex.whitespace,
+  `not a whitespace`
+)
 
 /** @internal */
 export const zip = dual<
@@ -932,7 +943,7 @@ export const zipWith = dual<
 })
 
 /** @internal */
-class StringParserState extends recursive.ParserState<string> {
+class StringParserState extends InternalRecursive.ParserState<string> {
   readonly length: number
   constructor(readonly source: string) {
     super()
@@ -972,14 +983,14 @@ export const parseStringWith = dual<
 ) => {
   switch (implementation) {
     case "stack-safe": {
-      return stackSafe.charParserExecutor(
-        stackSafe.compile(optimize(self) as Primitive),
+      return InternalStackSafe.charParserExecutor(
+        InternalStackSafe.compile(optimize(self) as Primitive),
         input
       ) as Either.Either<ParserError.ParserError<Error>, Result>
     }
     case "recursive": {
       const state = new StringParserState(input)
-      const result = recursive.parseRecursive(optimize(self) as Primitive, state)
+      const result = InternalRecursive.parseRecursive(optimize(self) as Primitive, state)
       if (state.error !== undefined) {
         return Either.left(state.error as ParserError.ParserError<Error>)
       }
@@ -1141,7 +1152,7 @@ const optimizeNode = (
           const skipRegexRight = optimizedRight.parser
           const innerOp = Object.create(proto)
           innerOp._tag = "SkipRegex"
-          innerOp.regex = _regex.or(skipRegexLeft.regex, skipRegexRight.regex)
+          innerOp.regex = InternalRegex.or(skipRegexLeft.regex, skipRegexRight.regex)
           innerOp.onFailure = Option.orElse(skipRegexRight.onFailure, () => skipRegexLeft.onFailure)
           op._tag = "CaptureString"
           op.parser = innerOp
@@ -1171,7 +1182,7 @@ const optimizeNode = (
       const op = Object.create(proto)
       if (optimizedInner._tag === "ParseRegexLastChar") {
         op._tag = "ParseRegex"
-        op.regex = _regex.repeat(optimizedInner.regex, self.min, self.max)
+        op.regex = InternalRegex.repeat(optimizedInner.regex, self.min, self.max)
         op.onFailure = optimizedInner.onFailure
         state.optimized.set(self, op)
         return op

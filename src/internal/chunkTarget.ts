@@ -1,5 +1,5 @@
-import type * as ChunkTarget from "@effect/parser/ChunkTarget"
 import { Cause, Chunk, List } from "effect"
+import type * as ChunkTarget from "./../ChunkTarget.js"
 
 /** @internal */
 export class ChunkTargetImpl<Output> implements ChunkTarget.ChunkTarget<Output> {

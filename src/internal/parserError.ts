@@ -1,7 +1,7 @@
-import type * as ParserError from "@effect/parser/ParserError"
 import type { List } from "effect"
 import { Option } from "effect"
 import { dual } from "effect/Function"
+import type * as ParserError from "./../ParserError.js"
 
 /** @internal */
 const ParserErrorSymbolKey = "@effect/parser/ParserError"
@@ -80,8 +80,9 @@ export const isAllBranchesFailed = <Error>(
 ): self is ParserError.AllBranchesFailed<Error> => self._tag === "AllBranchesFailed"
 
 /** @internal */
-export const isFailure = <Error>(self: ParserError.ParserError<Error>): self is ParserError.Failure<Error> =>
-  self._tag === "Failure"
+export const isFailure = <Error>(
+  self: ParserError.ParserError<Error>
+): self is ParserError.Failure<Error> => self._tag === "Failure"
 
 /** @internal */
 export const isNotConsumedAll = <Error>(
@@ -94,8 +95,9 @@ export const isUnexpectedEndOfInput = <Error>(
 ): self is ParserError.UnexpectedEndOfInput => self._tag === "UnexpectedEndOfInput"
 
 /** @internal */
-export const isUnknownFailure = <Error>(self: ParserError.ParserError<Error>): self is ParserError.UnknownFailure =>
-  self._tag === "UnknownFailure"
+export const isUnknownFailure = <Error>(
+  self: ParserError.ParserError<Error>
+): self is ParserError.UnknownFailure => self._tag === "UnknownFailure"
 
 /** @internal */
 export const addFailedBranch = dual<
