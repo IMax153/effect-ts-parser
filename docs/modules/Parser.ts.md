@@ -1,6 +1,6 @@
 ---
 title: Parser.ts
-nav_order: 2
+nav_order: 4
 parent: Modules
 ---
 
@@ -24,6 +24,7 @@ Added in v1.0.0
   - [filter](#filter)
   - [flatMap](#flatmap)
   - [flatten](#flatten)
+  - [flattenNonEmpty](#flattennonempty)
   - [manualBacktracking](#manualbacktracking)
   - [map](#map)
   - [mapError](#maperror)
@@ -52,18 +53,20 @@ Added in v1.0.0
   - [anything](#anything)
   - [char](#char)
   - [charIn](#charin)
+  - [charNot](#charnot)
+  - [charNotIn](#charnotin)
   - [digit](#digit)
   - [end](#end)
   - [fail](#fail)
   - [ignoreRest](#ignorerest)
   - [index](#index)
   - [letter](#letter)
-  - [notChar](#notchar)
   - [regex](#regex)
   - [regexChar](#regexchar)
   - [regexDiscard](#regexdiscard)
   - [string](#string)
   - [succeed](#succeed)
+  - [suspend](#suspend)
   - [unit](#unit)
   - [unsafeRegex](#unsaferegex)
   - [unsafeRegexChar](#unsaferegexchar)
@@ -77,6 +80,10 @@ Added in v1.0.0
 - [symbols](#symbols)
   - [ParserTypeId](#parsertypeid)
   - [ParserTypeId (type alias)](#parsertypeid-type-alias)
+- [utils](#utils)
+  - [Parser (namespace)](#parser-namespace)
+    - [Variance (interface)](#variance-interface)
+    - [Implementation (type alias)](#implementation-type-alias)
 
 ---
 
@@ -84,15 +91,15 @@ Added in v1.0.0
 
 ## as
 
-Ignores the parser's successful result and result in 'result' instead
+Transforms a `Syntax` that results in `void` in a `Syntax` that results in `value`
 
 **Signature**
 
 ```ts
 export declare const as: {
-  <Result, Result2>(result: Result2): <Input, Error>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input, Error, Result2>
+  <Result, Result2>(
+    result: Result2
+  ): <Input, Error>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Result2>
   <Input, Error, Result, Result2>(self: Parser<Input, Error, Result>, result: Result2): Parser<Input, Error, Result2>
 }
 ```
@@ -101,7 +108,7 @@ Added in v1.0.0
 
 ## asUnit
 
-Maps the result of this parser to the unit value.
+Transforms a `Syntax` that results in `from` in a `Syntax` that results in `void`
 
 **Signature**
 
@@ -226,9 +233,10 @@ specified predicate is `false`, the parser fails with the given error.
 
 ```ts
 export declare const filter: {
-  <Result, Error2>(predicate: Predicate<Result>, error: Error2): <Input, Error>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input, Error2 | Error, Result>
+  <Result, Error2>(
+    predicate: Predicate<Result>,
+    error: Error2
+  ): <Input, Error>(self: Parser<Input, Error, Result>) => Parser<Input, Error2 | Error, Result>
   <Input, Error, Result, Error2>(
     self: Parser<Input, Error, Result>,
     predicate: Predicate<Result>,
@@ -247,9 +255,9 @@ Determines the continuation of the parser by the result of this parser.
 
 ```ts
 export declare const flatMap: {
-  <Result, Input2, Error2, Result2>(f: (result: Result) => Parser<Input2, Error2, Result2>): <Input, Error>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Result2>
+  <Result, Input2, Error2, Result2>(
+    f: (result: Result) => Parser<Input2, Error2, Result2>
+  ): <Input, Error>(self: Parser<Input, Error, Result>) => Parser<Input & Input2, Error2 | Error, Result2>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     f: (result: Result) => Parser<Input2, Error2, Result2>
@@ -267,6 +275,20 @@ Flattens a result of parsed strings to a single string.
 
 ```ts
 export declare const flatten: <Input, Error>(self: Parser<Input, Error, Chunk<string>>) => Parser<Input, Error, string>
+```
+
+Added in v1.0.0
+
+## flattenNonEmpty
+
+Flattens a result of parsed strings to a single string.
+
+**Signature**
+
+```ts
+export declare const flattenNonEmpty: <Input, Error>(
+  self: Parser<Input, Error, NonEmptyChunk<string>>
+) => Parser<Input, Error, string>
 ```
 
 Added in v1.0.0
@@ -293,14 +315,13 @@ Maps the parser's successful result with the specified function.
 
 ```ts
 export declare const map: {
-  <Result, Result2>(f: (result: Result) => Result2): <Input, Error>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input, Error, Result2>
-  <Input, Error, Result, Result2>(self: Parser<Input, Error, Result>, f: (result: Result) => Result2): Parser<
-    Input,
-    Error,
-    Result2
-  >
+  <Result, Result2>(
+    f: (result: Result) => Result2
+  ): <Input, Error>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Result2>
+  <Input, Error, Result, Result2>(
+    self: Parser<Input, Error, Result>,
+    f: (result: Result) => Result2
+  ): Parser<Input, Error, Result2>
 }
 ```
 
@@ -314,14 +335,13 @@ Maps the over the error channel of a parser with the specified function.
 
 ```ts
 export declare const mapError: {
-  <Error, Error2>(f: (error: Error) => Error2): <Input, Result>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input, Error2, Result>
-  <Input, Error, Result, Error2>(self: Parser<Input, Error, Result>, f: (error: Error) => Error2): Parser<
-    Input,
-    Error2,
-    Result
-  >
+  <Error, Error2>(
+    f: (error: Error) => Error2
+  ): <Input, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error2, Result>
+  <Input, Error, Result, Error2>(
+    self: Parser<Input, Error, Result>,
+    f: (error: Error) => Error2
+  ): Parser<Input, Error2, Result>
 }
 ```
 
@@ -388,7 +408,9 @@ If auto-backtracking is on, this parser will backtrack before trying `that` pars
 
 ```ts
 export declare const orElse: {
-  <Input2, Error2, Result2>(that: LazyArg<Parser<Input2, Error2, Result2>>): <Input, Error, Result>(
+  <Input2, Error2, Result2>(
+    that: LazyArg<Parser<Input2, Error2, Result2>>
+  ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
   ) => Parser<Input & Input2, Error2 | Error, Result2 | Result>
   <Input, Error, Result, Input2, Error2, Result2>(
@@ -418,7 +440,9 @@ parser.
 
 ```ts
 export declare const orElseEither: {
-  <Input2, Error2, Result2>(that: LazyArg<Parser<Input2, Error2, Result2>>): <Input, Error, Result>(
+  <Input2, Error2, Result2>(
+    that: LazyArg<Parser<Input2, Error2, Result2>>
+  ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
   ) => Parser<Input & Input2, Error2 | Error, Either<Result, Result2>>
   <Input, Error, Result, Input2, Error2, Result2>(
@@ -474,9 +498,9 @@ Repeats this parser until the given `stopCondition` parser succeeds.
 
 ```ts
 export declare const repeatUntil: {
-  <Input2, Error2>(stopCondition: Parser<Input2, Error2, void>): <Input, Error, Result>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Chunk<Result>>
+  <Input2, Error2>(
+    stopCondition: Parser<Input2, Error2, void>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input & Input2, Error2 | Error, Chunk<Result>>
   <Input, Error, Result, Input2, Error2>(
     self: Parser<Input, Error, Result>,
     stopCondition: Parser<Input2, Error2, void>
@@ -495,9 +519,9 @@ element, the `separator` parser succeeds.
 
 ```ts
 export declare const repeatWithSeparator: {
-  <Input2, Error2>(separator: Parser<Input2, Error2, void>): <Input, Error, Result>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Chunk<Result>>
+  <Input2, Error2>(
+    separator: Parser<Input2, Error2, void>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input & Input2, Error2 | Error, Chunk<Result>>
   <Input, Error, Result, Input2, Error2>(
     self: Parser<Input, Error, Result>,
     separator: Parser<Input2, Error2, void>
@@ -516,7 +540,9 @@ the `separator` parser succeeds.
 
 ```ts
 export declare const repeatWithSeparator1: {
-  <Input2, Error2>(separator: Parser<Input2, Error2, void>): <Input, Error, Result>(
+  <Input2, Error2>(
+    separator: Parser<Input2, Error2, void>
+  ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
   ) => Parser<Input & Input2, Error2 | Error, NonEmptyChunk<Result>>
   <Input, Error, Result, Input2, Error2>(
@@ -552,9 +578,9 @@ result.
 
 ```ts
 export declare const surroundedBy: {
-  <Input2, Error2, Result2>(other: Parser<Input2, Error2, Result2>): <Input, Error, Result>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Result>
+  <Input2, Error2, Result2>(
+    other: Parser<Input2, Error2, Result2>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input & Input2, Error2 | Error, Result>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     other: Parser<Input2, Error2, Result2>
@@ -573,9 +599,9 @@ fails or produces a new result value.
 
 ```ts
 export declare const transformEither: {
-  <Result, Error2, Result2>(f: (result: Result) => Either<Error2, Result2>): <Input, Error>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input, Error2, Result2>
+  <Result, Error2, Result2>(
+    f: (result: Result) => Either<Error2, Result2>
+  ): <Input, Error>(self: Parser<Input, Error, Result>) => Parser<Input, Error2, Result2>
   <Input, Error, Result, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     f: (result: Result) => Either<Error2, Result2>
@@ -595,14 +621,13 @@ value `None`.
 
 ```ts
 export declare const transformOption: {
-  <Result, Result2>(pf: (result: Result) => Option<Result2>): <Input, Error>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input, Option<Error>, Result2>
-  <Input, Error, Result, Result2>(self: Parser<Input, Error, Result>, pf: (result: Result) => Option<Result2>): Parser<
-    Input,
-    Option<Error>,
-    Result2
-  >
+  <Result, Result2>(
+    pf: (result: Result) => Option<Result2>
+  ): <Input, Error>(self: Parser<Input, Error, Result>) => Parser<Input, Option<Error>, Result2>
+  <Input, Error, Result, Result2>(
+    self: Parser<Input, Error, Result>,
+    pf: (result: Result) => Option<Result2>
+  ): Parser<Input, Option<Error>, Result2>
 }
 ```
 
@@ -617,7 +642,9 @@ the result is a pair of the results.
 
 ```ts
 export declare const zip: {
-  <Input2, Error2, Result2>(that: Parser<Input2, Error2, Result2>): <Input, Error, Result>(
+  <Input2, Error2, Result2>(
+    that: Parser<Input2, Error2, Result2>
+  ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
   ) => Parser<Input & Input2, Error2 | Error, readonly [Result, Result2]>
   <Input, Error, Result, Input2, Error2, Result2>(
@@ -638,9 +665,9 @@ the result is the result of this parser. Otherwise the parser fails.
 
 ```ts
 export declare const zipLeft: {
-  <Input2, Error2, Result2>(that: Parser<Input2, Error2, Result2>): <Input, Error, Result>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Result>
+  <Input2, Error2, Result2>(
+    that: Parser<Input2, Error2, Result2>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input & Input2, Error2 | Error, Result>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     that: Parser<Input2, Error2, Result2>
@@ -659,9 +686,9 @@ the result is the result of `that` parser. Otherwise the parser fails.
 
 ```ts
 export declare const zipRight: {
-  <Input2, Error2, Result2>(that: Parser<Input2, Error2, Result2>): <Input, Error, Result>(
-    self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Result2>
+  <Input2, Error2, Result2>(
+    that: Parser<Input2, Error2, Result2>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input & Input2, Error2 | Error, Result2>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     that: Parser<Input2, Error2, Result2>
@@ -771,6 +798,32 @@ export declare const charIn: (chars: Iterable<string>) => Parser<string, string,
 
 Added in v1.0.0
 
+## charNot
+
+Constructs a `Parser` that consumes a single character and fails with the
+specified `error` if it matches the specified character.
+
+**Signature**
+
+```ts
+export declare const charNot: <Error = string>(char: string, error?: Error | undefined) => Parser<string, Error, string>
+```
+
+Added in v1.0.0
+
+## charNotIn
+
+Constructs a `Parser` that consumes a single character and succeeds with it
+if it is **NOT** one of the specified characters.
+
+**Signature**
+
+```ts
+export declare const charNotIn: (chars: Iterable<string>) => Parser<string, string, string>
+```
+
+Added in v1.0.0
+
 ## digit
 
 Constructs a `Parser` of a single digit.
@@ -846,19 +899,6 @@ export declare const letter: Parser<string, string, string>
 
 Added in v1.0.0
 
-## notChar
-
-Constructs a `Parser` that consumes a single character and fails with the
-specified `error` if it matches the specified character.
-
-**Signature**
-
-```ts
-export declare const notChar: <Error = string>(char: string, error?: Error | undefined) => Parser<string, Error, string>
-```
-
-Added in v1.0.0
-
 ## regex
 
 Constructs a `Parser` that executes a regular expression on the input and
@@ -923,6 +963,20 @@ specified value.
 
 ```ts
 export declare const succeed: <Result>(result: Result) => Parser<unknown, never, Result>
+```
+
+Added in v1.0.0
+
+## suspend
+
+Lazily constructs a `Parser`.
+
+**Signature**
+
+```ts
+export declare const suspend: <Input, Error, Result>(
+  parser: LazyArg<Parser<Input, Error, Result>>
+) => Parser<Input, Error, Result>
 ```
 
 Added in v1.0.0
@@ -1019,9 +1073,10 @@ implementation.
 
 ```ts
 export declare const parseStringWith: {
-  (input: string, implementation: Parser.Implementation): <Input, Error, Result>(
-    self: Parser<Input, Error, Result>
-  ) => Either<ParserError<Error>, Result>
+  (
+    input: string,
+    implementation: Parser.Implementation
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<ParserError<Error>, Result>
   <Input, Error, Result>(
     self: Parser<Input, Error, Result>,
     input: string,
@@ -1080,6 +1135,38 @@ Added in v1.0.0
 
 ```ts
 export type ParserTypeId = typeof ParserTypeId
+```
+
+Added in v1.0.0
+
+# utils
+
+## Parser (namespace)
+
+Added in v1.0.0
+
+### Variance (interface)
+
+**Signature**
+
+```ts
+export interface Variance<Input, Error, Result> {
+  readonly [ParserTypeId]: {
+    readonly _Input: (_: Input) => void
+    readonly _Error: (_: never) => Error
+    readonly _Result: (_: never) => Result
+  }
+}
+```
+
+Added in v1.0.0
+
+### Implementation (type alias)
+
+**Signature**
+
+```ts
+export type Implementation = "stack-safe" | "recursive"
 ```
 
 Added in v1.0.0

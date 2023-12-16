@@ -1,6 +1,6 @@
 ---
 title: Printer.ts
-nav_order: 4
+nav_order: 6
 parent: Modules
 ---
 
@@ -20,6 +20,7 @@ Added in v1.0.0
   - [contramapTo](#contramapto)
   - [filterInput](#filterinput)
   - [flatten](#flatten)
+  - [flattenNonEmpty](#flattennonempty)
   - [mapError](#maperror)
   - [optional](#optional)
   - [orElse](#orelse)
@@ -70,6 +71,9 @@ Added in v1.0.0
 - [symbols](#symbols)
   - [PrinterTypeId](#printertypeid)
   - [PrinterTypeId (type alias)](#printertypeid-type-alias)
+- [utils](#utils)
+  - [Printer (namespace)](#printer-namespace)
+    - [Variance (interface)](#variance-interface)
 
 ---
 
@@ -77,20 +81,21 @@ Added in v1.0.0
 
 ## asPrinted
 
-Ignores the printer's result and input and use `matches` and `from` instead.
+Transforms a `Syntax` that results in `from` in a `Syntax` that results in `value`
 
 **Signature**
 
 ```ts
 export declare const asPrinted: {
-  <Input2, Input>(matches: Input2, from: Input): <Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input2, Error, Output>
-  <Input, Error, Output, Input2>(self: Printer<Input, Error, Output>, matches: Input2, from: Input): Printer<
-    Input2,
-    Error,
-    Output
-  >
+  <Input2, Input>(
+    matches: Input2,
+    from: Input
+  ): <Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input2, Error, Output>
+  <Input, Error, Output, Input2>(
+    self: Printer<Input, Error, Output>,
+    matches: Input2,
+    from: Input
+  ): Printer<Input2, Error, Output>
 }
 ```
 
@@ -105,11 +110,10 @@ be printed.
 
 ```ts
 export declare const between: {
-  <Error2, Output2, Error3, Output3>(left: Printer<void, Error2, Output2>, right: Printer<void, Error3, Output3>): <
-    Input,
-    Error,
-    Output
-  >(
+  <Error2, Output2, Error3, Output3>(
+    left: Printer<void, Error2, Output2>,
+    right: Printer<void, Error3, Output3>
+  ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Input, Error2 | Error3 | Error, Output2 | Output3 | Output>
   <Input, Error, Output, Error2, Output2, Error3, Output3>(
@@ -130,14 +134,13 @@ Maps the printer's input value with the specified function.
 
 ```ts
 export declare const contramap: {
-  <Input2, Input>(from: (value: Input2) => Input): <Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input2, Error, Output>
-  <Input, Error, Output, Input2>(self: Printer<Input, Error, Output>, from: (value: Input2) => Input): Printer<
-    Input2,
-    Error,
-    Output
-  >
+  <Input2, Input>(
+    from: (value: Input2) => Input
+  ): <Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input2, Error, Output>
+  <Input, Error, Output, Input2>(
+    self: Printer<Input, Error, Output>,
+    from: (value: Input2) => Input
+  ): Printer<Input2, Error, Output>
 }
 ```
 
@@ -152,9 +155,9 @@ an `Either`.
 
 ```ts
 export declare const contramapEither: {
-  <Input2, Error2, Input>(from: (value: Input2) => Either<Error2, Input>): <Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input2, Error2, Output>
+  <Input2, Error2, Input>(
+    from: (value: Input2) => Either<Error2, Input>
+  ): <Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input2, Error2, Output>
   <Input, Error, Output, Input2, Error2>(
     self: Printer<Input, Error, Output>,
     from: (value: Input2) => Either<Error2, Input>
@@ -176,9 +179,10 @@ combined.
 
 ```ts
 export declare const contramapTo: {
-  <Input2, Input, Error2>(from: (value: Input2) => Option<Input>, error: Error2): <Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input2, Error2, Output>
+  <Input2, Input, Error2>(
+    from: (value: Input2) => Option<Input>,
+    error: Error2
+  ): <Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input2, Error2, Output>
   <Input, Error, Output, Input2, Error2>(
     self: Printer<Input, Error, Output>,
     from: (value: Input2) => Option<Input>,
@@ -198,9 +202,10 @@ case it evaluates to `false`, fails with the provided `error`.
 
 ```ts
 export declare const filterInput: {
-  <Input, Error2>(condition: Predicate<Input>, error: Error2): <Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input, Error2 | Error, Output>
+  <Input, Error2>(
+    condition: Predicate<Input>,
+    error: Error2
+  ): <Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input, Error2 | Error, Output>
   <Input, Error, Output, Error2>(
     self: Printer<Input, Error, Output>,
     condition: Predicate<Input>,
@@ -225,6 +230,20 @@ export declare const flatten: <Error, Output>(
 
 Added in v1.0.0
 
+## flattenNonEmpty
+
+Concatenates an input `Chunk<string>` to a `string` to be printed.
+
+**Signature**
+
+```ts
+export declare const flattenNonEmpty: <Error, Output>(
+  self: Printer<NonEmptyChunk<string>, Error, Output>
+) => Printer<string, Error, Output>
+```
+
+Added in v1.0.0
+
 ## mapError
 
 Maps over the error channel with the specified function.
@@ -233,14 +252,13 @@ Maps over the error channel with the specified function.
 
 ```ts
 export declare const mapError: {
-  <Error, Error2>(f: (error: Error) => Error2): <Input, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input, Error2, Output>
-  <Input, Output, Error, Error2>(self: Printer<Input, Error, Output>, f: (error: Error) => Error2): Printer<
-    Input,
-    Error2,
-    Output
-  >
+  <Error, Error2>(
+    f: (error: Error) => Error2
+  ): <Input, Output>(self: Printer<Input, Error, Output>) => Printer<Input, Error2, Output>
+  <Input, Output, Error, Error2>(
+    self: Printer<Input, Error, Output>,
+    f: (error: Error) => Error2
+  ): Printer<Input, Error2, Output>
 }
 ```
 
@@ -269,7 +287,9 @@ instead.
 
 ```ts
 export declare const orElse: {
-  <Input2, Error2, Output2>(that: LazyArg<Printer<Input2, Error2, Output2>>): <Input, Error, Output>(
+  <Input2, Error2, Output2>(
+    that: LazyArg<Printer<Input2, Error2, Output2>>
+  ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Input2 | Input, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
@@ -290,7 +310,9 @@ Prints `self` if the input is `Left`, or print `that` if the input is
 
 ```ts
 export declare const orElseEither: {
-  <Input2, Error2, Output2>(that: LazyArg<Printer<Input2, Error2, Output2>>): <Input, Error, Output>(
+  <Input2, Error2, Output2>(
+    that: LazyArg<Printer<Input2, Error2, Output2>>
+  ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Either<Input, Input2>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
@@ -341,7 +363,9 @@ Repeat this printer for each element of the input chunk, verifying the
 
 ```ts
 export declare const repeatUntil: {
-  <Error2, Output2>(stopCondition: Printer<void, Error2, Output2>): <Input, Error, Output>(
+  <Error2, Output2>(
+    stopCondition: Printer<void, Error2, Output2>
+  ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Chunk<Input>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Error2, Output2>(
@@ -364,7 +388,9 @@ The input chunk may not be empty.
 
 ```ts
 export declare const repeatWithSeparator: {
-  <Error2, Output2>(separator: Printer<void, Error2, Output2>): <Input, Error, Output>(
+  <Error2, Output2>(
+    separator: Printer<void, Error2, Output2>
+  ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Chunk<Input>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Error2, Output2>(
@@ -387,7 +413,9 @@ The input chunk **must not** be empty.
 
 ```ts
 export declare const repeatWithSeparator1: {
-  <Error2, Output2>(separator: Printer<void, Error2, Output2>): <Input, Error, Output>(
+  <Error2, Output2>(
+    separator: Printer<void, Error2, Output2>
+  ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<NonEmptyChunk<Input>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Error2, Output2>(
@@ -408,9 +436,9 @@ be printed.
 
 ```ts
 export declare const surroundedBy: {
-  <Error2, Output2>(other: Printer<void, Error2, Output2>): <Input, Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input, Error2 | Error, Output2 | Output>
+  <Error2, Output2>(
+    other: Printer<void, Error2, Output2>
+  ): <Input, Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Error2, Output2>(
     self: Printer<Input, Error, Output>,
     other: Printer<void, Error2, Output2>
@@ -430,14 +458,13 @@ Maps the printer's input value with `from`.
 
 ```ts
 export declare const transformOption: {
-  <Input2, Input>(from: (input: Input2) => Option<Input>): <Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input2, Option<Error>, Output>
-  <Input, Error, Output, Input2>(self: Printer<Input, Error, Output>, from: (input: Input2) => Option<Input>): Printer<
-    Input2,
-    Option<Error>,
-    Output
-  >
+  <Input2, Input>(
+    from: (input: Input2) => Option<Input>
+  ): <Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input2, Option<Error>, Output>
+  <Input, Error, Output, Input2>(
+    self: Printer<Input, Error, Output>,
+    from: (input: Input2) => Option<Input>
+  ): Printer<Input2, Option<Error>, Output>
 }
 ```
 
@@ -452,7 +479,9 @@ right value with `that`. The result is a pair of both printer's results.
 
 ```ts
 export declare const zip: {
-  <Input2, Error2, Output2>(that: Printer<Input2, Error2, Output2>): <Input, Error, Output>(
+  <Input2, Error2, Output2>(
+    that: Printer<Input2, Error2, Output2>
+  ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<readonly [Input, Input2], Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
@@ -473,9 +502,9 @@ result is the `self` printer's result.
 
 ```ts
 export declare const zipLeft: {
-  <Input2, Error2, Output2>(that: Printer<Input2, Error2, Output2>): <Input, Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input, Error2 | Error, Output2 | Output>
+  <Input2, Error2, Output2>(
+    that: Printer<Input2, Error2, Output2>
+  ): <Input, Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer<Input, Error, Output>,
     that: Printer<Input2, Error2, Output2>
@@ -494,9 +523,9 @@ result is `that` printer's result.
 
 ```ts
 export declare const zipRight: {
-  <Input2, Error2, Output2>(that: Printer<Input2, Error2, Output2>): <Input, Error, Output>(
-    self: Printer<Input, Error, Output>
-  ) => Printer<Input2, Error2 | Error, Output2 | Output>
+  <Input2, Error2, Output2>(
+    that: Printer<Input2, Error2, Output2>
+  ): <Input, Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input2, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer<Input, Error, Output>,
     that: Printer<Input2, Error2, Output2>
@@ -611,7 +640,7 @@ Added in v1.0.0
 A `Printer` that emits the input if it is equals to the specified `value`,
 otherwise fails with the specified `error` (if provided).
 
-**Note**: equality is checked using Equal.equals from `@effect/data`.
+**Note**: equality is checked using Equal.equals from `effect`.
 
 **Signature**
 
@@ -629,7 +658,7 @@ Added in v1.0.0
 A `Printer` that emits the input unless it is equal to `value`, in which case
 it fails with the specified `error` (if provided).
 
-**Note**: equality is checked using Equal.equals from `@effect/data`.
+**Note**: equality is checked using Equal.equals from `effect`.
 
 **Signature**
 
@@ -887,9 +916,10 @@ Print the specified input value to the given `target` implementation.
 
 ```ts
 export declare const printToTarget: {
-  <Input, Output, T extends Target<any, Output>>(input: Input, target: T): <Error>(
-    self: Printer<Input, Error, Output>
-  ) => Either<Error, void>
+  <Input, Output, T extends Target<any, Output>>(
+    input: Input,
+    target: T
+  ): <Error>(self: Printer<Input, Error, Output>) => Either<Error, void>
   <Input, Error, Output, T extends Target<any, Output>>(
     self: Printer<Input, Error, Output>,
     input: Input,
@@ -936,6 +966,28 @@ Added in v1.0.0
 
 ```ts
 export type PrinterTypeId = typeof PrinterTypeId
+```
+
+Added in v1.0.0
+
+# utils
+
+## Printer (namespace)
+
+Added in v1.0.0
+
+### Variance (interface)
+
+**Signature**
+
+```ts
+export interface Variance<Input, Error, Output> {
+  readonly [PrinterTypeId]: {
+    readonly _Input: (_: Input) => void
+    readonly _Error: (_: never) => Error
+    readonly _Output: (_: never) => Output
+  }
+}
 ```
 
 Added in v1.0.0

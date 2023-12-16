@@ -15,7 +15,6 @@ Added in v1.0.0
 - [constructors](#constructors)
   - [allChars](#allchars)
   - [fromIterable](#fromiterable)
-  - [make](#make)
 - [models](#models)
   - [BitSet (interface)](#bitset-interface)
 
@@ -39,16 +38,6 @@ Added in v1.0.0
 
 ```ts
 export declare const fromIterable: (bits: Iterable<number>) => BitSet
-```
-
-Added in v1.0.0
-
-## make
-
-**Signature**
-
-```ts
-export declare const make: (...bits: ReadonlyArray<number>) => BitSet
 ```
 
 Added in v1.0.0
