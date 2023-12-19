@@ -17,13 +17,13 @@ import type { Regex } from "./Regex.js"
  * @since 1.0.0
  * @category symbols
  */
-export const SyntaxTypeId: unique symbol = InternalSyntax.SyntaxTypeId
+export const TypeId: unique symbol = InternalSyntax.TypeId
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export type SyntaxTypeId = typeof SyntaxTypeId
+export type TypeId = typeof TypeId
 
 /**
  * A `Syntax` defines both a `Parser` and a `Printer` and provides combinators
@@ -46,7 +46,7 @@ export declare namespace Syntax {
    * @category models
    */
   export interface Variance<Input, Error, Output, Value> {
-    readonly [SyntaxTypeId]: {
+    readonly [TypeId]: {
       _Input: (_: Input) => void
       _Error: (_: never) => Error
       _Output: (_: never) => Output

@@ -14,13 +14,13 @@ import type { Target } from "./Target.js"
  * @since 1.0.0
  * @category symbols
  */
-export const PrinterTypeId: unique symbol = InternalPrinter.PrinterTypeId
+export const TypeId: unique symbol = InternalPrinter.TypeId
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export type PrinterTypeId = typeof PrinterTypeId
+export type TypeId = typeof TypeId
 
 /**
  * A `Printer` takes an input value of type `Input` and either produces a result
@@ -43,7 +43,7 @@ export declare namespace Printer {
    * @category models
    */
   export interface Variance<Input, Error, Output> {
-    readonly [PrinterTypeId]: {
+    readonly [TypeId]: {
       readonly _Input: (_: Input) => void
       readonly _Error: (_: never) => Error
       readonly _Output: (_: never) => Output

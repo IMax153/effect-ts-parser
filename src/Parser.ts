@@ -14,13 +14,13 @@ import type { Regex } from "./Regex.js"
  * @since 1.0.0
  * @category symbols
  */
-export const ParserTypeId: unique symbol = InternalParser.ParserTypeId
+export const TypeId: unique symbol = InternalParser.TypeId
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export type ParserTypeId = typeof ParserTypeId
+export type TypeId = typeof TypeId
 
 /**
  * A `Parser` consumes a stream of `Input`s and either fails with a `ParserError`
@@ -55,7 +55,7 @@ export declare namespace Parser {
    * @category models
    */
   export interface Variance<Input, Error, Result> {
-    readonly [ParserTypeId]: {
+    readonly [TypeId]: {
       readonly _Input: (_: Input) => void
       readonly _Error: (_: never) => Error
       readonly _Result: (_: never) => Result

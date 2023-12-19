@@ -9,13 +9,13 @@ import * as InternalParserError from "./internal/parserError.js"
  * @since 1.0.0
  * @category symbols
  */
-export const ParserErrorTypeId: unique symbol = InternalParserError.ParserErrorTypeId
+export const TypeId: unique symbol = InternalParserError.TypeId
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export type ParserErrorTypeId = typeof ParserErrorTypeId
+export type TypeId = typeof TypeId
 
 /**
  * Represents an error that occurred during execution of a `Parser`.
@@ -39,7 +39,7 @@ export declare namespace ParserError {
    * @category models
    */
   export interface Proto {
-    readonly [ParserErrorTypeId]: ParserErrorTypeId
+    readonly [TypeId]: TypeId
   }
 }
 

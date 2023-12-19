@@ -13,16 +13,11 @@ import * as InternalPrinter from "./printer.js"
 import * as InternalRegex from "./regex.js"
 
 /** @internal */
-const SyntaxSymbolKey = "@effect/parser/Syntax"
-
-/** @internal */
-export const SyntaxTypeId: Syntax.SyntaxTypeId = Symbol.for(
-  SyntaxSymbolKey
-) as Syntax.SyntaxTypeId
+export const TypeId: Syntax.TypeId = Symbol.for("@effect/parser/Syntax") as Syntax.TypeId
 
 /** @internal */
 const proto = {
-  [SyntaxTypeId]: {
+  [TypeId]: {
     _Input: (_: unknown) => _,
     _Error: (_: never) => _,
     _Output: (_: never) => _,
@@ -475,8 +470,8 @@ export const repeatWithSeparator = dual<
     )
   ))
 
-type V<S extends { readonly [SyntaxTypeId]: { _Value: (..._: any) => any } }> = Parameters<
-  S[Syntax.SyntaxTypeId]["_Value"]
+type V<S extends { readonly [TypeId]: { _Value: (..._: any) => any } }> = Parameters<
+  S[Syntax.TypeId]["_Value"]
 >[0]
 
 /** @internal */

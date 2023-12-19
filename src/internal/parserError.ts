@@ -4,15 +4,10 @@ import { dual } from "effect/Function"
 import type * as ParserError from "./../ParserError.js"
 
 /** @internal */
-const ParserErrorSymbolKey = "@effect/parser/ParserError"
-
-/** @internal */
-export const ParserErrorTypeId: ParserError.ParserErrorTypeId = Symbol.for(
-  ParserErrorSymbolKey
-) as ParserError.ParserErrorTypeId
+export const TypeId: ParserError.TypeId = Symbol.for("@effect/parser/ParserError") as ParserError.TypeId
 
 const proto = {
-  [ParserErrorTypeId]: ParserErrorTypeId
+  [TypeId]: TypeId
 }
 
 /** @internal */
@@ -72,7 +67,7 @@ export const unknownFailure = (
 
 /** @internal */
 export const isParserError = (u: unknown): u is ParserError.ParserError<unknown> =>
-  typeof u === "object" && u != null && ParserErrorTypeId in u
+  typeof u === "object" && u != null && TypeId in u
 
 /** @internal */
 export const isAllBranchesFailed = <Error>(

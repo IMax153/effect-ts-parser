@@ -11,16 +11,11 @@ import * as InternalParserError from "./parserError.js"
 import * as InternalRegex from "./regex.js"
 
 /** @internal */
-const PrinterSymbolKey = "@effect/parser/Printer"
-
-/** @internal */
-export const PrinterTypeId: Printer.PrinterTypeId = Symbol.for(
-  PrinterSymbolKey
-) as Printer.PrinterTypeId
+export const TypeId: Printer.TypeId = Symbol.for("@effect/parser/Printer") as Printer.TypeId
 
 /** @internal */
 const proto = {
-  [PrinterTypeId]: {
+  [TypeId]: {
     _Input: (_: unknown) => _,
     _Error: (_: never) => _,
     _Output: (_: never) => _

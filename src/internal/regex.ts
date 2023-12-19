@@ -8,15 +8,10 @@ import * as InternalCommon from "./common.js"
 import * as InternalLookupFunction from "./lookupFunction.js"
 
 /** @internal */
-const RegexSymbolKey = "@effect/parser/Regex"
-
-/** @internal */
-export const RegexTypeId: Regex.RegexTypeId = Symbol.for(
-  RegexSymbolKey
-) as Regex.RegexTypeId
+export const TypeId: Regex.TypeId = Symbol.for("@effect/parser/Regex") as Regex.TypeId
 
 const proto = {
-  [RegexTypeId]: RegexTypeId
+  [TypeId]: TypeId
 }
 
 /** @internal */

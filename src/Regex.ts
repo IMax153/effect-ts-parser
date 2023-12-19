@@ -12,13 +12,13 @@ import * as InternalRegex from "./internal/regex.js"
  * @since 1.0.0
  * @category symbols
  */
-export const RegexTypeId: unique symbol = InternalRegex.RegexTypeId
+export const TypeId: unique symbol = InternalRegex.TypeId
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export type RegexTypeId = typeof RegexTypeId
+export type TypeId = typeof TypeId
 
 /**
  * Represents a regular expression.
@@ -37,7 +37,7 @@ export declare namespace Regex {
    * @category models
    */
   export interface Proto {
-    readonly [RegexTypeId]: RegexTypeId
+    readonly [TypeId]: TypeId
   }
 
   /**

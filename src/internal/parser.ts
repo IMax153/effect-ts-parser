@@ -11,16 +11,11 @@ import * as InternalParserError from "./parserError.js"
 import * as InternalRegex from "./regex.js"
 
 /** @internal */
-const ParserSymbolKey = "@effect/parser/Parser"
-
-/** @internal */
-export const ParserTypeId: Parser.ParserTypeId = Symbol.for(
-  ParserSymbolKey
-) as Parser.ParserTypeId
+export const TypeId: Parser.TypeId = Symbol.for("@effect/parser/Parser") as Parser.TypeId
 
 /** @internal */
 const proto = {
-  [ParserTypeId]: {
+  [TypeId]: {
     _Input: (_: unknown) => _,
     _Error: (_: never) => _,
     _Result: (_: never) => _
