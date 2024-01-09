@@ -7,6 +7,7 @@ import type { LazyArg } from "effect/Function"
 import type { Option } from "effect/Option"
 import type { Pipeable } from "effect/Pipeable"
 import type { Predicate } from "effect/Predicate"
+import type * as Types from "effect/Types"
 import * as InternalSyntax from "./internal/syntax.js"
 import type { Parser } from "./Parser.js"
 import type { ParserError } from "./ParserError.js"
@@ -45,12 +46,12 @@ export declare namespace Syntax {
    * @since 1.0.0
    * @category models
    */
-  export interface Variance<Input, Error, Output, Value> {
+  export interface Variance<in Input, out Error, out Output, in out Value> {
     readonly [TypeId]: {
-      _Input: (_: Input) => void
-      _Error: (_: never) => Error
-      _Output: (_: never) => Output
-      _Value: (_: Value) => Value
+      _Input: Types.Contravariant<Input>
+      _Error: Types.Covariant<Error>
+      _Output: Types.Covariant<Output>
+      _Value: Types.Invariant<Value>
     }
   }
 }

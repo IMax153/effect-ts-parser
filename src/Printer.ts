@@ -6,6 +6,7 @@ import type { Either } from "effect/Either"
 import type { LazyArg } from "effect/Function"
 import type { Option } from "effect/Option"
 import type { Predicate } from "effect/Predicate"
+import type * as Types from "effect/Types"
 import * as InternalPrinter from "./internal/printer.js"
 import type { Regex } from "./Regex.js"
 import type { Target } from "./Target.js"
@@ -42,11 +43,11 @@ export declare namespace Printer {
    * @since 1.0.0
    * @category models
    */
-  export interface Variance<Input, Error, Output> {
+  export interface Variance<in Input, out Error, out Output> {
     readonly [TypeId]: {
-      readonly _Input: (_: Input) => void
-      readonly _Error: (_: never) => Error
-      readonly _Output: (_: never) => Output
+      readonly _Input: Types.Contravariant<Input>
+      readonly _Error: Types.Covariant<Error>
+      readonly _Output: Types.Covariant<Output>
     }
   }
 }

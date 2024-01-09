@@ -6,6 +6,7 @@ import type { Either } from "effect/Either"
 import type { LazyArg } from "effect/Function"
 import type { Option } from "effect/Option"
 import type { Predicate } from "effect/Predicate"
+import type * as Types from "effect/Types"
 import * as InternalParser from "./internal/parser.js"
 import type { ParserError } from "./ParserError.js"
 import type { Regex } from "./Regex.js"
@@ -54,11 +55,11 @@ export declare namespace Parser {
    * @since 1.0.0
    * @category models
    */
-  export interface Variance<Input, Error, Result> {
+  export interface Variance<in Input, out Error, out Result> {
     readonly [TypeId]: {
-      readonly _Input: (_: Input) => void
-      readonly _Error: (_: never) => Error
-      readonly _Result: (_: never) => Result
+      readonly _Input: Types.Contravariant<Input>
+      readonly _Error: Types.Covariant<Error>
+      readonly _Result: Types.Covariant<Result>
     }
   }
 
