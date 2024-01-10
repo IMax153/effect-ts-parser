@@ -1,34 +1,30 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import { dual, pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import { tuple } from "@effect/data/Tuple"
-import * as _parser from "@effect/parser/internal_effect_untraced/parser"
-import * as _printer from "@effect/parser/internal_effect_untraced/printer"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
-import type * as Parser from "@effect/parser/Parser"
-import type * as ParserError from "@effect/parser/ParserError"
-import type * as Printer from "@effect/parser/Printer"
-import type * as Regex from "@effect/parser/Regex"
-import type * as Syntax from "@effect/parser/Syntax"
+import { Chunk, Either, Option, Tuple } from "effect"
+import type { LazyArg } from "effect/Function"
+import { dual, pipe } from "effect/Function"
+import { pipeArguments } from "effect/Pipeable"
+import type { Predicate } from "effect/Predicate"
+import type * as Parser from "./../Parser.js"
+import type * as ParserError from "./../ParserError.js"
+import type * as Printer from "./../Printer.js"
+import type * as Regex from "./../Regex.js"
+import type * as Syntax from "./../Syntax.js"
+import * as InternalParser from "./parser.js"
+import * as InternalPrinter from "./printer.js"
+import * as InternalRegex from "./regex.js"
 
 /** @internal */
-const SyntaxSymbolKey = "@effect/Syntax/Syntax"
-
-/** @internal */
-export const SyntaxTypeId: Syntax.SyntaxTypeId = Symbol.for(
-  SyntaxSymbolKey
-) as Syntax.SyntaxTypeId
+export const TypeId: Syntax.TypeId = Symbol.for("@effect/parser/Syntax") as Syntax.TypeId
 
 /** @internal */
 const proto = {
-  [SyntaxTypeId]: {
+  [TypeId]: {
     _Input: (_: unknown) => _,
     _Error: (_: never) => _,
     _Output: (_: never) => _,
     _Value: (_: never) => _
+  },
+  pipe() {
+    return pipeArguments(this, arguments)
   }
 }
 
@@ -45,7 +41,7 @@ const make = <Input, Error, Output, Value>(
 
 /** @internal */
 export const anything = <Input>(): Syntax.Syntax<Input, never, Input, Input> =>
-  make(_parser.anything(), _printer.anything())
+  make(InternalParser.anything(), InternalPrinter.anything())
 
 /** @internal */
 export const asPrinted = dual<
@@ -62,8 +58,8 @@ export const asPrinted = dual<
   ) => Syntax.Syntax<Input, Error, Output, Value2>
 >(3, (self, value, from) =>
   make(
-    _parser.as(self.parser, value),
-    _printer.asPrinted(self.printer, value, from)
+    InternalParser.as(self.parser, value),
+    InternalPrinter.asPrinted(self.printer, value, from)
   ))
 
 /** @internal */
@@ -94,26 +90,26 @@ export const asUnit = dual<
 
 /** @internal */
 export const succeed = <Value>(value: Value): Syntax.Syntax<unknown, never, never, Value> =>
-  make(_parser.succeed(value), _printer.succeed(value))
+  make(InternalParser.succeed(value), InternalPrinter.succeed(value))
 
 /** @internal */
 export const unit = (): Syntax.Syntax<unknown, never, never, void> => succeed<void>(void 0)
 
 /** @internal */
 export const fail = <Error>(error: Error): Syntax.Syntax<unknown, Error, never, unknown> =>
-  make(_parser.fail(error), _printer.fail(error))
+  make(InternalParser.fail(error), InternalPrinter.fail(error))
 
 /** @internal */
 export const optional = <Input, Error, Output, Value>(
   self: Syntax.Syntax<Input, Error, Output, Value>
 ): Syntax.Syntax<Input, Error, Output, Option.Option<Value>> =>
-  make(_parser.optional(self.parser), _printer.optional(self.printer))
+  make(InternalParser.optional(self.parser), InternalPrinter.optional(self.printer))
 
 /** @internal */
 export const suspend = <Input, Error, Output, Value>(
   self: LazyArg<Syntax.Syntax<Input, Error, Output, Value>>
 ): Syntax.Syntax<Input, Error, Output, Value> =>
-  make(_parser.suspend(() => self().parser), _printer.suspend(() => self().printer))
+  make(InternalParser.suspend(() => self().parser), InternalPrinter.suspend(() => self().printer))
 
 /** @internal */
 export const orElse = dual<
@@ -128,8 +124,8 @@ export const orElse = dual<
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 >(2, (self, that) =>
   make(
-    _parser.orElse(self.parser, () => that().parser),
-    _printer.orElse(self.printer, () => that().printer)
+    InternalParser.orElse(self.parser, () => that().parser),
+    InternalPrinter.orElse(self.printer, () => that().printer)
   ))
 
 /** @internal */
@@ -145,8 +141,8 @@ export const orElseEither = dual<
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>
 >(2, (self, that) =>
   make(
-    _parser.orElseEither(self.parser, () => that().parser),
-    _printer.orElseEither(self.printer, () => that().printer)
+    InternalParser.orElseEither(self.parser, () => that().parser),
+    InternalPrinter.orElseEither(self.printer, () => that().printer)
   ))
 
 /** @internal */
@@ -164,8 +160,8 @@ export const transform = dual<
   ) => Syntax.Syntax<Input, Error, Output, Value2>
 >(3, (self, to, from) =>
   make(
-    _parser.map(self.parser, to),
-    _printer.contramap(self.printer, from)
+    InternalParser.map(self.parser, to),
+    InternalPrinter.contramap(self.printer, from)
   ))
 
 /** @internal */
@@ -183,8 +179,8 @@ export const transformEither = dual<
   ) => Syntax.Syntax<Input, Error, Output, Value2>
 >(3, (self, to, from) =>
   make(
-    _parser.transformEither(self.parser, to),
-    _printer.contramapEither(self.printer, from)
+    InternalParser.transformEither(self.parser, to),
+    InternalPrinter.contramapEither(self.printer, from)
   ))
 
 /** @internal */
@@ -202,7 +198,7 @@ export const transformOption = dual<
   ) => Syntax.Syntax<Input, Option.Option<Error>, Output, Value2>
 >(3, (self, to, from) =>
   make(
-    _parser.transformEither(
+    InternalParser.transformEither(
       self.parser,
       (value) =>
         Option.match(to(value), {
@@ -210,7 +206,7 @@ export const transformOption = dual<
           onSome: Either.right
         })
     ),
-    _printer.contramapEither(
+    InternalPrinter.contramapEither(
       self.printer,
       (value) =>
         Option.match(from(value), {
@@ -279,7 +275,7 @@ export const filter = dual<
 export const filterChar = <Error>(
   predicate: Predicate<string>,
   error: Error
-): Syntax.Syntax<string, Error, string, string> => regexChar(_regex.filter(predicate), error)
+): Syntax.Syntax<string, Error, string, string> => regexChar(InternalRegex.filter(predicate), error)
 
 /** @internal */
 export const flatten = <Input, Error, Output>(
@@ -304,8 +300,8 @@ export const mapError = dual<
   ) => Syntax.Syntax<Input, Error2, Output, Value>
 >(2, (self, f) =>
   make(
-    _parser.mapError(self.parser, f),
-    _printer.mapError(self.printer, f)
+    InternalParser.mapError(self.parser, f),
+    InternalPrinter.mapError(self.printer, f)
   ))
 
 /** @internal */
@@ -321,8 +317,8 @@ export const zip = dual<
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, readonly [Value, Value2]>
 >(2, (self, that) =>
   make(
-    _parser.zip(self.parser, that.parser),
-    _printer.zip(self.printer, that.printer)
+    InternalParser.zip(self.parser, that.parser),
+    InternalPrinter.zip(self.printer, that.printer)
   ))
 
 /** @internal */
@@ -338,8 +334,8 @@ export const zipLeft = dual<
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 >(2, (self, that) =>
   make(
-    _parser.zipLeft(self.parser, that.parser),
-    _printer.zipLeft(self.printer, that.printer)
+    InternalParser.zipLeft(self.parser, that.parser),
+    InternalPrinter.zipLeft(self.printer, that.printer)
   ))
 
 /** @internal */
@@ -355,8 +351,8 @@ export const zipRight = dual<
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value2>
 >(2, (self, that) =>
   make(
-    _parser.zipRight(self.parser, that.parser),
-    _printer.zipRight(self.printer, that.printer)
+    InternalParser.zipRight(self.parser, that.parser),
+    InternalPrinter.zipRight(self.printer, that.printer)
   ))
 
 /** @internal */
@@ -398,19 +394,19 @@ export const repeatMin = dual<
     self: Syntax.Syntax<Input, Error, Output, Value>,
     min: number
   ) => Syntax.Syntax<Input, Error, Output, Chunk.Chunk<Value>>
->(2, (self, min) => make(_parser.repeatMin(self.parser, min), _printer.repeatMin(self.printer, min)))
+>(2, (self, min) => make(InternalParser.repeatMin(self.parser, min), InternalPrinter.repeatMin(self.printer, min)))
 
 /** @internal */
 export const repeatMin0 = <Input, Error, Output, Value>(
   self: Syntax.Syntax<Input, Error, Output, Value>
 ): Syntax.Syntax<Input, Error, Output, Chunk.Chunk<Value>> =>
-  make(_parser.repeatMin0(self.parser), _printer.repeatMin0(self.printer))
+  make(InternalParser.repeatMin0(self.parser), InternalPrinter.repeatMin0(self.printer))
 
 /** @internal */
 export const repeatMin1 = <Input, Error, Output, Value>(
   self: Syntax.Syntax<Input, Error, Output, Value>
 ): Syntax.Syntax<Input, Error, Output, Chunk.NonEmptyChunk<Value>> =>
-  make(_parser.repeatMin1(self.parser), _printer.repeatMin1(self.printer))
+  make(InternalParser.repeatMin1(self.parser), InternalPrinter.repeatMin1(self.printer))
 
 /** @internal */
 export const repeatMax = dual<
@@ -423,7 +419,7 @@ export const repeatMax = dual<
     self: Syntax.Syntax<Input, Error, Output, Value>,
     max: number
   ) => Syntax.Syntax<Input, Error, Output, Chunk.Chunk<Value>>
->(2, (self, max) => make(_parser.repeatMax(self.parser, max), _printer.repeatMin0(self.printer)))
+>(2, (self, max) => make(InternalParser.repeatMax(self.parser, max), InternalPrinter.repeatMin0(self.printer)))
 
 /** @internal */
 export const repeatUntil = dual<
@@ -438,8 +434,8 @@ export const repeatUntil = dual<
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk.Chunk<Value>>
 >(2, (self, stopCondition) =>
   make(
-    _parser.repeatUntil(self.parser, stopCondition.parser),
-    _printer.repeatUntil(self.printer, stopCondition.printer)
+    InternalParser.repeatUntil(self.parser, stopCondition.parser),
+    InternalPrinter.repeatUntil(self.printer, stopCondition.printer)
   ))
 
 /** @internal */
@@ -465,7 +461,7 @@ export const repeatWithSeparator = dual<
       (a) =>
         Chunk.isNonEmpty(a) ?
           Option.some(
-            tuple(
+            Tuple.make(
               Chunk.headNonEmpty(a),
               Chunk.drop(a, 1)
             )
@@ -474,8 +470,8 @@ export const repeatWithSeparator = dual<
     )
   ))
 
-type V<S extends { readonly [SyntaxTypeId]: { _Value: (..._: any) => any } }> = Parameters<
-  S[Syntax.SyntaxTypeId]["_Value"]
+type V<S extends { readonly [TypeId]: { _Value: (..._: any) => any } }> = Parameters<
+  S[Syntax.TypeId]["_Value"]
 >[0]
 
 /** @internal */
@@ -498,7 +494,7 @@ export const repeatWithSeparator1 = dual<
     // readonly [Value, readonly Value[]] => => readonly Value[]
     ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<V<typeof self>>,
     (a) =>
-      tuple(
+      Tuple.make(
         Chunk.headNonEmpty(a),
         Chunk.tailNonEmpty(a)
       )
@@ -517,7 +513,7 @@ export const setAutoBacktracking = dual<
   ) => Syntax.Syntax<Input, Error, Output, Value>
 >(2, (self, enabled) =>
   make(
-    _parser.setAutoBacktracking(self.parser, enabled),
+    InternalParser.setAutoBacktracking(self.parser, enabled),
     self.printer
   ))
 
@@ -536,7 +532,7 @@ export const backtrack = <Input, Error, Output, Value>(
   self: Syntax.Syntax<Input, Error, Output, Value>
 ): Syntax.Syntax<Input, Error, Output, Value> =>
   make(
-    _parser.backtrack(self.parser),
+    InternalParser.backtrack(self.parser),
     self.printer
   )
 
@@ -545,8 +541,8 @@ export const captureString = <Error, Output, Value>(
   self: Syntax.Syntax<string, Error, Output, Value>
 ): Syntax.Syntax<string, Error, string, string> =>
   make(
-    _parser.captureString(self.parser),
-    _printer.anyString
+    InternalParser.captureString(self.parser),
+    InternalPrinter.anyString
   )
 
 /** @internal */
@@ -554,11 +550,11 @@ export const regex = <Error>(
   regex: Regex.Regex,
   error: Error
 ): Syntax.Syntax<string, Error, string, Chunk.Chunk<string>> =>
-  make(_parser.regex(regex, error), _printer.regex(regex, error))
+  make(InternalParser.regex(regex, error), InternalPrinter.regex(regex, error))
 
 /** @internal */
 export const regexChar = <Error>(regex: Regex.Regex, error: Error): Syntax.Syntax<string, Error, string, string> =>
-  make(_parser.regexChar(regex, error), _printer.regexChar(regex, error))
+  make(InternalParser.regexChar(regex, error), InternalPrinter.regexChar(regex, error))
 
 /** @internal */
 export const regexDiscard = <Error>(
@@ -566,66 +562,69 @@ export const regexDiscard = <Error>(
   error: Error,
   chars: Iterable<string>
 ): Syntax.Syntax<string, Error, string, void> =>
-  make(_parser.regexDiscard(regex, error), _printer.regexDiscard(regex, chars))
+  make(InternalParser.regexDiscard(regex, error), InternalPrinter.regexDiscard(regex, chars))
 
 /** @internal */
 export const char = <Error = string>(char: string, error?: Error): Syntax.Syntax<string, Error, string, void> =>
-  regexDiscard(_regex.charIn([char]), error ?? (`not '${char}'` as any), [char])
+  regexDiscard(InternalRegex.charIn([char]), error ?? (`not '${char}'` as any), [char])
 
 /** @internal */
 export const charNot = <Error>(char: string, error: Error): Syntax.Syntax<string, Error, string, string> =>
-  regexChar(_regex.charNotIn([char]), error)
+  regexChar(InternalRegex.charNotIn([char]), error)
 
 /** @internal */
 export const charIn = (chars: Iterable<string>): Syntax.Syntax<string, string, string, string> =>
-  regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
+  regexChar(InternalRegex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
 
 /** @internal */
 export const charNotIn = (chars: Iterable<string>): Syntax.Syntax<string, string, string, string> =>
-  regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
+  regexChar(InternalRegex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
 
 /** @internal */
 export const string = <Value>(str: string, value: Value): Syntax.Syntax<string, string, string, Value> =>
-  asPrinted(regexDiscard(_regex.string(str), `not '${str}'`, str.split("")), value, void 0)
+  asPrinted(regexDiscard(InternalRegex.string(str), `not '${str}'`, str.split("")), value, void 0)
 
 /** @internal */
-export const digit: Syntax.Syntax<string, string, string, string> = regexChar(_regex.anyDigit, "not a digit")
+export const digit: Syntax.Syntax<string, string, string, string> = regexChar(InternalRegex.anyDigit, "not a digit")
 
 /** @internal */
-export const letter: Syntax.Syntax<string, string, string, string> = regexChar(_regex.anyLetter, "not a letter")
+export const letter: Syntax.Syntax<string, string, string, string> = regexChar(InternalRegex.anyLetter, "not a letter")
 
 /** @internal */
 export const alphaNumeric: Syntax.Syntax<string, string, string, string> = regexChar(
-  _regex.anyAlphaNumeric,
+  InternalRegex.anyAlphaNumeric,
   "not alphanumeric"
 )
 
 /** @internal */
 export const whitespace: Syntax.Syntax<string, string, string, string> = regexChar(
-  _regex.anyWhitespace,
+  InternalRegex.anyWhitespace,
   "not a whitespace character"
 )
 
 /** @internal */
 export const unsafeRegex = (regex: Regex.Regex): Syntax.Syntax<string, never, string, Chunk.Chunk<string>> =>
-  make(_parser.unsafeRegex(regex), _printer.unsafeRegex(regex))
+  make(InternalParser.unsafeRegex(regex), InternalPrinter.unsafeRegex(regex))
 
 /** @internal */
 export const unsafeRegexChar = (regex: Regex.Regex): Syntax.Syntax<string, never, string, string> =>
-  make(_parser.unsafeRegexChar(regex), _printer.unsafeRegexChar(regex))
+  make(InternalParser.unsafeRegexChar(regex), InternalPrinter.unsafeRegexChar(regex))
 
 /** @internal */
 export const unsafeRegexDiscard = (
   regex: Regex.Regex,
   chars: Iterable<string>
 ): Syntax.Syntax<string, never, string, void> =>
-  make(_parser.unsafeRegexDiscard(regex), _printer.regexDiscard(regex, chars))
+  make(InternalParser.unsafeRegexDiscard(regex), InternalPrinter.regexDiscard(regex, chars))
 
 /** @internal */
-export const anyChar: Syntax.Syntax<string, never, string, string> = unsafeRegexChar(_regex.anyChar)
+export const anyChar: Syntax.Syntax<string, never, string, string> = unsafeRegexChar(InternalRegex.anyChar)
 
 /** @internal */
-export const anyString: Syntax.Syntax<string, never, string, string> = make(_parser.anyString, _printer.anyString)
+export const anyString: Syntax.Syntax<string, never, string, string> = make(
+  InternalParser.anyString,
+  InternalPrinter.anyString
+)
 
 /** @internal */
 export const named = dual<
@@ -638,7 +637,7 @@ export const named = dual<
     self: Syntax.Syntax<Input, Error, Output, Value>,
     name: string
   ) => Syntax.Syntax<Input, Error, Output, Value>
->(2, (self, name) => make(_parser.named(self.parser, name), self.printer))
+>(2, (self, name) => make(InternalParser.named(self.parser, name), self.printer))
 
 /** @internal */
 export const not = dual<
@@ -651,13 +650,16 @@ export const not = dual<
     self: Syntax.Syntax<Input, Error, Output, Value>,
     error: Error2
   ) => Syntax.Syntax<Input, Error | Error2, Output, void>
->(2, (self, error) => make(_parser.not(self.parser, error), _printer.unit()))
+>(2, (self, error) => make(InternalParser.not(self.parser, error), InternalPrinter.unit()))
 
 /** @internal */
-export const index: Syntax.Syntax<unknown, never, never, number> = make(_parser.index, _printer.succeed(0))
+export const index: Syntax.Syntax<unknown, never, never, number> = make(
+  InternalParser.index,
+  InternalPrinter.succeed(0)
+)
 
 /** @internal */
-export const end: Syntax.Syntax<unknown, never, never, void> = make(_parser.end, _printer.succeed(void 0))
+export const end: Syntax.Syntax<unknown, never, never, void> = make(InternalParser.end, InternalPrinter.succeed(void 0))
 
 /** @internal */
 export const parseString = dual<
@@ -670,7 +672,7 @@ export const parseString = dual<
     self: Syntax.Syntax<string, Error, Output, Value>,
     input: string
   ) => Either.Either<ParserError.ParserError<Error>, Value>
->(2, (self, input) => _parser.parseString(self.parser, input))
+>(2, (self, input) => InternalParser.parseString(self.parser, input))
 
 /** @internal */
 export const parseStringWith = dual<
@@ -685,7 +687,7 @@ export const parseStringWith = dual<
     input: string,
     implementation: Parser.Parser.Implementation
   ) => Either.Either<ParserError.ParserError<Error>, Value>
->(3, (self, input, implementation) => _parser.parseStringWith(self.parser, input, implementation))
+>(3, (self, input, implementation) => InternalParser.parseStringWith(self.parser, input, implementation))
 
 /** @internal */
 export const printString = dual<
@@ -698,4 +700,4 @@ export const printString = dual<
     self: Syntax.Syntax<Input, Error, string, Value>,
     value: Value
   ) => Either.Either<Error, string>
->(2, (self, value) => _printer.printToString(self.printer, value))
+>(2, (self, value) => InternalPrinter.printToString(self.printer, value))

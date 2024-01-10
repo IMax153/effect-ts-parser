@@ -1,4 +1,4 @@
-import type * as Regex from "@effect/parser/Regex"
+import type * as Regex from "./../Regex.js"
 
 /** @internal */
 export const notMatched = -1

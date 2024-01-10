@@ -1,6 +1,6 @@
 ---
 title: Regex.ts
-nav_order: 5
+nav_order: 7
 parent: Modules
 ---
 
@@ -48,9 +48,12 @@ Added in v1.0.0
   - [Sequence (interface)](#sequence-interface)
   - [Succeed (interface)](#succeed-interface)
 - [symbols](#symbols)
-  - [RegexTypeId](#regextypeid)
-  - [RegexTypeId (type alias)](#regextypeid-type-alias)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
 - [utils](#utils)
+  - [Regex (namespace)](#regex-namespace)
+    - [Compiled (interface)](#compiled-interface)
+    - [Proto (interface)](#proto-interface)
   - [needMoreInput](#needmoreinput)
   - [notMatched](#notmatched)
 
@@ -60,8 +63,8 @@ Added in v1.0.0
 
 ## and
 
-Composes this regex with the specified regex using intersection, returning
-a regex that will match a prefix only if both this and the specified regex match it.
+Composes this `Regex` with the specified `Regex` using intersection,
+returning a `Regex` that will match a prefix only if both this and the specified one match it.
 
 **Signature**
 
@@ -73,7 +76,7 @@ Added in v1.0.0
 
 ## atLeast
 
-Returns a new regex that matches at least `min` occurrences of this regex.
+Returns a new `Regex` that matches at least `min` occurrences of this `Regex`.
 
 **Signature**
 
@@ -85,7 +88,7 @@ Added in v1.0.0
 
 ## atMost
 
-Returns a new regex that matches at most `max` occurrences of this regex.
+Returns a new `Regex` that matches at most `max` occurrences of this `Regex`.
 
 **Signature**
 
@@ -97,8 +100,8 @@ Added in v1.0.0
 
 ## between
 
-Returns a new regex that matches between `min` and `max` occurrences of this
-regex.
+Returns a new `Regex` that matches between `min` and `max` occurrences of this
+`Regex`.
 
 **Signature**
 
@@ -126,8 +129,8 @@ Added in v1.0.0
 
 ## or
 
-Composes this regex with the specified regex using union, returning a regex
-that will match a prefix only if either this or the specified regex match it.
+Composes this `Regex` with the specified `Regex` using union,
+returning a `Regex` that will match a prefix only if either this or the specified one matches it.
 
 **Signature**
 
@@ -139,8 +142,8 @@ Added in v1.0.0
 
 ## sequence
 
-Sequentially composes this regex with the specified regex, returning a
-regex that will first match this one, and then match the specified regex.
+Composes this `Regex` with the specified `Regex` sequentially,
+returning a `Regex` that will match this first, and then the specified one.
 
 **Signature**
 
@@ -154,7 +157,7 @@ Added in v1.0.0
 
 ## alphaNumerics
 
-A regex that matches at least one letter or digit character.
+A `Regex` that matches at least one letter or digit character.
 
 **Signature**
 
@@ -166,7 +169,7 @@ Added in v1.0.0
 
 ## anyAlphaNumeric
 
-A regex that matches a single letter or digit character.
+A `Regex` that matches a single letter or digit character.
 
 **Signature**
 
@@ -178,7 +181,7 @@ Added in v1.0.0
 
 ## anyChar
 
-A regex that matches any single character.
+A `Regex` that matches any single character.
 
 **Signature**
 
@@ -190,7 +193,7 @@ Added in v1.0.0
 
 ## anyDigit
 
-A regex that matches any single digit character.
+A `Regex` that matches any single digit character.
 
 **Signature**
 
@@ -202,7 +205,7 @@ Added in v1.0.0
 
 ## anyLetter
 
-A regex that matches any single letter character.
+A `Regex` that matches any single letter character.
 
 **Signature**
 
@@ -214,7 +217,7 @@ Added in v1.0.0
 
 ## anyWhitespace
 
-A regex that matches any single whitespace character.
+A `Regex` that matches any single whitespace character.
 
 **Signature**
 
@@ -226,7 +229,7 @@ Added in v1.0.0
 
 ## char
 
-A regex that matches the specified character.
+A `Regex` that matches the specified character.
 
 **Signature**
 
@@ -238,7 +241,7 @@ Added in v1.0.0
 
 ## charIn
 
-A regex that matches one of the specified characters.
+A `Regex` that matches one of the specified characters.
 
 **Signature**
 
@@ -250,7 +253,7 @@ Added in v1.0.0
 
 ## charNotIn
 
-A regex that matches any character except of the specified ones
+A `Regex` that matches any character except for the specified ones.
 
 **Signature**
 
@@ -262,7 +265,7 @@ Added in v1.0.0
 
 ## digits
 
-A regex that matches one or more digit characters.
+A `Regex` that matches one or more digit characters.
 
 **Signature**
 
@@ -274,7 +277,7 @@ Added in v1.0.0
 
 ## empty
 
-A regex that matches the empty string, which will always succeed.
+A `Regex` that matches the empty string, which will always succeed.
 
 **Signature**
 
@@ -286,7 +289,7 @@ Added in v1.0.0
 
 ## letters
 
-A regex that matches any one or more letter characters.
+A `Regex` that matches one or more letter characters.
 
 **Signature**
 
@@ -310,7 +313,7 @@ Added in v1.0.0
 
 ## whitespace
 
-A regex that matches zero or more whitespace characters.
+A `Regex` that matches zero or more whitespace characters.
 
 **Signature**
 
@@ -324,7 +327,7 @@ Added in v1.0.0
 
 ## compile
 
-Compiles the regex to a form that allows efficient execution on chunks of
+Compiles the `Regex` to a form that allows efficient execution on chunks of
 characters.
 
 **Signature**
@@ -357,7 +360,7 @@ Added in v1.0.0
 
 ```ts
 export interface And extends Regex.Proto {
-  readonly _tag: 'And'
+  readonly _tag: "And"
   readonly left: Regex
   readonly right: Regex
 }
@@ -371,7 +374,7 @@ Added in v1.0.0
 
 ```ts
 export interface OneOf extends Regex.Proto {
-  readonly _tag: 'OneOf'
+  readonly _tag: "OneOf"
   readonly bitset: BitSet
 }
 ```
@@ -384,7 +387,7 @@ Added in v1.0.0
 
 ```ts
 export interface Or extends Regex.Proto {
-  readonly _tag: 'Or'
+  readonly _tag: "Or"
   readonly left: Regex
   readonly right: Regex
 }
@@ -410,7 +413,7 @@ Added in v1.0.0
 
 ```ts
 export interface Repeat extends Regex.Proto {
-  readonly _tag: 'Repeat'
+  readonly _tag: "Repeat"
   readonly regex: Regex
   readonly min: Option<number>
   readonly max: Option<number>
@@ -425,7 +428,7 @@ Added in v1.0.0
 
 ```ts
 export interface Sequence extends Regex.Proto {
-  readonly _tag: 'Sequence'
+  readonly _tag: "Sequence"
   readonly left: Regex
   readonly right: Regex
 }
@@ -439,7 +442,7 @@ Added in v1.0.0
 
 ```ts
 export interface Succeed extends Regex.Proto {
-  readonly _tag: 'Succeed'
+  readonly _tag: "Succeed"
 }
 ```
 
@@ -447,27 +450,66 @@ Added in v1.0.0
 
 # symbols
 
-## RegexTypeId
+## TypeId
 
 **Signature**
 
 ```ts
-export declare const RegexTypeId: typeof RegexTypeId
+export declare const TypeId: typeof TypeId
 ```
 
 Added in v1.0.0
 
-## RegexTypeId (type alias)
+## TypeId (type alias)
 
 **Signature**
 
 ```ts
-export type RegexTypeId = typeof RegexTypeId
+export type TypeId = typeof TypeId
 ```
 
 Added in v1.0.0
 
 # utils
+
+## Regex (namespace)
+
+Added in v1.0.0
+
+### Compiled (interface)
+
+Represents a compiled regular expression.
+
+**Signature**
+
+```ts
+export interface Compiled {
+  /**
+   * Tests the compiled regex against the specified character sequence.
+   *
+   * Returns the new index into the string.
+   */
+  test(index: number, chars: string): number
+  /**
+   * Determines if the compiled regex matches the specified string.
+   */
+  matches(string: string): boolean
+}
+```
+
+Added in v1.0.0
+
+### Proto (interface)
+
+**Signature**
+
+```ts
+export interface Proto {
+  readonly [TypeId]: TypeId
+}
+```
+
+Added in v1.0.0
 
 ## needMoreInput
 
