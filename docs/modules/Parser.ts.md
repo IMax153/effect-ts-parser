@@ -78,8 +78,8 @@ Added in v1.0.0
 - [models](#models)
   - [Parser (interface)](#parser-interface)
 - [symbols](#symbols)
-  - [ParserTypeId](#parsertypeid)
-  - [ParserTypeId (type alias)](#parsertypeid-type-alias)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
 - [utils](#utils)
   - [Parser (namespace)](#parser-namespace)
     - [Variance (interface)](#variance-interface)
@@ -1119,22 +1119,22 @@ Added in v1.0.0
 
 # symbols
 
-## ParserTypeId
+## TypeId
 
 **Signature**
 
 ```ts
-export declare const ParserTypeId: typeof ParserTypeId
+export declare const TypeId: typeof TypeId
 ```
 
 Added in v1.0.0
 
-## ParserTypeId (type alias)
+## TypeId (type alias)
 
 **Signature**
 
 ```ts
-export type ParserTypeId = typeof ParserTypeId
+export type TypeId = typeof TypeId
 ```
 
 Added in v1.0.0
@@ -1150,11 +1150,11 @@ Added in v1.0.0
 **Signature**
 
 ```ts
-export interface Variance<Input, Error, Result> {
-  readonly [ParserTypeId]: {
-    readonly _Input: (_: Input) => void
-    readonly _Error: (_: never) => Error
-    readonly _Result: (_: never) => Result
+export interface Variance<in Input, out Error, out Result> {
+  readonly [TypeId]: {
+    readonly _Input: Types.Contravariant<Input>
+    readonly _Error: Types.Covariant<Error>
+    readonly _Result: Types.Covariant<Result>
   }
 }
 ```

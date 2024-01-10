@@ -36,8 +36,8 @@ Added in v1.0.0
   - [isUnexpectedEndOfInput](#isunexpectedendofinput)
   - [isUnknownFailure](#isunknownfailure)
 - [symbols](#symbols)
-  - [ParserErrorTypeId](#parsererrortypeid)
-  - [ParserErrorTypeId (type alias)](#parsererrortypeid-type-alias)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
 - [utils](#utils)
   - [ParserError (namespace)](#parsererror-namespace)
     - [Proto (interface)](#proto-interface)
@@ -354,22 +354,22 @@ Added in v1.0.0
 
 # symbols
 
-## ParserErrorTypeId
+## TypeId
 
 **Signature**
 
 ```ts
-export declare const ParserErrorTypeId: typeof ParserErrorTypeId
+export declare const TypeId: typeof TypeId
 ```
 
 Added in v1.0.0
 
-## ParserErrorTypeId (type alias)
+## TypeId (type alias)
 
 **Signature**
 
 ```ts
-export type ParserErrorTypeId = typeof ParserErrorTypeId
+export type TypeId = typeof TypeId
 ```
 
 Added in v1.0.0
@@ -386,7 +386,7 @@ Added in v1.0.0
 
 ```ts
 export interface Proto {
-  readonly [ParserErrorTypeId]: ParserErrorTypeId
+  readonly [TypeId]: TypeId
 }
 ```
 

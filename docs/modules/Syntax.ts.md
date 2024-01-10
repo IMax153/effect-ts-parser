@@ -78,8 +78,8 @@ Added in v1.0.0
 - [models](#models)
   - [Syntax (interface)](#syntax-interface)
 - [symbols](#symbols)
-  - [SyntaxTypeId](#syntaxtypeid)
-  - [SyntaxTypeId (type alias)](#syntaxtypeid-type-alias)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
 - [transformTo](#transformto)
   - [transformTo](#transformto-1)
 - [utils](#utils)
@@ -1233,22 +1233,22 @@ Added in v1.0.0
 
 # symbols
 
-## SyntaxTypeId
+## TypeId
 
 **Signature**
 
 ```ts
-export declare const SyntaxTypeId: typeof SyntaxTypeId
+export declare const TypeId: typeof TypeId
 ```
 
 Added in v1.0.0
 
-## SyntaxTypeId (type alias)
+## TypeId (type alias)
 
 **Signature**
 
 ```ts
-export type SyntaxTypeId = typeof SyntaxTypeId
+export type TypeId = typeof TypeId
 ```
 
 Added in v1.0.0
@@ -1294,12 +1294,12 @@ Added in v1.0.0
 **Signature**
 
 ```ts
-export interface Variance<Input, Error, Output, Value> {
-  readonly [SyntaxTypeId]: {
-    _Input: (_: Input) => void
-    _Error: (_: never) => Error
-    _Output: (_: never) => Output
-    _Value: (_: Value) => Value
+export interface Variance<in Input, out Error, out Output, in out Value> {
+  readonly [TypeId]: {
+    _Input: Types.Contravariant<Input>
+    _Error: Types.Covariant<Error>
+    _Output: Types.Covariant<Output>
+    _Value: Types.Invariant<Value>
   }
 }
 ```

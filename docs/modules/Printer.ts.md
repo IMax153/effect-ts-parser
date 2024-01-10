@@ -69,8 +69,8 @@ Added in v1.0.0
 - [models](#models)
   - [Printer (interface)](#printer-interface)
 - [symbols](#symbols)
-  - [PrinterTypeId](#printertypeid)
-  - [PrinterTypeId (type alias)](#printertypeid-type-alias)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
 - [utils](#utils)
   - [Printer (namespace)](#printer-namespace)
     - [Variance (interface)](#variance-interface)
@@ -950,22 +950,22 @@ Added in v1.0.0
 
 # symbols
 
-## PrinterTypeId
+## TypeId
 
 **Signature**
 
 ```ts
-export declare const PrinterTypeId: typeof PrinterTypeId
+export declare const TypeId: typeof TypeId
 ```
 
 Added in v1.0.0
 
-## PrinterTypeId (type alias)
+## TypeId (type alias)
 
 **Signature**
 
 ```ts
-export type PrinterTypeId = typeof PrinterTypeId
+export type TypeId = typeof TypeId
 ```
 
 Added in v1.0.0
@@ -981,11 +981,11 @@ Added in v1.0.0
 **Signature**
 
 ```ts
-export interface Variance<Input, Error, Output> {
-  readonly [PrinterTypeId]: {
-    readonly _Input: (_: Input) => void
-    readonly _Error: (_: never) => Error
-    readonly _Output: (_: never) => Output
+export interface Variance<in Input, out Error, out Output> {
+  readonly [TypeId]: {
+    readonly _Input: Types.Contravariant<Input>
+    readonly _Error: Types.Covariant<Error>
+    readonly _Output: Types.Covariant<Output>
   }
 }
 ```

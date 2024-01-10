@@ -48,8 +48,8 @@ Added in v1.0.0
   - [Sequence (interface)](#sequence-interface)
   - [Succeed (interface)](#succeed-interface)
 - [symbols](#symbols)
-  - [RegexTypeId](#regextypeid)
-  - [RegexTypeId (type alias)](#regextypeid-type-alias)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
 - [utils](#utils)
   - [Regex (namespace)](#regex-namespace)
     - [Compiled (interface)](#compiled-interface)
@@ -450,22 +450,22 @@ Added in v1.0.0
 
 # symbols
 
-## RegexTypeId
+## TypeId
 
 **Signature**
 
 ```ts
-export declare const RegexTypeId: typeof RegexTypeId
+export declare const TypeId: typeof TypeId
 ```
 
 Added in v1.0.0
 
-## RegexTypeId (type alias)
+## TypeId (type alias)
 
 **Signature**
 
 ```ts
-export type RegexTypeId = typeof RegexTypeId
+export type TypeId = typeof TypeId
 ```
 
 Added in v1.0.0
@@ -505,7 +505,7 @@ Added in v1.0.0
 
 ```ts
 export interface Proto {
-  readonly [RegexTypeId]: RegexTypeId
+  readonly [TypeId]: TypeId
 }
 ```
 
