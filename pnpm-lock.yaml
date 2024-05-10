@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   effect:
-    specifier: ^2.0.3
-    version: 2.0.3
+    specifier: ^3
+    version: 3.1.3
 
 devDependencies:
   '@babel/cli':
@@ -659,7 +659,7 @@ packages:
     dependencies:
       doctrine: 3.0.0
       glob: 10.3.10
-      markdown-toc: github.com/effect-ts/markdown-toc/4bfeb0f140105440ea0d12df2fa23199cc3ec1d5
+      markdown-toc: github.com/effect-ts/markdown-toc/3ea4550bf1352c612aa8b9e582dc263a89f2b64d
       prettier: 3.1.1
       tsx: 4.7.0
       typescript: 5.3.3
@@ -2679,8 +2679,8 @@ packages:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
     dev: true
 
-  /effect@2.0.3:
-    resolution: {integrity: sha512-I/XvcbHypegNFWCr/arbfIR6pA+8JpSqv9wS4xOrgXypQMRj8H3wRorTcUiPmcQ0e6Ko67CdI2XZpjx7z0Ev/A==}
+  /effect@3.1.3:
+    resolution: {integrity: sha512-afL9sbn4m9fCERYMLgUgtJC8+JvHb62zh0Q3v0O56z4aMAEdrrd+DKvLtlTbonQjgdOB37frE9LJuwUO7DV0ww==}
     dev: false
 
   /electron-to-chromium@1.4.616:
@@ -6408,10 +6408,10 @@ packages:
     engines: {node: '>=12.20'}
     dev: true
 
-  github.com/effect-ts/markdown-toc/4bfeb0f140105440ea0d12df2fa23199cc3ec1d5:
-    resolution: {tarball: https://codeload.github.com/effect-ts/markdown-toc/tar.gz/4bfeb0f140105440ea0d12df2fa23199cc3ec1d5}
-    name: markdown-toc
-    version: 1.2.0
+  github.com/effect-ts/markdown-toc/3ea4550bf1352c612aa8b9e582dc263a89f2b64d:
+    resolution: {tarball: https://codeload.github.com/effect-ts/markdown-toc/tar.gz/3ea4550bf1352c612aa8b9e582dc263a89f2b64d}
+    name: '@effect/markdown-toc'
+    version: 0.1.0
     engines: {node: '>=0.10.0'}
     hasBin: true
     dependencies:

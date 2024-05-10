@@ -56,8 +56,8 @@
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
-  "dependencies": {
-    "effect": "^2.0.3"
+  "peerDependencies": {
+    "effect": "^3"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.4",
