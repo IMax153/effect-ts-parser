@@ -1,6 +1,6 @@
 import * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
-import { Chunk, Either, List, Option, ReadonlyArray } from "effect"
+import { Array as ReadonlyArray, Chunk, Either, List, Option } from "effect"
 import { pipe } from "effect/Function"
 import { describe, expect, it } from "vitest"
 

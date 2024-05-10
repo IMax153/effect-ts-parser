@@ -1,4 +1,4 @@
-import { Number, ReadonlyArray } from "effect"
+import { Array as ReadonlyArray, Number } from "effect"
 import { pipe } from "effect/Function"
 import type * as BitSet from "./../BitSet.js"
 

@@ -1,4 +1,4 @@
-import { Chunk, Option, ReadonlyArray } from "effect"
+import { Array as ReadonlyArray, Chunk, Option } from "effect"
 import { dual, pipe } from "effect/Function"
 import type { Predicate } from "effect/Predicate"
 import type * as BitSet from "./../BitSet.js"

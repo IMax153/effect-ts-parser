@@ -1,5 +1,5 @@
 import * as Regex from "@effect/parser/Regex"
-import { ReadonlyArray } from "effect"
+import { Array as ReadonlyArray } from "effect"
 import { pipe } from "effect/Function"
 import type { Predicate } from "effect/Predicate"
 import * as fc from "fast-check"

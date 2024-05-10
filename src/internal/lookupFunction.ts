@@ -1,4 +1,4 @@
-import { Cause, Chunk, Equal, Hash, HashSet, Number, Option, ReadonlyArray } from "effect"
+import { Array as ReadonlyArray, Cause, Chunk, Equal, Hash, HashSet, Number, Option } from "effect"
 import { pipe } from "effect/Function"
 import type * as Regex from "./../Regex.js"
 import * as InternalBitSet from "./bitset.js"
