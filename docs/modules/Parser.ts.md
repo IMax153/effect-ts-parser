@@ -444,11 +444,11 @@ export declare const orElseEither: {
     that: LazyArg<Parser<Input2, Error2, Result2>>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Either<Result, Result2>>
+  ) => Parser<Input & Input2, Error2 | Error, Either<Result2, Result>>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     that: LazyArg<Parser<Input2, Error2, Result2>>
-  ): Parser<Input & Input2, Error | Error2, Either<Result, Result2>>
+  ): Parser<Input & Input2, Error | Error2, Either<Result2, Result>>
 }
 ```
 
@@ -600,11 +600,11 @@ fails or produces a new result value.
 ```ts
 export declare const transformEither: {
   <Result, Error2, Result2>(
-    f: (result: Result) => Either<Error2, Result2>
+    f: (result: Result) => Either<Result2, Error2>
   ): <Input, Error>(self: Parser<Input, Error, Result>) => Parser<Input, Error2, Result2>
   <Input, Error, Result, Error2, Result2>(
     self: Parser<Input, Error, Result>,
-    f: (result: Result) => Either<Error2, Result2>
+    f: (result: Result) => Either<Result2, Error2>
   ): Parser<Input, Error2, Result2>
 }
 ```
@@ -1057,8 +1057,8 @@ Run a `Parser` on the given `input` string.
 
 ```ts
 export declare const parseString: {
-  (input: string): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<ParserError<Error>, Result>
-  <Input, Error, Result>(self: Parser<Input, Error, Result>, input: string): Either<ParserError<Error>, Result>
+  (input: string): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<Result, ParserError<Error>>
+  <Input, Error, Result>(self: Parser<Input, Error, Result>, input: string): Either<Result, ParserError<Error>>
 }
 ```
 
@@ -1076,12 +1076,12 @@ export declare const parseStringWith: {
   (
     input: string,
     implementation: Parser.Implementation
-  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<ParserError<Error>, Result>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<Result, ParserError<Error>>
   <Input, Error, Result>(
     self: Parser<Input, Error, Result>,
     input: string,
     implementation: Parser.Implementation
-  ): Either<ParserError<Error>, Result>
+  ): Either<Result, ParserError<Error>>
 }
 ```
 

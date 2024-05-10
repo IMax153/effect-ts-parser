@@ -8,8 +8,8 @@ export const tests = <Error, Result>(
   name: string,
   syntax: Syntax.Syntax<string, Error, string, Result>,
   input: string,
-  assertion: Either.Either<ParserError.ParserError<Error>, Result>,
-  printer?: Either.Either<Error, string>
+  assertion: Either.Either<Result, ParserError.ParserError<Error>>,
+  printer?: Either.Either<string, Error>
 ): void => {
   const result = Syntax.parseStringWith(syntax, input, "stack-safe")
   it(`${name} - stack-safe`, () => {

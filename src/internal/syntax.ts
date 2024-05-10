@@ -134,11 +134,11 @@ export const orElseEither = dual<
     that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
   ) => <Input, Error, Output, Value>(
     self: Syntax.Syntax<Input, Error, Output, Value>
-  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>,
+  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value2, Value>>,
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
     that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
-  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>
+  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value2, Value>>
 >(2, (self, that) =>
   make(
     InternalParser.orElseEither(self.parser, () => that().parser),
@@ -167,15 +167,15 @@ export const transform = dual<
 /** @internal */
 export const transformEither = dual<
   <Error, Value, Value2>(
-    to: (value: Value) => Either.Either<Error, Value2>,
-    from: (value: Value2) => Either.Either<Error, Value>
+    to: (value: Value) => Either.Either<Value2, Error>,
+    from: (value: Value2) => Either.Either<Value, Error>
   ) => <Input, Output>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input, Error, Output, Value2>,
   <Input, Error, Output, Value, Value2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    to: (value: Value) => Either.Either<Error, Value2>,
-    from: (value: Value2) => Either.Either<Error, Value>
+    to: (value: Value) => Either.Either<Value2, Error>,
+    from: (value: Value2) => Either.Either<Value, Error>
   ) => Syntax.Syntax<Input, Error, Output, Value2>
 >(3, (self, to, from) =>
   make(
@@ -667,11 +667,11 @@ export const parseString = dual<
     input: string
   ) => <Error, Output, Value>(
     self: Syntax.Syntax<string, Error, Output, Value>
-  ) => Either.Either<ParserError.ParserError<Error>, Value>,
+  ) => Either.Either<Value, ParserError.ParserError<Error>>,
   <Error, Output, Value>(
     self: Syntax.Syntax<string, Error, Output, Value>,
     input: string
-  ) => Either.Either<ParserError.ParserError<Error>, Value>
+  ) => Either.Either<Value, ParserError.ParserError<Error>>
 >(2, (self, input) => InternalParser.parseString(self.parser, input))
 
 /** @internal */
@@ -681,12 +681,12 @@ export const parseStringWith = dual<
     implementation: Parser.Parser.Implementation
   ) => <Error, Output, Value>(
     self: Syntax.Syntax<string, Error, Output, Value>
-  ) => Either.Either<ParserError.ParserError<Error>, Value>,
+  ) => Either.Either<Value, ParserError.ParserError<Error>>,
   <Error, Output, Value>(
     self: Syntax.Syntax<string, Error, Output, Value>,
     input: string,
     implementation: Parser.Parser.Implementation
-  ) => Either.Either<ParserError.ParserError<Error>, Value>
+  ) => Either.Either<Value, ParserError.ParserError<Error>>
 >(3, (self, input, implementation) => InternalParser.parseStringWith(self.parser, input, implementation))
 
 /** @internal */
@@ -695,9 +695,9 @@ export const printString = dual<
     value: Value
   ) => <Input, Error>(
     self: Syntax.Syntax<Input, Error, string, Value>
-  ) => Either.Either<Error, string>,
+  ) => Either.Either<string, Error>,
   <Input, Error, Value>(
     self: Syntax.Syntax<Input, Error, string, Value>,
     value: Value
-  ) => Either.Either<Error, string>
+  ) => Either.Either<string, Error>
 >(2, (self, value) => InternalPrinter.printToString(self.printer, value))

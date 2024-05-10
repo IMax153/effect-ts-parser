@@ -757,7 +757,7 @@ const needsEmptyResultSlot = (op: ParserOp): boolean => {
 export const charParserExecutor = (
   parser: InitialParser,
   source: string
-): Either.Either<ParserError.ParserError<unknown>, unknown> => {
+): Either.Either<unknown, ParserError.ParserError<unknown>> => {
   // Operation stack; the next operation is returned to the main loop as a
   // return value, further operations are stacked here
   let opStack = parser.stack

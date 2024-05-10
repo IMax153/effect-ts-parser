@@ -563,11 +563,11 @@ export const orElseEither = dual<
     that: LazyArg<Parser.Parser<Input2, Error2, Result2>>
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
-  ) => Parser.Parser<Input & Input2, Error | Error2, Either.Either<Result, Result2>>,
+  ) => Parser.Parser<Input & Input2, Error | Error2, Either.Either<Result2, Result>>,
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser.Parser<Input, Error, Result>,
     that: LazyArg<Parser.Parser<Input2, Error2, Result2>>
-  ) => Parser.Parser<Input & Input2, Error | Error2, Either.Either<Result, Result2>>
+  ) => Parser.Parser<Input & Input2, Error | Error2, Either.Either<Result2, Result>>
 >(2, (self, that) => {
   const op = Object.create(proto)
   op._tag = "OrElseEither"
@@ -784,13 +784,13 @@ export const suspend = <Input, Error, Result>(
 /** @internal */
 export const transformEither = dual<
   <Result, Error2, Result2>(
-    f: (result: Result) => Either.Either<Error2, Result2>
+    f: (result: Result) => Either.Either<Result2, Error2>
   ) => <Input, Error>(
     self: Parser.Parser<Input, Error, Result>
   ) => Parser.Parser<Input, Error2, Result2>,
   <Input, Error, Result, Error2, Result2>(
     self: Parser.Parser<Input, Error, Result>,
-    f: (result: Result) => Either.Either<Error2, Result2>
+    f: (result: Result) => Either.Either<Result2, Error2>
   ) => Parser.Parser<Input, Error2, Result2>
 >(2, (self, f) => {
   const op = Object.create(proto)
@@ -965,12 +965,12 @@ export const parseStringWith = dual<
     implementation: Parser.Parser.Implementation
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
-  ) => Either.Either<ParserError.ParserError<Error>, Result>,
+  ) => Either.Either<Result, ParserError.ParserError<Error>>,
   <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>,
     input: string,
     implementation: Parser.Parser.Implementation
-  ) => Either.Either<ParserError.ParserError<Error>, Result>
+  ) => Either.Either<Result, ParserError.ParserError<Error>>
 >(3, <Input, Error, Result>(
   self: Parser.Parser<Input, Error, Result>,
   input: string,
@@ -981,7 +981,7 @@ export const parseStringWith = dual<
       return InternalStackSafe.charParserExecutor(
         InternalStackSafe.compile(optimize(self) as Primitive),
         input
-      ) as Either.Either<ParserError.ParserError<Error>, Result>
+      ) as Either.Either<Result, ParserError.ParserError<Error>>
     }
     case "recursive": {
       const state = new StringParserState(input)
@@ -1000,11 +1000,11 @@ export const parseString = dual<
     input: string
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
-  ) => Either.Either<ParserError.ParserError<Error>, Result>,
+  ) => Either.Either<Result, ParserError.ParserError<Error>>,
   <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>,
     input: string
-  ) => Either.Either<ParserError.ParserError<Error>, Result>
+  ) => Either.Either<Result, ParserError.ParserError<Error>>
 >(2, (self, input) => parseStringWith(self, input, "recursive"))
 
 // -----------------------------------------------------------------------------

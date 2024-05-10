@@ -156,11 +156,11 @@ an `Either`.
 ```ts
 export declare const contramapEither: {
   <Input2, Error2, Input>(
-    from: (value: Input2) => Either<Error2, Input>
+    from: (value: Input2) => Either<Input, Error2>
   ): <Error, Output>(self: Printer<Input, Error, Output>) => Printer<Input2, Error2, Output>
   <Input, Error, Output, Input2, Error2>(
     self: Printer<Input, Error, Output>,
-    from: (value: Input2) => Either<Error2, Input>
+    from: (value: Input2) => Either<Input, Error2>
   ): Printer<Input2, Error2, Output>
 }
 ```
@@ -314,11 +314,11 @@ export declare const orElseEither: {
     that: LazyArg<Printer<Input2, Error2, Output2>>
   ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
-  ) => Printer<Either<Input, Input2>, Error2 | Error, Output2 | Output>
+  ) => Printer<Either<Input2, Input>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer<Input, Error, Output>,
     that: LazyArg<Printer<Input2, Error2, Output2>>
-  ): Printer<Either<Input, Input2>, Error | Error2, Output | Output2>
+  ): Printer<Either<Input2, Input>, Error | Error2, Output | Output2>
 }
 ```
 
@@ -886,8 +886,8 @@ Print the specified input value to a chunk of output elements.
 
 ```ts
 export declare const printToChunk: {
-  <Input>(input: Input): <Error, Output>(self: Printer<Input, Error, Output>) => Either<Error, Chunk<Output>>
-  <Input, Error, Output>(self: Printer<Input, Error, Output>, input: Input): Either<Error, Chunk<Output>>
+  <Input>(input: Input): <Error, Output>(self: Printer<Input, Error, Output>) => Either<Chunk<Output>, Error>
+  <Input, Error, Output>(self: Printer<Input, Error, Output>, input: Input): Either<Chunk<Output>, Error>
 }
 ```
 
@@ -901,8 +901,8 @@ Print the specified input value to a string.
 
 ```ts
 export declare const printToString: {
-  <Input>(value: Input): <Error>(self: Printer<Input, Error, string>) => Either<Error, string>
-  <Input, Error>(self: Printer<Input, Error, string>, input: Input): Either<Error, string>
+  <Input>(value: Input): <Error>(self: Printer<Input, Error, string>) => Either<string, Error>
+  <Input, Error>(self: Printer<Input, Error, string>, input: Input): Either<string, Error>
 }
 ```
 
@@ -919,12 +919,12 @@ export declare const printToTarget: {
   <Input, Output, T extends Target<any, Output>>(
     input: Input,
     target: T
-  ): <Error>(self: Printer<Input, Error, Output>) => Either<Error, void>
+  ): <Error>(self: Printer<Input, Error, Output>) => Either<void, Error>
   <Input, Error, Output, T extends Target<any, Output>>(
     self: Printer<Input, Error, Output>,
     input: Input,
     target: T
-  ): Either<Error, void>
+  ): Either<void, Error>
 }
 ```
 

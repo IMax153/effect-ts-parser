@@ -36,7 +36,7 @@ const parserTest = <Error, Result>(
   name: string,
   syntax: Syntax.Syntax<string, Error, string, Result>,
   input: string,
-  assertion: Either.Either<ParserError.ParserError<Error>, Result>
+  assertion: Either.Either<Result, ParserError.ParserError<Error>>
 ): void => {
   it(`${name} - stack-safe`, () => {
     const result = Syntax.parseStringWith(syntax, input, "stack-safe")

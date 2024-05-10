@@ -248,13 +248,13 @@ export const unsafeRegex = (regex: Regex.Regex): Printer.Printer<Chunk.Chunk<str
 /** @internal */
 export const contramapEither = dual<
   <Input2, Error2, Input>(
-    from: (value: Input2) => Either.Either<Error2, Input>
+    from: (value: Input2) => Either.Either<Input, Error2>
   ) => <Error, Output>(
     self: Printer.Printer<Input, Error, Output>
   ) => Printer.Printer<Input2, Error2, Output>,
   <Input, Error, Output, Input2, Error2>(
     self: Printer.Printer<Input, Error, Output>,
-    from: (value: Input2) => Either.Either<Error2, Input>
+    from: (value: Input2) => Either.Either<Input, Error2>
   ) => Printer.Printer<Input2, Error2, Output>
 >(2, (self, from) => {
   const op = Object.create(proto)
@@ -462,11 +462,11 @@ export const orElseEither = dual<
     that: LazyArg<Printer.Printer<Input2, Error2, Output2>>
   ) => <Input, Error, Output>(
     self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Either.Either<Input, Input2>, Error | Error2, Output | Output2>,
+  ) => Printer.Printer<Either.Either<Input2, Input>, Error | Error2, Output | Output2>,
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer.Printer<Input, Error, Output>,
     that: LazyArg<Printer.Printer<Input2, Error2, Output2>>
-  ) => Printer.Printer<Either.Either<Input, Input2>, Error | Error2, Output | Output2>
+  ) => Printer.Printer<Either.Either<Input2, Input>, Error | Error2, Output | Output2>
 >(2, (self, that) => {
   const op = Object.create(proto)
   op._tag = "OrElseEither"
@@ -493,11 +493,11 @@ export const printToChunk = dual<
     input: Input
   ) => <Error, Output>(
     self: Printer.Printer<Input, Error, Output>
-  ) => Either.Either<Error, Chunk.Chunk<Output>>,
+  ) => Either.Either<Chunk.Chunk<Output>, Error>,
   <Input, Error, Output>(
     self: Printer.Printer<Input, Error, Output>,
     input: Input
-  ) => Either.Either<Error, Chunk.Chunk<Output>>
+  ) => Either.Either<Chunk.Chunk<Output>, Error>
 >(2, <Input, Error, Output>(self: Printer.Printer<Input, Error, Output>, input: Input) => {
   const target = InternalChunkTarget.make<Output>()
   return Either.map(interpret(self, input, target), () => target.result())
@@ -505,8 +505,8 @@ export const printToChunk = dual<
 
 /** @internal */
 export const printToString = dual<
-  <Input>(value: Input) => <Error>(self: Printer.Printer<Input, Error, string>) => Either.Either<Error, string>,
-  <Input, Error>(self: Printer.Printer<Input, Error, string>, input: Input) => Either.Either<Error, string>
+  <Input>(value: Input) => <Error>(self: Printer.Printer<Input, Error, string>) => Either.Either<string, Error>,
+  <Input, Error>(self: Printer.Printer<Input, Error, string>, input: Input) => Either.Either<string, Error>
 >(2, (self, value) => Either.map(printToChunk(self, value), Chunk.join("")))
 
 /** @internal */
@@ -516,12 +516,12 @@ export const printToTarget = dual<
     target: T
   ) => <Error>(
     self: Printer.Printer<Input, Error, Output>
-  ) => Either.Either<Error, void>,
+  ) => Either.Either<void, Error>,
   <Input, Error, Output, T extends Target.Target<any, Output>>(
     self: Printer.Printer<Input, Error, Output>,
     input: Input,
     target: T
-  ) => Either.Either<Error, void>
+  ) => Either.Either<void, Error>
 >(3, (self, value, target) => interpret(self, value, target))
 
 export const provideInput = dual<
@@ -1064,5 +1064,5 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       }
     }
   }
-  return Either.map(result, constVoid) as Either.Either<Error, void>
+  return Either.map(result, constVoid) as Either.Either<void, Error>
 }
