@@ -1,8 +1,8 @@
 /**
  * @since 1.0.0
  */
-import * as internal from "@effect/parser/internal_effect_untraced/chunkTarget"
-import type { Target } from "@effect/parser/Target"
+import * as InternalChunkTarget from "./internal/chunkTarget.js"
+import type { Target } from "./Target.js"
 
 /**
  * @since 1.0.0
@@ -27,4 +27,4 @@ export declare namespace ChunkTarget {
  * @since 1.0.0
  * @category constructors
  */
-export const make: <Output>() => ChunkTarget<Output> = internal.make
+export const make: <Output>() => ChunkTarget<Output> = InternalChunkTarget.make

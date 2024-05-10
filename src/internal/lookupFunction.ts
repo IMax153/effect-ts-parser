@@ -1,15 +1,8 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Equal from "@effect/data/Equal"
-import { pipe } from "@effect/data/Function"
-import * as Hash from "@effect/data/Hash"
-import * as HashSet from "@effect/data/HashSet"
-import * as Number from "@effect/data/Number"
-import * as Option from "@effect/data/Option"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
-import * as Cause from "@effect/io/Cause"
-import * as bitset from "@effect/parser/internal_effect_untraced/bitset"
-import * as common from "@effect/parser/internal_effect_untraced/common"
-import type * as Regex from "@effect/parser/Regex"
+import { Cause, Chunk, Equal, Hash, HashSet, Number, Option, ReadonlyArray } from "effect"
+import { pipe } from "effect/Function"
+import type * as Regex from "./../Regex.js"
+import * as InternalBitSet from "./bitset.js"
+import * as InternalCommon from "./common.js"
 
 const LookupFunctionSymbolKey = "@effect/parser/LookupFunction"
 
@@ -404,15 +397,15 @@ const compileTest = (self: LookupFunction) => {
   return (index: number, input: string): number => {
     let curLookup = self
     let curIdx = index
-    let result = common.needMoreInput
+    let result = InternalCommon.needMoreInput
     while (curIdx < input.length) {
       const char = input[curIdx]!.charCodeAt(0)
       curIdx = curIdx + 1
       const step = lookup(curLookup, char)
       switch (step._tag) {
         case "Error": {
-          if (result === common.needMoreInput) {
-            result = common.notMatched
+          if (result === InternalCommon.needMoreInput) {
+            result = InternalCommon.notMatched
           }
           curIdx = input.length
           break
@@ -433,7 +426,7 @@ const compileTest = (self: LookupFunction) => {
         }
       }
     }
-    if ((result === common.needMoreInput || result === common.notMatched) && supportsEmpty(self)) {
+    if ((result === InternalCommon.needMoreInput || result === InternalCommon.notMatched) && supportsEmpty(self)) {
       return index
     }
     return result
@@ -453,8 +446,8 @@ const compileLookupFunction = (self: Regex.Regex): LookupFunction => {
     }
     case "OneOf": {
       if (
-        self.bitset.length === bitset.all.length &&
-        ReadonlyArray.getEquivalence(Number.Equivalence)(self.bitset, bitset.all)
+        self.bitset.length === InternalBitSet.all.length &&
+        ReadonlyArray.getEquivalence(Number.Equivalence)(self.bitset, InternalBitSet.all)
       ) {
         return acceptAll
       }
@@ -491,7 +484,7 @@ const compileLookupFunction = (self: Regex.Regex): LookupFunction => {
         const rest = choices.slice(1)
         return ReadonlyArray.reduce(rest, head, or)
       }
-      throw Cause.IllegalArgumentException("Cannot compile to DFA unbounded repetition")
+      throw new Cause.IllegalArgumentException("Cannot compile to DFA unbounded repetition")
     }
   }
 }
@@ -501,7 +494,7 @@ export const compileToTabular = (self: Regex.Regex): Option.Option<Regex.Regex.C
   try {
     const lookupFunction = compileLookupFunction(self)
     const test = compileTest(lookupFunction)
-    return Option.some(new common.CompiledImpl(test))
+    return Option.some(new InternalCommon.CompiledImpl(test))
   } catch (error) {
     if (Cause.isIllegalArgumentException(error)) {
       return Option.none()

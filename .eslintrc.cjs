@@ -1,33 +1,33 @@
 /* eslint-disable no-undef */
 module.exports = {
-  ignorePatterns: ["build", "dist", "*.mjs", "docs", "*.md"],
+  ignorePatterns: ["dist", "build", "*.md"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 2018,
-    sourceType: "module",
+    sourceType: "module"
   },
   settings: {
     "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx"],
+      "@typescript-eslint/parser": [".ts", ".tsx"]
     },
     "import/resolver": {
       typescript: {
-        alwaysTryTypes: true,
-      },
-    },
+        alwaysTryTypes: true
+      }
+    }
   },
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:@repo-tooling/dprint/recommended",
+    "plugin:@effect/recommended"
   ],
   plugins: [
     "deprecation",
     "import",
     "sort-destructure-keys",
     "simple-import-sort",
-    "codegen",
+    "codegen"
   ],
   rules: {
     "codegen/codegen": "error",
@@ -45,13 +45,12 @@ module.exports = {
     "import/no-duplicates": "error",
     "import/no-unresolved": "off",
     "import/order": "off",
-    "linebreak-style": ["error", "unix"],
     "simple-import-sort/imports": "off",
     "sort-destructure-keys/sort-destructure-keys": "error",
     "deprecation/deprecation": "off",
     "@typescript-eslint/array-type": [
       "warn",
-      { default: "generic", readonly: "generic" },
+      { default: "generic", readonly: "generic" }
     ],
     "@typescript-eslint/member-delimiter-style": 0,
     "@typescript-eslint/no-non-null-assertion": "off",
@@ -63,8 +62,8 @@ module.exports = {
       "error",
       {
         argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-      },
+        varsIgnorePattern: "^_"
+      }
     ],
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/camelcase": "off",
@@ -74,7 +73,7 @@ module.exports = {
     "@typescript-eslint/no-array-constructor": "off",
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/no-namespace": "off",
-    "@repo-tooling/dprint/dprint": [
+    "@effect/dprint": [
       "error",
       {
         config: {
@@ -84,9 +83,9 @@ module.exports = {
           quoteStyle: "alwaysDouble",
           trailingCommas: "never",
           operatorPosition: "maintain",
-          "arrowFunction.useParentheses": "force",
-        },
-      },
-    ],
-  },
-};
+          "arrowFunction.useParentheses": "force"
+        }
+      }
+    ]
+  }
+}

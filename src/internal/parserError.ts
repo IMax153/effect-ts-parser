@@ -1,18 +1,13 @@
-import { dual } from "@effect/data/Function"
-import type * as List from "@effect/data/List"
-import * as Option from "@effect/data/Option"
-import type * as ParserError from "@effect/parser/ParserError"
+import type { List } from "effect"
+import { Option } from "effect"
+import { dual } from "effect/Function"
+import type * as ParserError from "./../ParserError.js"
 
 /** @internal */
-const ParserErrorSymbolKey = "@effect/parser/ParserError"
-
-/** @internal */
-export const ParserErrorTypeId: ParserError.ParserErrorTypeId = Symbol.for(
-  ParserErrorSymbolKey
-) as ParserError.ParserErrorTypeId
+export const TypeId: ParserError.TypeId = Symbol.for("@effect/parser/ParserError") as ParserError.TypeId
 
 const proto = {
-  [ParserErrorTypeId]: ParserErrorTypeId
+  [TypeId]: TypeId
 }
 
 /** @internal */
@@ -72,7 +67,7 @@ export const unknownFailure = (
 
 /** @internal */
 export const isParserError = (u: unknown): u is ParserError.ParserError<unknown> =>
-  typeof u === "object" && u != null && ParserErrorTypeId in u
+  typeof u === "object" && u != null && TypeId in u
 
 /** @internal */
 export const isAllBranchesFailed = <Error>(
@@ -80,8 +75,9 @@ export const isAllBranchesFailed = <Error>(
 ): self is ParserError.AllBranchesFailed<Error> => self._tag === "AllBranchesFailed"
 
 /** @internal */
-export const isFailure = <Error>(self: ParserError.ParserError<Error>): self is ParserError.Failure<Error> =>
-  self._tag === "Failure"
+export const isFailure = <Error>(
+  self: ParserError.ParserError<Error>
+): self is ParserError.Failure<Error> => self._tag === "Failure"
 
 /** @internal */
 export const isNotConsumedAll = <Error>(
@@ -94,8 +90,9 @@ export const isUnexpectedEndOfInput = <Error>(
 ): self is ParserError.UnexpectedEndOfInput => self._tag === "UnexpectedEndOfInput"
 
 /** @internal */
-export const isUnknownFailure = <Error>(self: ParserError.ParserError<Error>): self is ParserError.UnknownFailure =>
-  self._tag === "UnknownFailure"
+export const isUnknownFailure = <Error>(
+  self: ParserError.ParserError<Error>
+): self is ParserError.UnknownFailure => self._tag === "UnknownFailure"
 
 /** @internal */
 export const addFailedBranch = dual<

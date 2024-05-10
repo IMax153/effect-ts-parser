@@ -1,6 +1,6 @@
 ---
 title: ParserError.ts
-nav_order: 3
+nav_order: 5
 parent: Modules
 ---
 
@@ -36,8 +36,11 @@ Added in v1.0.0
   - [isUnexpectedEndOfInput](#isunexpectedendofinput)
   - [isUnknownFailure](#isunknownfailure)
 - [symbols](#symbols)
-  - [ParserErrorTypeId](#parsererrortypeid)
-  - [ParserErrorTypeId (type alias)](#parsererrortypeid-type-alias)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
+- [utils](#utils)
+  - [ParserError (namespace)](#parsererror-namespace)
+    - [Proto (interface)](#proto-interface)
 
 ---
 
@@ -159,7 +162,7 @@ Every failed branch's failure is preserved.
 
 ```ts
 export interface AllBranchesFailed<Error> extends ParserError.Proto {
-  readonly _tag: 'AllBranchesFailed'
+  readonly _tag: "AllBranchesFailed"
   /**
    * The parser error from the left branch of parsing.
    */
@@ -181,7 +184,7 @@ Represents a custom, user-defined parser error of type `Error`.
 
 ```ts
 export interface Failure<Error> extends ParserError.Proto {
-  readonly _tag: 'Failure'
+  readonly _tag: "Failure"
   /**
    * The stack of named parsers until reaching the failure.
    */
@@ -208,7 +211,7 @@ input but it does not consume all input.
 
 ```ts
 export interface NotConsumedAll<Error> extends ParserError.Proto {
-  readonly _tag: 'NotConsumedAll'
+  readonly _tag: "NotConsumedAll"
   /**
    * The last failure encountered in the `Parser`, if any.
    */
@@ -244,7 +247,7 @@ is done consuming input.
 
 ```ts
 export interface UnexpectedEndOfInput extends ParserError.Proto {
-  readonly _tag: 'UnexpectedEndOfInput'
+  readonly _tag: "UnexpectedEndOfInput"
 }
 ```
 
@@ -261,7 +264,7 @@ for example if the unsafe regex variants encounter an error.
 
 ```ts
 export interface UnknownFailure extends ParserError.Proto {
-  readonly _tag: 'UnknownFailure'
+  readonly _tag: "UnknownFailure"
   /**
    * The stack of named parsers until reaching the failure.
    */
@@ -351,22 +354,40 @@ Added in v1.0.0
 
 # symbols
 
-## ParserErrorTypeId
+## TypeId
 
 **Signature**
 
 ```ts
-export declare const ParserErrorTypeId: typeof ParserErrorTypeId
+export declare const TypeId: typeof TypeId
 ```
 
 Added in v1.0.0
 
-## ParserErrorTypeId (type alias)
+## TypeId (type alias)
 
 **Signature**
 
 ```ts
-export type ParserErrorTypeId = typeof ParserErrorTypeId
+export type TypeId = typeof TypeId
+```
+
+Added in v1.0.0
+
+# utils
+
+## ParserError (namespace)
+
+Added in v1.0.0
+
+### Proto (interface)
+
+**Signature**
+
+```ts
+export interface Proto {
+  readonly [TypeId]: TypeId
+}
 ```
 
 Added in v1.0.0

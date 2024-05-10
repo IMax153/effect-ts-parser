@@ -1,10 +1,10 @@
 ---
-title: Target/Chunk.ts
-nav_order: 8
+title: ChunkTarget.ts
+nav_order: 2
 parent: Modules
 ---
 
-## Chunk overview
+## ChunkTarget overview
 
 Added in v1.0.0
 
@@ -16,6 +16,9 @@ Added in v1.0.0
   - [make](#make)
 - [models](#models)
   - [ChunkTarget (interface)](#chunktarget-interface)
+- [utils](#utils)
+  - [ChunkTarget (namespace)](#chunktarget-namespace)
+    - [Capture (interface)](#capture-interface)
 
 ---
 
@@ -39,6 +42,24 @@ Added in v1.0.0
 
 ```ts
 export interface ChunkTarget<Output> extends Target<ChunkTarget.Capture<Output>, Output> {}
+```
+
+Added in v1.0.0
+
+# utils
+
+## ChunkTarget (namespace)
+
+Added in v1.0.0
+
+### Capture (interface)
+
+**Signature**
+
+```ts
+export interface Capture<Output> {
+  readonly subBuilder: Array<Output>
+}
 ```
 
 Added in v1.0.0

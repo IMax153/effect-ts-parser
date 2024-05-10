@@ -1,30 +1,21 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import * as Equal from "@effect/data/Equal"
-import type { LazyArg } from "@effect/data/Function"
-import { constVoid, dual, pipe } from "@effect/data/Function"
-import * as List from "@effect/data/List"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import * as chunkTarget from "@effect/parser/internal_effect_untraced/chunkTarget"
-import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
-import type * as ParserError from "@effect/parser/ParserError"
-import type * as Printer from "@effect/parser/Printer"
-import type * as Regex from "@effect/parser/Regex"
-import type * as Target from "@effect/parser/Target"
+import { Chunk, Either, Equal, List, Option } from "effect"
+import { constVoid, dual, pipe } from "effect/Function"
+import type { LazyArg } from "effect/Function"
+import type { Predicate } from "effect/Predicate"
+import type * as ParserError from "./../ParserError.js"
+import type * as Printer from "./../Printer.js"
+import type * as Regex from "./../Regex.js"
+import type * as Target from "./../Target.js"
+import * as InternalChunkTarget from "./chunkTarget.js"
+import * as InternalParserError from "./parserError.js"
+import * as InternalRegex from "./regex.js"
 
 /** @internal */
-const PrinterSymbolKey = "@effect/parser/Printer"
-
-/** @internal */
-export const PrinterTypeId: Printer.PrinterTypeId = Symbol.for(
-  PrinterSymbolKey
-) as Printer.PrinterTypeId
+export const TypeId: Printer.TypeId = Symbol.for("@effect/parser/Printer") as Printer.TypeId
 
 /** @internal */
 const proto = {
-  [PrinterTypeId]: {
+  [TypeId]: {
     _Input: (_: unknown) => _,
     _Error: (_: never) => _,
     _Output: (_: never) => _
@@ -229,7 +220,7 @@ export const regexChar = <Error>(regex: Regex.Regex, error: Error): Printer.Prin
 
 /** @internal */
 export const alphaNumeric: Printer.Printer<string, string, string> = regexChar(
-  _regex.anyAlphaNumeric,
+  InternalRegex.anyAlphaNumeric,
   "not alphanumeric"
 )
 
@@ -243,7 +234,7 @@ export const unsafeRegexChar = (regex: Regex.Regex): Printer.Printer<string, nev
 }
 
 /** @internal */
-export const anyChar: Printer.Printer<string, never, string> = unsafeRegexChar(_regex.anyChar)
+export const anyChar: Printer.Printer<string, never, string> = unsafeRegexChar(InternalRegex.anyChar)
 
 /** @internal */
 export const unsafeRegex = (regex: Regex.Regex): Printer.Printer<Chunk.Chunk<string>, never, string> => {
@@ -288,7 +279,7 @@ export const contramap = dual<
 
 /** @internal */
 export const anyString: Printer.Printer<string, never, string> = pipe(
-  unsafeRegex(_regex.repeatMin(_regex.anyChar, 0)),
+  unsafeRegex(InternalRegex.repeatMin(InternalRegex.anyChar, 0)),
   contramap((s) => Chunk.fromIterable(s))
 )
 
@@ -316,19 +307,19 @@ export const asPrinted = dual<
 
 /** @internal */
 export const char = (char: string): Printer.Printer<void, string, string> =>
-  regexDiscard(_regex.charIn([char]), Chunk.of(char))
+  regexDiscard(InternalRegex.charIn([char]), Chunk.of(char))
 
 /** @internal */
 export const charIn = (chars: Iterable<string>): Printer.Printer<string, string, string> =>
-  regexChar(_regex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
+  regexChar(InternalRegex.charIn(chars), `not one of the expected characters (${Array.from(chars).join(", ")})`)
 
 /** @internal */
 export const charNot = <Error>(char: string, failure?: Error): Printer.Printer<string, Error, string> =>
-  regexChar(_regex.charNotIn([char]), failure ?? (`cannot be '${char}'` as any))
+  regexChar(InternalRegex.charNotIn([char]), failure ?? (`cannot be '${char}'` as any))
 
 /** @internal */
 export const charNotIn = (chars: Iterable<string>): Printer.Printer<string, string, string> =>
-  regexChar(_regex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
+  regexChar(InternalRegex.charNotIn(chars), `one of the unexpected characters (${Array.from(chars).join(", ")})`)
 
 /** @internal */
 export const contramapTo = dual<
@@ -349,7 +340,7 @@ export const contramapTo = dual<
     })))
 
 /** @internal */
-export const digit: Printer.Printer<string, string, string> = regexChar(_regex.anyDigit, "not a digit")
+export const digit: Printer.Printer<string, string, string> = regexChar(InternalRegex.anyDigit, "not a digit")
 
 /** @internal */
 export const exactly = <Output, Error = string>(value: Output, error?: Error): Printer.Printer<Output, Error, Output> =>
@@ -415,7 +406,7 @@ export const fromInput = <Input, Error, Output>(
 }
 
 /** @internal */
-export const letter: Printer.Printer<string, string, string> = regexChar(_regex.anyLetter, "not a letter")
+export const letter: Printer.Printer<string, string, string> = regexChar(InternalRegex.anyLetter, "not a letter")
 
 /** @internal */
 export const mapError = dual<
@@ -508,15 +499,15 @@ export const printToChunk = dual<
     input: Input
   ) => Either.Either<Error, Chunk.Chunk<Output>>
 >(2, <Input, Error, Output>(self: Printer.Printer<Input, Error, Output>, input: Input) => {
-  const target = chunkTarget.make<Output>()
-  return Either.mapRight(interpret(self, input, target), () => target.result())
+  const target = InternalChunkTarget.make<Output>()
+  return Either.map(interpret(self, input, target), () => target.result())
 })
 
 /** @internal */
 export const printToString = dual<
   <Input>(value: Input) => <Error>(self: Printer.Printer<Input, Error, string>) => Either.Either<Error, string>,
   <Input, Error>(self: Printer.Printer<Input, Error, string>, input: Input) => Either.Either<Error, string>
->(2, (self, value) => Either.mapRight(printToChunk(self, value), Chunk.join("")))
+>(2, (self, value) => Either.map(printToChunk(self, value), Chunk.join("")))
 
 /** @internal */
 export const printToTarget = dual<
@@ -653,7 +644,7 @@ export const repeatWithSeparator1 = dual<
 /** @internal */
 export const string = <Input>(str: string, input: Input): Printer.Printer<Input, never, string> =>
   pipe(
-    regexDiscard(_regex.string(str), Chunk.fromIterable(str)),
+    regexDiscard(InternalRegex.string(str), Chunk.fromIterable(str)),
     asPrinted(input, void 0 as void)
   )
 
@@ -790,7 +781,7 @@ export const zipSurrounded = dual<
 
 /** @internal */
 export const whitespace: Printer.Printer<string, string, string> = regexChar(
-  _regex.whitespace,
+  InternalRegex.whitespace,
   "not a whitespace character"
 )
 
@@ -870,7 +861,7 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
           stack = List.cons(cont, stack)
         } else {
           // TODO
-          finish(Either.left(failed(parserError.unknownFailure(List.nil(), 0))))
+          finish(Either.left(failed(InternalParserError.unknownFailure(List.nil(), 0))))
         }
         break
       }
@@ -948,7 +939,7 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       }
       case "ParseRegex": {
         if (Option.isSome(current.onFailure)) {
-          const compiled = _regex.compile(current.regex)
+          const compiled = InternalRegex.compile(current.regex)
           const chunk = input as Chunk.Chunk<string>
           if (compiled.test(0, Chunk.join(chunk, "")) < 0) {
             finish(Either.left(current.onFailure.value))
@@ -968,7 +959,7 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       }
       case "ParseRegexLastChar": {
         if (Option.isSome(current.onFailure)) {
-          const compiled = _regex.compile(current.regex)
+          const compiled = InternalRegex.compile(current.regex)
           const char = input as string
           if (compiled.test(0, char) > 0) {
             output.write(input as Output)
@@ -1073,5 +1064,5 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       }
     }
   }
-  return Either.mapRight(result, constVoid) as Either.Either<Error, void>
+  return Either.map(result, constVoid) as Either.Either<Error, void>
 }
