@@ -1,21 +1,21 @@
 /**
  * @since 1.0.0
  */
-import type { List } from "@effect/data/List"
-import type { Option } from "@effect/data/Option"
-import * as internal from "@effect/parser/internal_effect_untraced/parserError"
+import type { List } from "effect/List"
+import type { Option } from "effect/Option"
+import * as InternalParserError from "./internal/parserError.js"
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export const ParserErrorTypeId: unique symbol = internal.ParserErrorTypeId
+export const TypeId: unique symbol = InternalParserError.TypeId
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export type ParserErrorTypeId = typeof ParserErrorTypeId
+export type TypeId = typeof TypeId
 
 /**
  * Represents an error that occurred during execution of a `Parser`.
@@ -30,9 +30,16 @@ export type ParserError<Error> =
   | UnexpectedEndOfInput
   | UnknownFailure
 
+/**
+ * @since 1.0.0
+ */
 export declare namespace ParserError {
+  /**
+   * @since 1.0.0
+   * @category models
+   */
   export interface Proto {
-    readonly [ParserErrorTypeId]: ParserErrorTypeId
+    readonly [TypeId]: TypeId
   }
 }
 
@@ -138,7 +145,7 @@ export interface UnknownFailure extends ParserError.Proto {
 export const allBranchesFailed: <Error, Error2>(
   left: ParserError<Error>,
   right: ParserError<Error2>
-) => ParserError<Error | Error2> = internal.allBranchesFailed
+) => ParserError<Error | Error2> = InternalParserError.allBranchesFailed
 
 /**
  * Constructs a custom, user-defined parser error of type `Error`.
@@ -147,7 +154,7 @@ export const allBranchesFailed: <Error, Error2>(
  * @category constructors
  */
 export const failure: <Error>(nameStack: List<string>, position: number, failure: Error) => ParserError<Error> =
-  internal.failure
+  InternalParserError.failure
 
 /**
  * Constructs a failure that occurs if the `Parser` is expected to consume all
@@ -157,7 +164,7 @@ export const failure: <Error>(nameStack: List<string>, position: number, failure
  * @category constructors
  */
 export const notConsumedAll: <Error>(lastFailure: Option<ParserError<Error>>) => ParserError<Error> =
-  internal.notConsumedAll
+  InternalParserError.notConsumedAll
 
 /**
  * Constructs a failure that occurs if the input stream ends before the `Parser`
@@ -166,7 +173,7 @@ export const notConsumedAll: <Error>(lastFailure: Option<ParserError<Error>>) =>
  * @since 1.0.0
  * @category constructors
  */
-export const unexpectedEndOfInput: ParserError<never> = internal.unexpectedEndOfInput
+export const unexpectedEndOfInput: ParserError<never> = InternalParserError.unexpectedEndOfInput
 
 /**
  * Constructs an unknown parser error.
@@ -177,7 +184,8 @@ export const unexpectedEndOfInput: ParserError<never> = internal.unexpectedEndOf
  * @since 1.0.0
  * @category constructors
  */
-export const unknownFailure: (nameStack: List<string>, position: number) => ParserError<Error> = internal.unknownFailure
+export const unknownFailure: (nameStack: List<string>, position: number) => ParserError<Error> =
+  InternalParserError.unknownFailure
 
 /**
  * Returns `true` if the value is a `ParserError`, `false` otherwise.
@@ -185,7 +193,7 @@ export const unknownFailure: (nameStack: List<string>, position: number) => Pars
  * @since 1.0.0
  * @category refinements
  */
-export const isParserError: (u: unknown) => u is ParserError<unknown> = internal.isParserError
+export const isParserError: (u: unknown) => u is ParserError<unknown> = InternalParserError.isParserError
 
 /**
  * Returns `true` if the `ParserError` is `AllBranchesFailed`, `false` otherwise.
@@ -194,7 +202,7 @@ export const isParserError: (u: unknown) => u is ParserError<unknown> = internal
  * @category refinements
  */
 export const isAllBranchesFailed: <Error>(self: ParserError<Error>) => self is AllBranchesFailed<Error> =
-  internal.isAllBranchesFailed
+  InternalParserError.isAllBranchesFailed
 
 /**
  * Returns `true` if the `ParserError` is a `Failure`, `false` otherwise.
@@ -202,7 +210,7 @@ export const isAllBranchesFailed: <Error>(self: ParserError<Error>) => self is A
  * @since 1.0.0
  * @category refinements
  */
-export const isFailure: <Error>(self: ParserError<Error>) => self is Failure<Error> = internal.isFailure
+export const isFailure: <Error>(self: ParserError<Error>) => self is Failure<Error> = InternalParserError.isFailure
 
 /**
  * Returns `true` if the `ParserError` is `NotConsumedAll`, `false` otherwise.
@@ -211,7 +219,7 @@ export const isFailure: <Error>(self: ParserError<Error>) => self is Failure<Err
  * @category refinements
  */
 export const isNotConsumedAll: <Error>(self: ParserError<Error>) => self is NotConsumedAll<Error> =
-  internal.isNotConsumedAll
+  InternalParserError.isNotConsumedAll
 
 /**
  * Returns `true` if the `ParserError` is `UnexpectedEndOfInput`, `false` otherwise.
@@ -220,7 +228,7 @@ export const isNotConsumedAll: <Error>(self: ParserError<Error>) => self is NotC
  * @category refinements
  */
 export const isUnexpectedEndOfInput: <Error>(self: ParserError<Error>) => self is UnexpectedEndOfInput =
-  internal.isUnexpectedEndOfInput
+  InternalParserError.isUnexpectedEndOfInput
 
 /**
  * Returns `true` if the `ParserError` is an `UnknownFailure`, `false` otherwise.
@@ -228,7 +236,8 @@ export const isUnexpectedEndOfInput: <Error>(self: ParserError<Error>) => self i
  * @since 1.0.0
  * @category refinements
  */
-export const isUnknownFailure: <Error>(self: ParserError<Error>) => self is UnknownFailure = internal.isUnknownFailure
+export const isUnknownFailure: <Error>(self: ParserError<Error>) => self is UnknownFailure =
+  InternalParserError.isUnknownFailure
 
 /**
  * Adds an additional failed branch to a `ParserError`.
@@ -239,7 +248,7 @@ export const isUnknownFailure: <Error>(self: ParserError<Error>) => self is Unkn
 export const addFailedBranch: {
   <Error2>(that: ParserError<Error2>): <Error>(self: ParserError<Error>) => ParserError<Error2 | Error>
   <Error, Error2>(self: ParserError<Error>, that: ParserError<Error2>): ParserError<Error | Error2>
-} = internal.addFailedBranch
+} = InternalParserError.addFailedBranch
 
 /**
  * Maps over the `Error` type of a `ParserError`.
@@ -250,4 +259,4 @@ export const addFailedBranch: {
 export const map: {
   <Error, Error2>(f: (error: Error) => Error2): (self: ParserError<Error>) => ParserError<Error2>
   <Error, Error2>(self: ParserError<Error>, f: (error: Error) => Error2): ParserError<Error2>
-} = internal.map
+} = InternalParserError.map

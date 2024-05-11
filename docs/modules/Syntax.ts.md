@@ -1,6 +1,6 @@
 ---
 title: Syntax.ts
-nav_order: 6
+nav_order: 8
 parent: Modules
 ---
 
@@ -17,12 +17,14 @@ Added in v1.0.0
   - [asPrinted](#asprinted)
   - [asUnit](#asunit)
   - [atLeast](#atleast)
+  - [atMost](#atmost)
   - [autoBacktracking](#autobacktracking)
   - [backtrack](#backtrack)
   - [between](#between)
   - [captureString](#capturestring)
   - [filter](#filter)
   - [flatten](#flatten)
+  - [flattenNonEmpty](#flattennonempty)
   - [manualBacktracking](#manualbacktracking)
   - [mapError](#maperror)
   - [named](#named)
@@ -50,6 +52,7 @@ Added in v1.0.0
   - [anything](#anything)
   - [char](#char)
   - [charIn](#charin)
+  - [charNot](#charnot)
   - [charNotIn](#charnotin)
   - [digit](#digit)
   - [end](#end)
@@ -57,12 +60,12 @@ Added in v1.0.0
   - [filterChar](#filterchar)
   - [index](#index)
   - [letter](#letter)
-  - [notChar](#notchar)
   - [regex](#regex)
   - [regexChar](#regexchar)
   - [regexDiscard](#regexdiscard)
   - [string](#string)
   - [succeed](#succeed)
+  - [suspend](#suspend)
   - [unit](#unit)
   - [unsafeRegex](#unsaferegex)
   - [unsafeRegexChar](#unsaferegexchar)
@@ -75,10 +78,13 @@ Added in v1.0.0
 - [models](#models)
   - [Syntax (interface)](#syntax-interface)
 - [symbols](#symbols)
-  - [SyntaxTypeId](#syntaxtypeid)
-  - [SyntaxTypeId (type alias)](#syntaxtypeid-type-alias)
+  - [TypeId](#typeid)
+  - [TypeId (type alias)](#typeid-type-alias)
 - [transformTo](#transformto)
   - [transformTo](#transformto-1)
+- [utils](#utils)
+  - [Syntax (namespace)](#syntax-namespace)
+    - [Variance (interface)](#variance-interface)
 
 ---
 
@@ -86,21 +92,19 @@ Added in v1.0.0
 
 ## as
 
-Ignores the `Syntax`'s successful result and result in `value` instead
+Transforms a `Syntax` that results in `void` in a `Syntax` that results in `value`
 
 **Signature**
 
 ```ts
 export declare const as: {
-  <Value2>(value: Value2): <Input, Error, Output>(
-    self: Syntax<Input, Error, Output, void>
-  ) => Syntax<Input, Error, Output, Value2>
-  <Input, Error, Output, Value2>(self: Syntax<Input, Error, Output, void>, value: Value2): Syntax<
-    Input,
-    Error,
-    Output,
-    Value2
-  >
+  <Value2>(
+    value: Value2
+  ): <Input, Error, Output>(self: Syntax<Input, Error, Output, void>) => Syntax<Input, Error, Output, Value2>
+  <Input, Error, Output, Value2>(
+    self: Syntax<Input, Error, Output, void>,
+    value: Value2
+  ): Syntax<Input, Error, Output, Value2>
 }
 ```
 
@@ -108,20 +112,20 @@ Added in v1.0.0
 
 ## asPrinted
 
-Sets the value of this `Syntax` to the specified `value` and the value to be
-printed to `toPrint`.
+Transforms a `Syntax` that results in `from` in a `Syntax` that results in `value`
 
 **Signature**
 
 ```ts
 export declare const asPrinted: {
-  <Value, Value2>(value: Value2, toPrint: Value): <Input, Error, Output>(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error, Output, Value2>
+  <Value, Value2>(
+    value: Value2,
+    from: Value
+  ): <Input, Error, Output>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     value: Value2,
-    toPrint: Value
+    from: Value
   ): Syntax<Input, Error, Output, Value2>
 }
 ```
@@ -130,22 +134,19 @@ Added in v1.0.0
 
 ## asUnit
 
-Returns a new `Syntax` from the provided syntax that does not consume any
-input but prints `printed` and results in `void`.
+Transforms a `Syntax` that results in `from` in a `Syntax` that results in `void`
 
 **Signature**
 
 ```ts
 export declare const asUnit: {
-  <Value>(printed: Value): <Input, Error, Output>(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error, Output, void>
-  <Input, Error, Output, Value>(self: Syntax<Input, Error, Output, Value>, printed: Value): Syntax<
-    Input,
-    Error,
-    Output,
-    void
-  >
+  <Value>(
+    from: Value
+  ): <Input, Error, Output>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error, Output, void>
+  <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>,
+    from: Value
+  ): Syntax<Input, Error, Output, void>
 }
 ```
 
@@ -165,15 +166,37 @@ When printing, the input is a chunk of values and each element gets printed.
 
 ```ts
 export declare const atLeast: {
-  (min: number): <Input, Error, Output, Value>(
+  (
+    min: number
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input, Error, Output, Chunk<Value>>
-  <Input, Error, Output, Value>(self: Syntax<Input, Error, Output, Value>, min: number): Syntax<
-    Input,
-    Error,
-    Output,
-    Chunk<Value>
-  >
+  <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>,
+    min: number
+  ): Syntax<Input, Error, Output, Chunk<Value>>
+}
+```
+
+Added in v1.0.0
+
+## atMost
+
+Repeat this `Syntax` at most `max` number of times.
+
+**Signature**
+
+```ts
+export declare const atMost: {
+  (
+    max: number
+  ): <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>
+  ) => Syntax<Input, Error, Output, Chunk<Value>>
+  <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>,
+    max: number
+  ): Syntax<Input, Error, Output, Chunk<Value>>
 }
 ```
 
@@ -268,9 +291,10 @@ mode and fails with the specified `error` if the predicate evaluates to
 
 ```ts
 export declare const filter: {
-  <Value, Error2>(predicate: Predicate<Value>, error: Error2): <Input, Error, Output>(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error2 | Error, Output, Value>
+  <Value, Error2>(
+    predicate: Predicate<Value>,
+    error: Error2
+  ): <Input, Error, Output>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error2 | Error, Output, Value>
   <Input, Error, Output, Value, Error2>(
     self: Syntax<Input, Error, Output, Value>,
     predicate: Predicate<Value>,
@@ -290,6 +314,20 @@ Flattens a result of parsed strings to a single string.
 ```ts
 export declare const flatten: <Input, Error, Output>(
   self: Syntax<Input, Error, Output, Chunk<string>>
+) => Syntax<Input, Error, Output, string>
+```
+
+Added in v1.0.0
+
+## flattenNonEmpty
+
+Flattens a result of parsed strings to a single string.
+
+**Signature**
+
+```ts
+export declare const flattenNonEmpty: <Input, Error, Output>(
+  self: Syntax<Input, Error, Output, NonEmptyChunk<string>>
 ) => Syntax<Input, Error, Output, string>
 ```
 
@@ -317,15 +355,13 @@ Maps the error with the specified function.
 
 ```ts
 export declare const mapError: {
-  <Error, Error2>(f: (error: Error) => Error2): <Input, Output, Value>(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error2, Output, Value>
-  <Input, Error, Output, Value, Error2>(self: Syntax<Input, Error, Output, Value>, f: (error: Error) => Error2): Syntax<
-    Input,
-    Error2,
-    Output,
-    Value
-  >
+  <Error, Error2>(
+    f: (error: Error) => Error2
+  ): <Input, Output, Value>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error2, Output, Value>
+  <Input, Error, Output, Value, Error2>(
+    self: Syntax<Input, Error, Output, Value>,
+    f: (error: Error) => Error2
+  ): Syntax<Input, Error2, Output, Value>
 }
 ```
 
@@ -340,15 +376,13 @@ in case of failure to help debugging parser issues.
 
 ```ts
 export declare const named: {
-  (name: string): <Input, Error, Output, Value>(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error, Output, Value>
-  <Input, Error, Output, Value>(self: Syntax<Input, Error, Output, Value>, name: string): Syntax<
-    Input,
-    Error,
-    Output,
-    Value
-  >
+  (
+    name: string
+  ): <Input, Error, Output, Value>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error, Output, Value>
+  <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>,
+    name: string
+  ): Syntax<Input, Error, Output, Value>
 }
 ```
 
@@ -363,15 +397,15 @@ syntax fails.
 
 ```ts
 export declare const not: {
-  <Error2>(error: Error2): <Input, Error, Output, Value>(
+  <Error2>(
+    error: Error2
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input, Error2 | Error, Output, void>
-  <Input, Error, Output, Value, Error2>(self: Syntax<Input, Error, Output, Value>, error: Error2): Syntax<
-    Input,
-    Error | Error2,
-    Output,
-    void
-  >
+  <Input, Error, Output, Value, Error2>(
+    self: Syntax<Input, Error, Output, Value>,
+    error: Error2
+  ): Syntax<Input, Error | Error2, Output, void>
 }
 ```
 
@@ -410,7 +444,9 @@ variant, see `Syntax.orElseEither`.
 
 ```ts
 export declare const orElse: {
-  <Input2, Error2, Output2, Value>(that: LazyArg<Syntax<Input2, Error2, Output2, Value>>): <Input, Error, Output>(
+  <Input2, Error2, Output2, Value>(
+    that: LazyArg<Syntax<Input2, Error2, Output2, Value>>
+  ): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Value>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
@@ -436,18 +472,15 @@ parser.
 
 ```ts
 export declare const orElseEither: {
-  <Input2, Error2, Output2, Value2>(that: LazyArg<Syntax<Input2, Error2, Output2, Value2>>): <
-    Input,
-    Error,
-    Output,
-    Value
-  >(
+  <Input2, Error2, Output2, Value2>(
+    that: LazyArg<Syntax<Input2, Error2, Output2, Value2>>
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Either<Value, Value2>>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Either<Value2, Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     that: LazyArg<Syntax<Input2, Error2, Output2, Value2>>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Either<Value, Value2>>
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Either<Value2, Value>>
 }
 ```
 
@@ -502,7 +535,9 @@ element, results in success.
 
 ```ts
 export declare const repeatUntil: {
-  <Input2, Error2, Output2>(stopCondition: Syntax<Input2, Error2, Output2, void>): <Input, Error, Output, Value>(
+  <Input2, Error2, Output2>(
+    stopCondition: Syntax<Input2, Error2, Output2, void>
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Chunk<Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
@@ -523,7 +558,9 @@ between each element.
 
 ```ts
 export declare const repeatWithSeparator: {
-  <Input2, Error2, Output2>(separator: Syntax<Input2, Error2, Output2, void>): <Input, Error, Output, Value>(
+  <Input2, Error2, Output2>(
+    separator: Syntax<Input2, Error2, Output2, void>
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Chunk<Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
@@ -544,7 +581,9 @@ each element.
 
 ```ts
 export declare const repeatWithSeparator1: {
-  <Input2, Error2, Output2>(separator: Syntax<Input2, Error2, Output2, void>): <Input, Error, Output, Value>(
+  <Input2, Error2, Output2>(
+    separator: Syntax<Input2, Error2, Output2, void>
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, NonEmptyChunk<Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
@@ -564,15 +603,13 @@ Enables or disables auto-backtracking for this syntax.
 
 ```ts
 export declare const setAutoBacktracking: {
-  (enabled: boolean): <Input, Error, Output, Value>(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error, Output, Value>
-  <Input, Error, Output, Value>(self: Syntax<Input, Error, Output, Value>, enabled: boolean): Syntax<
-    Input,
-    Error,
-    Output,
-    Value
-  >
+  (
+    enabled: boolean
+  ): <Input, Error, Output, Value>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error, Output, Value>
+  <Input, Error, Output, Value>(
+    self: Syntax<Input, Error, Output, Value>,
+    enabled: boolean
+  ): Syntax<Input, Error, Output, Value>
 }
 ```
 
@@ -587,7 +624,9 @@ result.
 
 ```ts
 export declare const surroundedBy: {
-  <Input2, Error2, Output2>(other: Syntax<Input2, Error2, Output2, void>): <Input, Error, Output, Value>(
+  <Input2, Error2, Output2>(
+    other: Syntax<Input2, Error2, Output2, void>
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Value>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
@@ -608,9 +647,10 @@ the value to be printed with the given function `from`.
 
 ```ts
 export declare const transform: {
-  <Value, Value2>(to: (value: Value) => Value2, from: (value: Value2) => Value): <Input, Error, Output>(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error, Output, Value2>
+  <Value, Value2>(
+    to: (value: Value) => Value2,
+    from: (value: Value2) => Value
+  ): <Input, Error, Output>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     to: (value: Value) => Value2,
@@ -631,16 +671,14 @@ functions can fail the parser/printer.
 
 ```ts
 export declare const transformEither: {
-  <Error, Value, Value2>(to: (value: Value) => Either<Error, Value2>, from: (value: Value2) => Either<Error, Value>): <
-    Input,
-    Output
-  >(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error, Output, Value2>
+  <Error, Value, Value2>(
+    to: (value: Value) => Either<Value2, Error>,
+    from: (value: Value2) => Either<Value, Error>
+  ): <Input, Output>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
-    to: (value: Value) => Either<Error, Value2>,
-    from: (value: Value2) => Either<Error, Value>
+    to: (value: Value) => Either<Value2, Error>,
+    from: (value: Value2) => Either<Value, Error>
   ): Syntax<Input, Error, Output, Value2>
 }
 ```
@@ -658,9 +696,10 @@ channel by the value `None`.
 
 ```ts
 export declare const transformOption: {
-  <Value, Value2>(to: (value: Value) => Option<Value2>, from: (value: Value2) => Option<Value>): <Input, Error, Output>(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Option<Error>, Output, Value2>
+  <Value, Value2>(
+    to: (value: Value) => Option<Value2>,
+    from: (value: Value2) => Option<Value>
+  ): <Input, Error, Output>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Option<Error>, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     to: (value: Value) => Option<Value2>,
@@ -683,7 +722,9 @@ right value with `that`.
 
 ```ts
 export declare const zip: {
-  <Input2, Error2, Output2, Value2>(that: Syntax<Input2, Error2, Output2, Value2>): <Input, Error, Output, Value>(
+  <Input2, Error2, Output2, Value2>(
+    that: Syntax<Input2, Error2, Output2, Value2>
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, readonly [Value, Value2]>
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
@@ -699,8 +740,8 @@ Added in v1.0.0
 
 Concatenates this `Syntax` with `that` `Syntax`. If the parser of both
 syntaxes succeeds, the result is the result of this `Syntax`. Otherwise the
-`Syntax` fails. The printer passes the value to be printed to this printer,
-and also executes `that` printer with `void` as the input value.
+`Syntax` fails. The printer executes `this` printer with `void` as the input value
+and also passes the value to be printed to that printer.
 
 Note that the right syntax must have `Value` defined as `void`, because there
 is no way for the printer to reconstruct an arbitrary input for the right
@@ -710,12 +751,14 @@ printer.
 
 ```ts
 export declare const zipLeft: {
-  <Input2, Error2, Output2, Value2>(that: Syntax<Input2, Error2, Output2, Value2>): <Input, Error, Output, Value>(
+  <Input2, Error2, Output2>(
+    that: Syntax<Input2, Error2, Output2, void>
+  ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Value>
-  <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
+  <Input, Error, Output, Value, Input2, Error2, Output2>(
     self: Syntax<Input, Error, Output, Value>,
-    that: Syntax<Input2, Error2, Output2, Value2>
+    that: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 }
 ```
@@ -737,7 +780,9 @@ printer.
 
 ```ts
 export declare const zipRight: {
-  <Input2, Error2, Output2, Value2>(that: Syntax<Input2, Error2, Output2, Value2>): <Input, Error, Output>(
+  <Input2, Error2, Output2, Value2>(
+    that: Syntax<Input2, Error2, Output2, Value2>
+  ): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, void>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Value2>
   <Input, Error, Output, Input2, Error2, Output2, Value2>(
@@ -828,6 +873,19 @@ export declare const charIn: (chars: Iterable<string>) => Syntax<string, string,
 
 Added in v1.0.0
 
+## charNot
+
+Parse or print a single character and fail with the specified `error` if the
+parsed character matches the specified character.
+
+**Signature**
+
+```ts
+export declare const charNot: <Error>(char: string, error: Error) => Syntax<string, Error, string, string>
+```
+
+Added in v1.0.0
+
 ## charNotIn
 
 Constructs a `Syntax` that parses/prints a single character if it **DOES
@@ -912,25 +970,12 @@ Added in v1.0.0
 
 ## letter
 
-Constructs a `Syntax` for a single digit.
+Constructs a `Syntax` for a single letter.
 
 **Signature**
 
 ```ts
 export declare const letter: Syntax<string, string, string, string>
-```
-
-Added in v1.0.0
-
-## notChar
-
-Parse or print a single character and fail with the specified `error` if the
-parsed character matches the specified character.
-
-**Signature**
-
-```ts
-export declare const notChar: <Error>(char: string, error: Error) => Syntax<string, Error, string, string>
 ```
 
 Added in v1.0.0
@@ -1007,6 +1052,38 @@ the specified `result`.
 
 ```ts
 export declare const succeed: <Value>(value: Value) => Syntax<unknown, never, never, Value>
+```
+
+Added in v1.0.0
+
+## suspend
+
+Lazily constructs a `Syntax`. Can be used to construct a recursive parser
+
+**Signature**
+
+```ts
+export declare const suspend: <Input, Error, Output, Value>(
+  self: LazyArg<Syntax<Input, Error, Output, Value>>
+) => Syntax<Input, Error, Output, Value>
+```
+
+**Example**
+
+```ts
+import { pipe } from "effect/Function"
+import * as Syntax from "@effect/parser/Syntax"
+
+const recursive: Syntax.Syntax<string, string, string, string> = pipe(
+  Syntax.digit,
+  Syntax.zipLeft(
+    pipe(
+      Syntax.suspend(() => recursive),
+      Syntax.orElse(() => Syntax.letter),
+      Syntax.asUnit("?")
+    )
+  )
+)
 ```
 
 Added in v1.0.0
@@ -1089,10 +1166,10 @@ Run this `Syntax`'s parser on the given `input` string.
 
 ```ts
 export declare const parseString: {
-  (input: string): <Error, Output, Value>(
-    self: Syntax<string, Error, Output, Value>
-  ) => Either<ParserError<Error>, Value>
-  <Error, Output, Value>(self: Syntax<string, Error, Output, Value>, input: string): Either<ParserError<Error>, Value>
+  (
+    input: string
+  ): <Error, Output, Value>(self: Syntax<string, Error, Output, Value>) => Either<Value, ParserError<Error>>
+  <Error, Output, Value>(self: Syntax<string, Error, Output, Value>, input: string): Either<Value, ParserError<Error>>
 }
 ```
 
@@ -1107,14 +1184,15 @@ parser implementation.
 
 ```ts
 export declare const parseStringWith: {
-  (input: string, implementation: Parser.Implementation): <Error, Output, Value>(
-    self: Syntax<string, Error, Output, Value>
-  ) => Either<ParserError<Error>, Value>
+  (
+    input: string,
+    implementation: Parser.Implementation
+  ): <Error, Output, Value>(self: Syntax<string, Error, Output, Value>) => Either<Value, ParserError<Error>>
   <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>,
     input: string,
     implementation: Parser.Implementation
-  ): Either<ParserError<Error>, Value>
+  ): Either<Value, ParserError<Error>>
 }
 ```
 
@@ -1128,8 +1206,8 @@ Prints the specified `value` to a string.
 
 ```ts
 export declare const printString: {
-  <Value>(value: Value): <Input, Error>(self: Syntax<Input, Error, string, Value>) => Either<Error, string>
-  <Input, Error, Value>(self: Syntax<Input, Error, string, Value>, value: Value): Either<Error, string>
+  <Value>(value: Value): <Input, Error>(self: Syntax<Input, Error, string, Value>) => Either<string, Error>
+  <Input, Error, Value>(self: Syntax<Input, Error, string, Value>, value: Value): Either<string, Error>
 }
 ```
 
@@ -1145,7 +1223,7 @@ to simultaneously build them up from smaller syntax fragments.
 **Signature**
 
 ```ts
-export interface Syntax<Input, Error, Output, Value> extends Syntax.Variance<Input, Error, Output, Value> {
+export interface Syntax<Input, Error, Output, Value> extends Syntax.Variance<Input, Error, Output, Value>, Pipeable {
   readonly parser: Parser<Input, Error, Value>
   readonly printer: Printer<Value, Error, Output>
 }
@@ -1155,22 +1233,22 @@ Added in v1.0.0
 
 # symbols
 
-## SyntaxTypeId
+## TypeId
 
 **Signature**
 
 ```ts
-export declare const SyntaxTypeId: typeof SyntaxTypeId
+export declare const TypeId: typeof TypeId
 ```
 
 Added in v1.0.0
 
-## SyntaxTypeId (type alias)
+## TypeId (type alias)
 
 **Signature**
 
 ```ts
-export type SyntaxTypeId = typeof SyntaxTypeId
+export type TypeId = typeof TypeId
 ```
 
 Added in v1.0.0
@@ -1189,19 +1267,40 @@ This can be used to define separate syntaxes for subtypes, that can be later com
 
 ```ts
 export declare const transformTo: {
-  <Error2, Value, Value2>(to: (value: Value) => Value2, from: (value: Value2) => Option<Value>, error: Error2): <
-    Input,
-    Error,
-    Output
-  >(
-    self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error2 | Error, Output, Value2>
+  <Error2, Value, Value2>(
+    to: (value: Value) => Value2,
+    from: (value: Value2) => Option<Value>,
+    error: Error2
+  ): <Input, Error, Output>(self: Syntax<Input, Error, Output, Value>) => Syntax<Input, Error2 | Error, Output, Value2>
   <Input, Error, Output, Value, Error2, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     to: (value: Value) => Value2,
     from: (value: Value2) => Option<Value>,
     error: Error2
   ): Syntax<Input, Error | Error2, Output, Value2>
+}
+```
+
+Added in v1.0.0
+
+# utils
+
+## Syntax (namespace)
+
+Added in v1.0.0
+
+### Variance (interface)
+
+**Signature**
+
+```ts
+export interface Variance<in Input, out Error, out Output, in out Value> {
+  readonly [TypeId]: {
+    _Input: Types.Contravariant<Input>
+    _Error: Types.Covariant<Error>
+    _Output: Types.Covariant<Output>
+    _Value: Types.Invariant<Value>
+  }
 }
 ```
 

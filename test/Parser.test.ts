@@ -1,12 +1,8 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
-import * as List from "@effect/data/List"
-import * as Option from "@effect/data/Option"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it } from "@effect/vitest"
+import { Array as ReadonlyArray, Chunk, Either, List, Option } from "effect"
+import { pipe } from "effect/Function"
 
 const charA = Syntax.as(Syntax.char("a"), "a")
 const charB = Syntax.as(Syntax.char("b"), "b")
@@ -40,7 +36,7 @@ const parserTest = <Error, Result>(
   name: string,
   syntax: Syntax.Syntax<string, Error, string, Result>,
   input: string,
-  assertion: Either.Either<ParserError.ParserError<Error>, Result>
+  assertion: Either.Either<Result, ParserError.ParserError<Error>>
 ): void => {
   it(`${name} - stack-safe`, () => {
     const result = Syntax.parseStringWith(syntax, input, "stack-safe")

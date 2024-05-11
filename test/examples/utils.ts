@@ -1,14 +1,15 @@
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
 import type * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
+import { expect, it } from "@effect/vitest"
+import { Either } from "effect"
+import { pipe } from "effect/Function"
 
 export const tests = <Error, Result>(
   name: string,
   syntax: Syntax.Syntax<string, Error, string, Result>,
   input: string,
-  assertion: Either.Either<ParserError.ParserError<Error>, Result>,
-  printer?: Either.Either<Error, string>
+  assertion: Either.Either<Result, ParserError.ParserError<Error>>,
+  printer?: Either.Either<string, Error>
 ): void => {
   const result = Syntax.parseStringWith(syntax, input, "stack-safe")
   it(`${name} - stack-safe`, () => {

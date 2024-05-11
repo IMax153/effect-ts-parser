@@ -1,28 +1,30 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk, NonEmptyChunk } from "@effect/data/Chunk"
-import type { Either } from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import * as internal from "@effect/parser/internal_effect_untraced/syntax"
-import type { Parser } from "@effect/parser/Parser"
-import type { ParserError } from "@effect/parser/ParserError"
-import type { Printer } from "@effect/parser/Printer"
-import type { Regex } from "@effect/parser/Regex"
+import type { Chunk, NonEmptyChunk } from "effect/Chunk"
+import type { Either } from "effect/Either"
+import type { LazyArg } from "effect/Function"
+import type { Option } from "effect/Option"
+import type { Pipeable } from "effect/Pipeable"
+import type { Predicate } from "effect/Predicate"
+import type * as Types from "effect/Types"
+import * as InternalSyntax from "./internal/syntax.js"
+import type { Parser } from "./Parser.js"
+import type { ParserError } from "./ParserError.js"
+import type { Printer } from "./Printer.js"
+import type { Regex } from "./Regex.js"
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export const SyntaxTypeId: unique symbol = internal.SyntaxTypeId
+export const TypeId: unique symbol = InternalSyntax.TypeId
 
 /**
  * @since 1.0.0
  * @category symbols
  */
-export type SyntaxTypeId = typeof SyntaxTypeId
+export type TypeId = typeof TypeId
 
 /**
  * A `Syntax` defines both a `Parser` and a `Printer` and provides combinators
@@ -31,7 +33,7 @@ export type SyntaxTypeId = typeof SyntaxTypeId
  * @since 1.0.0
  * @category models
  */
-export interface Syntax<Input, Error, Output, Value> extends Syntax.Variance<Input, Error, Output, Value> {
+export interface Syntax<Input, Error, Output, Value> extends Syntax.Variance<Input, Error, Output, Value>, Pipeable {
   readonly parser: Parser<Input, Error, Value>
   readonly printer: Printer<Value, Error, Output>
 }
@@ -44,12 +46,12 @@ export declare namespace Syntax {
    * @since 1.0.0
    * @category models
    */
-  export interface Variance<Input, Error, Output, Value> {
-    readonly [SyntaxTypeId]: {
-      _Input: (_: Input) => void
-      _Error: (_: never) => Error
-      _Output: (_: never) => Output
-      _Value: (_: Value) => Value
+  export interface Variance<in Input, out Error, out Output, in out Value> {
+    readonly [TypeId]: {
+      _Input: Types.Contravariant<Input>
+      _Error: Types.Covariant<Error>
+      _Output: Types.Covariant<Output>
+      _Value: Types.Invariant<Value>
     }
   }
 }
@@ -60,7 +62,7 @@ export declare namespace Syntax {
  * @since 1.0.0
  * @category constructors
  */
-export const alphaNumeric: Syntax<string, string, string, string> = internal.alphaNumeric
+export const alphaNumeric: Syntax<string, string, string, string> = InternalSyntax.alphaNumeric
 
 /**
  * Constructs a `Syntax` that parses/prints one element without modification.
@@ -68,7 +70,7 @@ export const alphaNumeric: Syntax<string, string, string, string> = internal.alp
  * @since 1.0.0
  * @category constructors
  */
-export const anything: <Input>() => Syntax<Input, never, Input, Input> = internal.anything
+export const anything: <Input>() => Syntax<Input, never, Input, Input> = InternalSyntax.anything
 
 /**
  * Constructs a `Syntax` that parses/prints a single character.
@@ -76,7 +78,7 @@ export const anything: <Input>() => Syntax<Input, never, Input, Input> = interna
  * @since 1.0.0
  * @category constructors
  */
-export const anyChar: Syntax<string, never, string, string> = internal.anyChar
+export const anyChar: Syntax<string, never, string, string> = InternalSyntax.anyChar
 
 /**
  * Constructs a `Syntax` that parses/prints an arbitrary long string.
@@ -84,7 +86,7 @@ export const anyChar: Syntax<string, never, string, string> = internal.anyChar
  * @since 1.0.0
  * @category constructors
  */
-export const anyString: Syntax<string, never, string, string> = internal.anyString
+export const anyString: Syntax<string, never, string, string> = InternalSyntax.anyString
 
 /**
  * Transforms a `Syntax` that results in `void` in a `Syntax` that results in `value`
@@ -100,7 +102,7 @@ export const as: {
     self: Syntax<Input, Error, Output, void>,
     value: Value2
   ): Syntax<Input, Error, Output, Value2>
-} = internal.as
+} = InternalSyntax.as
 
 /**
  * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `value`
@@ -117,7 +119,7 @@ export const asPrinted: {
     value: Value2,
     from: Value
   ): Syntax<Input, Error, Output, Value2>
-} = internal.asPrinted
+} = InternalSyntax.asPrinted
 
 /**
  * Transforms a `Syntax` that results in `from` in a `Syntax` that results in `void`
@@ -133,7 +135,7 @@ export const asUnit: {
     self: Syntax<Input, Error, Output, Value>,
     from: Value
   ): Syntax<Input, Error, Output, void>
-} = internal.asUnit
+} = InternalSyntax.asUnit
 
 /**
  * Repeat this `Syntax` at least `min` number of times.
@@ -157,7 +159,7 @@ export const atLeast: {
     self: Syntax<Input, Error, Output, Value>,
     min: number
   ): Syntax<Input, Error, Output, Chunk<Value>>
-} = internal.repeatMin
+} = InternalSyntax.repeatMin
 
 /**
  * Repeat this `Syntax` at most `max` number of times.
@@ -175,7 +177,7 @@ export const atMost: {
     self: Syntax<Input, Error, Output, Value>,
     max: number
   ): Syntax<Input, Error, Output, Chunk<Value>>
-} = internal.repeatMax
+} = InternalSyntax.repeatMax
 
 /**
  * Enables auto-backtracking for this syntax.
@@ -185,7 +187,7 @@ export const atMost: {
  */
 export const autoBacktracking: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Value> = internal.autoBacktracking
+) => Syntax<Input, Error, Output, Value> = InternalSyntax.autoBacktracking
 
 /**
  * Concatenates the syntaxes `left`, then this, then `right`.
@@ -211,7 +213,7 @@ export const between: {
     left: Syntax<Input2, Error2, Output2, void>,
     right: Syntax<Input3, Error3, Output3, void>
   ): Syntax<Input & Input2 & Input3, Error | Error2 | Error3, Output | Output2 | Output3, Value>
-} = internal.zipBetween
+} = InternalSyntax.zipBetween
 
 /**
  * Returns a new `Syntax` that resets the parsing position in case it fails.
@@ -227,7 +229,7 @@ export const between: {
  */
 export const backtrack: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Value> = internal.backtrack
+) => Syntax<Input, Error, Output, Value> = InternalSyntax.backtrack
 
 /**
  * Ignores this syntax's result and instead captures the parsed string fragment
@@ -238,7 +240,7 @@ export const backtrack: <Input, Error, Output, Value>(
  */
 export const captureString: <Error, Output, Value>(
   self: Syntax<string, Error, Output, Value>
-) => Syntax<string, Error, string, string> = internal.captureString
+) => Syntax<string, Error, string, string> = InternalSyntax.captureString
 
 /**
  * Parse or print the specified character or fail with the specified error and
@@ -248,7 +250,7 @@ export const captureString: <Error, Output, Value>(
  * @category constructors
  */
 export const char: <Error = string>(char: string, error?: Error | undefined) => Syntax<string, Error, string, void> =
-  internal.char
+  InternalSyntax.char
 
 /**
  * Constructs a `Syntax` that parses/prints a single character if it matches one
@@ -257,7 +259,7 @@ export const char: <Error = string>(char: string, error?: Error | undefined) => 
  * @since 1.0.0
  * @category constructors
  */
-export const charIn: (chars: Iterable<string>) => Syntax<string, string, string, string> = internal.charIn
+export const charIn: (chars: Iterable<string>) => Syntax<string, string, string, string> = InternalSyntax.charIn
 
 /**
  * Parse or print a single character and fail with the specified `error` if the
@@ -266,7 +268,8 @@ export const charIn: (chars: Iterable<string>) => Syntax<string, string, string,
  * @since 1.0.0
  * @category constructors
  */
-export const charNot: <Error>(char: string, error: Error) => Syntax<string, Error, string, string> = internal.charNot
+export const charNot: <Error>(char: string, error: Error) => Syntax<string, Error, string, string> =
+  InternalSyntax.charNot
 
 /**
  * Constructs a `Syntax` that parses/prints a single character if it **DOES
@@ -275,7 +278,7 @@ export const charNot: <Error>(char: string, error: Error) => Syntax<string, Erro
  * @since 1.0.0
  * @category constructors
  */
-export const charNotIn: (chars: Iterable<string>) => Syntax<string, string, string, string> = internal.charNotIn
+export const charNotIn: (chars: Iterable<string>) => Syntax<string, string, string, string> = InternalSyntax.charNotIn
 
 /**
  * Constructs a `Syntax` for a single digit.
@@ -283,7 +286,7 @@ export const charNotIn: (chars: Iterable<string>) => Syntax<string, string, stri
  * @since 1.0.0
  * @category constructors
  */
-export const digit: Syntax<string, string, string, string> = internal.digit
+export const digit: Syntax<string, string, string, string> = InternalSyntax.digit
 
 /**
  * Constructs a `Syntax` that in parser mode only succeeds if the input stream
@@ -294,7 +297,7 @@ export const digit: Syntax<string, string, string, string> = internal.digit
  * @since 1.0.0
  * @category constructors
  */
-export const end: Syntax<unknown, never, never, void> = internal.end
+export const end: Syntax<unknown, never, never, void> = InternalSyntax.end
 
 /**
  * Constructs a `Syntax` that does not pares or print anything but fails with
@@ -303,7 +306,7 @@ export const end: Syntax<unknown, never, never, void> = internal.end
  * @since 1.0.0
  * @category constructors
  */
-export const fail: <Error>(error: Error) => Syntax<unknown, Error, never, unknown> = internal.fail
+export const fail: <Error>(error: Error) => Syntax<unknown, Error, never, unknown> = InternalSyntax.fail
 
 /**
  * Specifies a filter condition that gets checked in both parser and printer
@@ -325,7 +328,7 @@ export const filter: {
     predicate: Predicate<Value>,
     error: Error2
   ): Syntax<Input, Error | Error2, Output, Value>
-} = internal.filter
+} = InternalSyntax.filter
 
 /**
  * Constructs a `Syntax` that parses/prints a single character that matches the
@@ -335,7 +338,7 @@ export const filter: {
  * @category constructors
  */
 export const filterChar: <Error>(predicate: Predicate<string>, error: Error) => Syntax<string, Error, string, string> =
-  internal.filterChar
+  InternalSyntax.filterChar
 
 /**
  * Flattens a result of parsed strings to a single string.
@@ -345,7 +348,7 @@ export const filterChar: <Error>(predicate: Predicate<string>, error: Error) => 
  */
 export const flatten: <Input, Error, Output>(
   self: Syntax<Input, Error, Output, Chunk<string>>
-) => Syntax<Input, Error, Output, string> = internal.flatten
+) => Syntax<Input, Error, Output, string> = InternalSyntax.flatten
 
 /**
  * Flattens a result of parsed strings to a single string.
@@ -355,7 +358,7 @@ export const flatten: <Input, Error, Output>(
  */
 export const flattenNonEmpty: <Input, Error, Output>(
   self: Syntax<Input, Error, Output, NonEmptyChunk<string>>
-) => Syntax<Input, Error, Output, string> = internal.flattenNonEmpty
+) => Syntax<Input, Error, Output, string> = InternalSyntax.flattenNonEmpty
 
 /**
  * Constructs a `Syntax` that in parser mode results in the current input
@@ -364,7 +367,7 @@ export const flattenNonEmpty: <Input, Error, Output>(
  * @since 1.0.0
  * @category constructors
  */
-export const index: Syntax<unknown, never, never, number> = internal.index
+export const index: Syntax<unknown, never, never, number> = InternalSyntax.index
 
 /**
  * Constructs a `Syntax` for a single letter.
@@ -372,7 +375,7 @@ export const index: Syntax<unknown, never, never, number> = internal.index
  * @since 1.0.0
  * @category constructors
  */
-export const letter: Syntax<string, string, string, string> = internal.letter
+export const letter: Syntax<string, string, string, string> = InternalSyntax.letter
 
 /**
  * Disables auto-backtracking for this syntax.
@@ -382,7 +385,7 @@ export const letter: Syntax<string, string, string, string> = internal.letter
  */
 export const manualBacktracking: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Value> = internal.manualBacktracking
+) => Syntax<Input, Error, Output, Value> = InternalSyntax.manualBacktracking
 
 /**
  * Maps the error with the specified function.
@@ -400,7 +403,7 @@ export const mapError: {
     self: Syntax<Input, Error, Output, Value>,
     f: (error: Error) => Error2
   ): Syntax<Input, Error2, Output, Value>
-} = internal.mapError
+} = InternalSyntax.mapError
 
 /**
  * Associates a name with this syntax. The chain of named parsers are reported
@@ -419,7 +422,7 @@ export const named: {
     self: Syntax<Input, Error, Output, Value>,
     name: string
   ): Syntax<Input, Error, Output, Value>
-} = internal.named
+} = InternalSyntax.named
 
 /**
  * Inverts the success condition of this `Syntax`, succeeding only if this
@@ -438,7 +441,7 @@ export const not: {
     self: Syntax<Input, Error, Output, Value>,
     error: Error2
   ): Syntax<Input, Error | Error2, Output, void>
-} = internal.not
+} = InternalSyntax.not
 
 /**
  * Make this `Syntax` optional.
@@ -451,7 +454,7 @@ export const not: {
  */
 export const optional: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Option<Value>> = internal.optional
+) => Syntax<Input, Error, Output, Option<Value>> = InternalSyntax.optional
 
 /**
  * Assigns `that` syntax as a fallback of this. First this parser or printer
@@ -477,7 +480,7 @@ export const orElse: {
     self: Syntax<Input, Error, Output, Value>,
     that: LazyArg<Syntax<Input2, Error2, Output2, Value>>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
-} = internal.orElse
+} = InternalSyntax.orElse
 
 /**
  * Assigns `that` syntax as a fallback of this. First this parser or printer
@@ -496,12 +499,12 @@ export const orElseEither: {
     that: LazyArg<Syntax<Input2, Error2, Output2, Value2>>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Either<Value, Value2>>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Either<Value2, Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     that: LazyArg<Syntax<Input2, Error2, Output2, Value2>>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Either<Value, Value2>>
-} = internal.orElseEither
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Either<Value2, Value>>
+} = InternalSyntax.orElseEither
 
 /**
  * Run this `Syntax`'s parser on the given `input` string.
@@ -514,12 +517,12 @@ export const parseString: {
     input: string
   ): <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>
-  ) => Either<ParserError<Error>, Value>
+  ) => Either<Value, ParserError<Error>>
   <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>,
     input: string
-  ): Either<ParserError<Error>, Value>
-} = internal.parseString
+  ): Either<Value, ParserError<Error>>
+} = InternalSyntax.parseString
 
 /**
  * Run this `Syntax`'s parser on the given `input` string using a specific
@@ -534,13 +537,13 @@ export const parseStringWith: {
     implementation: Parser.Implementation
   ): <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>
-  ) => Either<ParserError<Error>, Value>
+  ) => Either<Value, ParserError<Error>>
   <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>,
     input: string,
     implementation: Parser.Implementation
-  ): Either<ParserError<Error>, Value>
-} = internal.parseStringWith
+  ): Either<Value, ParserError<Error>>
+} = InternalSyntax.parseStringWith
 
 /**
  * Prints the specified `value` to a string.
@@ -549,9 +552,9 @@ export const parseStringWith: {
  * @category execution
  */
 export const printString: {
-  <Value>(value: Value): <Input, Error>(self: Syntax<Input, Error, string, Value>) => Either<Error, string>
-  <Input, Error, Value>(self: Syntax<Input, Error, string, Value>, value: Value): Either<Error, string>
-} = internal.printString
+  <Value>(value: Value): <Input, Error>(self: Syntax<Input, Error, string, Value>) => Either<string, Error>
+  <Input, Error, Value>(self: Syntax<Input, Error, string, Value>, value: Value): Either<string, Error>
+} = InternalSyntax.printString
 
 /**
  * Constructs a `Syntax` that executes a regular expression on the input and
@@ -561,7 +564,8 @@ export const printString: {
  * @since 1.0.0
  * @category constructors
  */
-export const regex: <Error>(regex: Regex, error: Error) => Syntax<string, Error, string, Chunk<string>> = internal.regex
+export const regex: <Error>(regex: Regex, error: Error) => Syntax<string, Error, string, Chunk<string>> =
+  InternalSyntax.regex
 
 /**
  * Constructs a `Syntax` that during parsing executes a regular expression on
@@ -576,7 +580,7 @@ export const regex: <Error>(regex: Regex, error: Error) => Syntax<string, Error,
  * @category constructors
  */
 export const regexChar: <Error>(regex: Regex, error: Error) => Syntax<string, Error, string, string> =
-  internal.regexChar
+  InternalSyntax.regexChar
 
 /**
  * Constructs a `Syntax` which parses using the given regular expression and
@@ -590,7 +594,7 @@ export const regexDiscard: <Error>(
   regex: Regex,
   error: Error,
   chars: Iterable<string>
-) => Syntax<string, Error, string, void> = internal.regexDiscard
+) => Syntax<string, Error, string, void> = InternalSyntax.regexDiscard
 
 /**
  * Repeats this `Syntax` zero or more times.
@@ -606,7 +610,7 @@ export const regexDiscard: <Error>(
  */
 export const repeat: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Chunk<Value>> = internal.repeatMin0
+) => Syntax<Input, Error, Output, Chunk<Value>> = InternalSyntax.repeatMin0
 
 /**
  * Repeats this `Syntax` at least one time.
@@ -622,7 +626,7 @@ export const repeat: <Input, Error, Output, Value>(
  */
 export const repeat1: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, NonEmptyChunk<Value>> = internal.repeatMin1
+) => Syntax<Input, Error, Output, NonEmptyChunk<Value>> = InternalSyntax.repeatMin1
 
 /**
  * Repeats this `Syntax` until the `stopCondition`, which performed after each
@@ -641,7 +645,7 @@ export const repeatUntil: {
     self: Syntax<Input, Error, Output, Value>,
     stopCondition: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk<Value>>
-} = internal.repeatUntil
+} = InternalSyntax.repeatUntil
 
 /**
  * Repeats this `Syntax` zero or more times and with the `separator` injected
@@ -660,7 +664,7 @@ export const repeatWithSeparator: {
     self: Syntax<Input, Error, Output, Value>,
     separator: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk<Value>>
-} = internal.repeatWithSeparator
+} = InternalSyntax.repeatWithSeparator
 
 /**
  * Repeats this `Syntax` at least once with the `separator` injected between
@@ -679,7 +683,7 @@ export const repeatWithSeparator1: {
     self: Syntax<Input, Error, Output, Value>,
     separator: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, NonEmptyChunk<Value>>
-} = internal.repeatWithSeparator1
+} = InternalSyntax.repeatWithSeparator1
 
 /**
  * Enables or disables auto-backtracking for this syntax.
@@ -697,7 +701,7 @@ export const setAutoBacktracking: {
     self: Syntax<Input, Error, Output, Value>,
     enabled: boolean
   ): Syntax<Input, Error, Output, Value>
-} = internal.setAutoBacktracking
+} = InternalSyntax.setAutoBacktracking
 
 /**
  * Constructs a `Syntax` that parses/prints the specified string and results in
@@ -706,7 +710,7 @@ export const setAutoBacktracking: {
  * @since 1.0.0
  * @category constructors
  */
-export const string: <Value>(str: string, value: Value) => Syntax<string, string, string, Value> = internal.string
+export const string: <Value>(str: string, value: Value) => Syntax<string, string, string, Value> = InternalSyntax.string
 
 /**
  * Constructs a `Syntax` that does not parse or print anything but succeeds with
@@ -715,7 +719,7 @@ export const string: <Value>(str: string, value: Value) => Syntax<string, string
  * @since 1.0.0
  * @category constructors
  */
-export const succeed: <Value>(value: Value) => Syntax<unknown, never, never, Value> = internal.succeed
+export const succeed: <Value>(value: Value) => Syntax<unknown, never, never, Value> = InternalSyntax.succeed
 
 /**
  * Surrounds this `Syntax` with the `other` syntax. The result is this syntax's
@@ -734,14 +738,14 @@ export const surroundedBy: {
     self: Syntax<Input, Error, Output, Value>,
     other: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
-} = internal.zipSurrounded
+} = InternalSyntax.zipSurrounded
 
 /**
  * Lazily constructs a `Syntax`. Can be used to construct a recursive parser
  *
  * @example
  *
- * import { pipe } from "@effect/data/Function"
+ * import { pipe } from "effect/Function"
  * import * as Syntax from "@effect/parser/Syntax"
  *
  * const recursive: Syntax.Syntax<string, string, string, string> = pipe(
@@ -756,7 +760,7 @@ export const surroundedBy: {
  */
 export const suspend: <Input, Error, Output, Value>(
   self: LazyArg<Syntax<Input, Error, Output, Value>>
-) => Syntax<Input, Error, Output, Value> = internal.suspend
+) => Syntax<Input, Error, Output, Value> = InternalSyntax.suspend
 
 /**
  * Maps the parser's successful result with the given function `to`, and maps
@@ -777,7 +781,7 @@ export const transform: {
     to: (value: Value) => Value2,
     from: (value: Value2) => Value
   ): Syntax<Input, Error, Output, Value2>
-} = internal.transform
+} = InternalSyntax.transform
 
 /**
  * Maps the parser's successful result with the given function `to`, and maps
@@ -789,17 +793,17 @@ export const transform: {
  */
 export const transformEither: {
   <Error, Value, Value2>(
-    to: (value: Value) => Either<Error, Value2>,
-    from: (value: Value2) => Either<Error, Value>
+    to: (value: Value) => Either<Value2, Error>,
+    from: (value: Value2) => Either<Value, Error>
   ): <Input, Output>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input, Error, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
-    to: (value: Value) => Either<Error, Value2>,
-    from: (value: Value2) => Either<Error, Value>
+    to: (value: Value) => Either<Value2, Error>,
+    from: (value: Value2) => Either<Value, Error>
   ): Syntax<Input, Error, Output, Value2>
-} = internal.transformEither
+} = InternalSyntax.transformEither
 
 /**
  * Maps the parser's successful result with the given function `to`, and maps
@@ -822,7 +826,7 @@ export const transformOption: {
     to: (value: Value) => Option<Value2>,
     from: (value: Value2) => Option<Value>
   ): Syntax<Input, Option<Error>, Output, Value2>
-} = internal.transformOption
+} = InternalSyntax.transformOption
 
 /**
  * Maps the parsed value with the function `to`, and the value to be printed
@@ -848,7 +852,7 @@ export const transformTo: {
     from: (value: Value2) => Option<Value>,
     error: Error2
   ): Syntax<Input, Error | Error2, Output, Value2>
-} = internal.transformTo
+} = InternalSyntax.transformTo
 
 /**
  * Constructs a `Syntax` that results in `void`.
@@ -856,7 +860,7 @@ export const transformTo: {
  * @since 1.0.0
  * @category constructors
  */
-export const unit: () => Syntax<unknown, never, never, void> = internal.unit
+export const unit: () => Syntax<unknown, never, never, void> = InternalSyntax.unit
 
 /**
  * Constructs a `Syntax` that executes a regular expression on the input and
@@ -865,7 +869,7 @@ export const unit: () => Syntax<unknown, never, never, void> = internal.unit
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegex: (regex: Regex) => Syntax<string, never, string, Chunk<string>> = internal.unsafeRegex
+export const unsafeRegex: (regex: Regex) => Syntax<string, never, string, Chunk<string>> = InternalSyntax.unsafeRegex
 
 /**
  * Constructs a `Syntax` that parses using a regular expression and results in
@@ -878,7 +882,7 @@ export const unsafeRegex: (regex: Regex) => Syntax<string, never, string, Chunk<
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegexChar: (regex: Regex) => Syntax<string, never, string, string> = internal.unsafeRegexChar
+export const unsafeRegexChar: (regex: Regex) => Syntax<string, never, string, string> = InternalSyntax.unsafeRegexChar
 
 /**
  * Constructs a `Syntax` which parses using the specified regular expression and
@@ -889,7 +893,7 @@ export const unsafeRegexChar: (regex: Regex) => Syntax<string, never, string, st
  * @category constructors
  */
 export const unsafeRegexDiscard: (regex: Regex, chars: Iterable<string>) => Syntax<string, never, string, void> =
-  internal.unsafeRegexDiscard
+  InternalSyntax.unsafeRegexDiscard
 
 /**
  * Constructs a `Syntax` for a single whitespace character.
@@ -897,7 +901,7 @@ export const unsafeRegexDiscard: (regex: Regex, chars: Iterable<string>) => Synt
  * @since 1.0.0
  * @category constructors
  */
-export const whitespace: Syntax<string, string, string, string> = internal.whitespace
+export const whitespace: Syntax<string, string, string, string> = InternalSyntax.whitespace
 
 /**
  * Concatenates this `Syntax` with `that` `Syntax`. If the parser of both
@@ -922,7 +926,7 @@ export const zipLeft: {
     self: Syntax<Input, Error, Output, Value>,
     that: Syntax<Input2, Error2, Output2, void>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
-} = internal.zipLeft
+} = InternalSyntax.zipLeft
 
 /**
  * Concatenates this `Syntax` with `that` `Syntax`. If the parser of both
@@ -947,7 +951,7 @@ export const zipRight: {
     self: Syntax<Input, Error, Output, void>,
     that: Syntax<Input2, Error2, Output2, Value2>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value2>
-} = internal.zipRight
+} = InternalSyntax.zipRight
 
 /**
  * Concatenates this syntax with `that` syntax. In case both parser succeeds,
@@ -969,4 +973,4 @@ export const zip: {
     self: Syntax<Input, Error, Output, Value>,
     that: Syntax<Input2, Error2, Output2, Value2>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, readonly [Value, Value2]>
-} = internal.zip
+} = InternalSyntax.zip
