@@ -148,7 +148,7 @@ describe.concurrent("Regex", () => {
   })
 
   it("literal+", () => {
-    fc.assert(fc.property(fc.string({ minLength: 1 }), (input) => {
+    fc.assert(fc.property(fc.string({ minLength: 1 }).filter(a => a !== "not".slice(0, a.length)), (input) => {
       const compiled = Regex.compile(Regex.string(input))
       const bad = "not" + input
       expect(compiled.test(0, input)).toBe(input.length)
