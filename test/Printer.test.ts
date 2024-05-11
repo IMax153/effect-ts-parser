@@ -1,8 +1,8 @@
 import * as Printer from "@effect/parser/Printer"
 import * as Syntax from "@effect/parser/Syntax"
+import { describe, expect, it } from "@effect/vitest"
 import { Array as ReadonlyArray, Chunk, Either, Option } from "effect"
 import { pipe } from "effect/Function"
-import { describe, expect, it } from "vitest"
 
 const charA: Syntax.Syntax<string, string, string, string> = Syntax.charIn("a")
 

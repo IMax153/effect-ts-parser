@@ -1,9 +1,9 @@
 import * as Regex from "@effect/parser/Regex"
+import { describe, expect, it } from "@effect/vitest"
 import { Array as ReadonlyArray } from "effect"
 import { pipe } from "effect/Function"
 import type { Predicate } from "effect/Predicate"
 import * as fc from "fast-check"
-import { describe, expect, it } from "vitest"
 
 const IS_DIGIT_REGEX = /^[0-9]$/
 const IS_LETTER_REGEX = /^[a-z]$/i

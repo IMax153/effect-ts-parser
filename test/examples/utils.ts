@@ -1,8 +1,8 @@
 import type * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
+import { expect, it } from "@effect/vitest"
 import { Either } from "effect"
 import { pipe } from "effect/Function"
-import { expect, it } from "vitest"
 
 export const tests = <Error, Result>(
   name: string,

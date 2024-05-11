@@ -1,8 +1,8 @@
 import * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
+import { describe, expect, it } from "@effect/vitest"
 import { Array as ReadonlyArray, Chunk, Either, List, Option } from "effect"
 import { pipe } from "effect/Function"
-import { describe, expect, it } from "vitest"
 
 const charA = Syntax.as(Syntax.char("a"), "a")
 const charB = Syntax.as(Syntax.char("b"), "b")
