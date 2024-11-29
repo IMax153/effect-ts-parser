@@ -1,14 +1,10 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk, NonEmptyChunk } from "@effect/data/Chunk"
-import type { Either } from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
 import * as internal from "@effect/parser/internal_effect_untraced/printer"
 import type { Regex } from "@effect/parser/Regex"
 import type { Target } from "@effect/parser/Target"
+import type { Chunk, Either, Function, Option, Predicate } from "effect"
 
 /**
  * @since 1.0.0
@@ -177,13 +173,13 @@ export const contramap: {
  */
 export const contramapEither: {
   <Input2, Error2, Input>(
-    from: (value: Input2) => Either<Error2, Input>
+    from: (value: Input2) => Either.Either<Error2, Input>
   ): <Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Input2, Error2, Output>
   <Input, Error, Output, Input2, Error2>(
     self: Printer<Input, Error, Output>,
-    from: (value: Input2) => Either<Error2, Input>
+    from: (value: Input2) => Either.Either<Error2, Input>
   ): Printer<Input2, Error2, Output>
 } = internal.contramapEither
 
@@ -199,14 +195,14 @@ export const contramapEither: {
  */
 export const contramapTo: {
   <Input2, Input, Error2>(
-    from: (value: Input2) => Option<Input>,
+    from: (value: Input2) => Option.Option<Input>,
     error: Error2
   ): <Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Input2, Error2, Output>
   <Input, Error, Output, Input2, Error2>(
     self: Printer<Input, Error, Output>,
-    from: (value: Input2) => Option<Input>,
+    from: (value: Input2) => Option.Option<Input>,
     error: Error2
   ): Printer<Input2, Error2, Output>
 } = internal.contramapTo
@@ -264,14 +260,14 @@ export const fail: <Error>(error: Error) => Printer<unknown, Error, never> = int
  */
 export const filterInput: {
   <Input, Error2>(
-    condition: Predicate<Input>,
+    condition: Predicate.Predicate<Input>,
     error: Error2
   ): <Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Input, Error2 | Error, Output>
   <Input, Error, Output, Error2>(
     self: Printer<Input, Error, Output>,
-    condition: Predicate<Input>,
+    condition: Predicate.Predicate<Input>,
     error: Error2
   ): Printer<Input, Error | Error2, Output>
 } = internal.filterInput
@@ -283,7 +279,7 @@ export const filterInput: {
  * @category combinators
  */
 export const flatten: <Error, Output>(
-  self: Printer<Chunk<string>, Error, Output>
+  self: Printer<Chunk.Chunk<string>, Error, Output>
 ) => Printer<string, Error, Output> = internal.flatten
 
 /**
@@ -293,7 +289,7 @@ export const flatten: <Error, Output>(
  * @category combinators
  */
 export const flattenNonEmpty: <Error, Output>(
-  self: Printer<NonEmptyChunk<string>, Error, Output>
+  self: Printer<Chunk.NonEmptyChunk<string>, Error, Output>
 ) => Printer<string, Error, Output> = internal.flattenNonEmpty
 
 /**
@@ -352,7 +348,7 @@ export const notChar: <Error>(char: string, failure?: Error | undefined) => Prin
  */
 export const optional: <Input, Error, Output>(
   self: Printer<Input, Error, Output>
-) => Printer<Option<Input>, Error, Output> = internal.optional
+) => Printer<Option.Option<Input>, Error, Output> = internal.optional
 
 /**
  * Prints `self` and if it fails, ignore the printed output and print `that`
@@ -363,13 +359,13 @@ export const optional: <Input, Error, Output>(
  */
 export const orElse: {
   <Input2, Error2, Output2>(
-    that: LazyArg<Printer<Input2, Error2, Output2>>
+    that: Function.LazyArg<Printer<Input2, Error2, Output2>>
   ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Input2 | Input, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer<Input, Error, Output>,
-    that: LazyArg<Printer<Input2, Error2, Output2>>
+    that: Function.LazyArg<Printer<Input2, Error2, Output2>>
   ): Printer<Input | Input2, Error | Error2, Output | Output2>
 } = internal.orElse
 
@@ -382,14 +378,14 @@ export const orElse: {
  */
 export const orElseEither: {
   <Input2, Error2, Output2>(
-    that: LazyArg<Printer<Input2, Error2, Output2>>
+    that: Function.LazyArg<Printer<Input2, Error2, Output2>>
   ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
-  ) => Printer<Either<Input, Input2>, Error2 | Error, Output2 | Output>
+  ) => Printer<Either.Either<Input, Input2>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer<Input, Error, Output>,
-    that: LazyArg<Printer<Input2, Error2, Output2>>
-  ): Printer<Either<Input, Input2>, Error | Error2, Output | Output2>
+    that: Function.LazyArg<Printer<Input2, Error2, Output2>>
+  ): Printer<Either.Either<Input, Input2>, Error | Error2, Output | Output2>
 } = internal.orElseEither
 
 /**
@@ -415,8 +411,10 @@ export const outputString: (value: string) => Printer<never, never, string> = in
  * @category execution
  */
 export const printToChunk: {
-  <Input>(input: Input): <Error, Output>(self: Printer<Input, Error, Output>) => Either<Error, Chunk<Output>>
-  <Input, Error, Output>(self: Printer<Input, Error, Output>, input: Input): Either<Error, Chunk<Output>>
+  <Input>(
+    input: Input
+  ): <Error, Output>(self: Printer<Input, Error, Output>) => Either.Either<Error, Chunk.Chunk<Output>>
+  <Input, Error, Output>(self: Printer<Input, Error, Output>, input: Input): Either.Either<Error, Chunk.Chunk<Output>>
 } = internal.printToChunk
 
 /**
@@ -426,8 +424,8 @@ export const printToChunk: {
  * @category execution
  */
 export const printToString: {
-  <Input>(value: Input): <Error>(self: Printer<Input, Error, string>) => Either<Error, string>
-  <Input, Error>(self: Printer<Input, Error, string>, input: Input): Either<Error, string>
+  <Input>(value: Input): <Error>(self: Printer<Input, Error, string>) => Either.Either<Error, string>
+  <Input, Error>(self: Printer<Input, Error, string>, input: Input): Either.Either<Error, string>
 } = internal.printToString
 
 /**
@@ -442,12 +440,12 @@ export const printToTarget: {
     target: T
   ): <Error>(
     self: Printer<Input, Error, Output>
-  ) => Either<Error, void>
+  ) => Either.Either<Error, void>
   <Input, Error, Output, T extends Target<any, Output>>(
     self: Printer<Input, Error, Output>,
     input: Input,
     target: T
-  ): Either<Error, void>
+  ): Either.Either<Error, void>
 } = internal.printToTarget
 
 /**
@@ -457,7 +455,7 @@ export const printToTarget: {
  * @since 1.0.0
  * @category constructors
  */
-export const regex: <Error>(regex: Regex, error: Error) => Printer<Chunk<string>, Error, string> = internal.regex
+export const regex: <Error>(regex: Regex, error: Error) => Printer<Chunk.Chunk<string>, Error, string> = internal.regex
 
 /**
  * A `Printer` that prints the specified characters.
@@ -485,7 +483,7 @@ export const regexChar: <Error>(regex: Regex, error: Error) => Printer<string, E
  */
 export const repeat: <Input, Error, Output>(
   self: Printer<Input, Error, Output>
-) => Printer<Chunk<Input>, Error, Output> = internal.repeatMin0
+) => Printer<Chunk.Chunk<Input>, Error, Output> = internal.repeatMin0
 
 /**
  * Repeats this printer for each element of the input chunk.
@@ -497,7 +495,7 @@ export const repeat: <Input, Error, Output>(
  */
 export const repeat1: <Input, Error, Output>(
   self: Printer<Input, Error, Output>
-) => Printer<NonEmptyChunk<Input>, Error, Output> = internal.repeatMin1
+) => Printer<Chunk.NonEmptyChunk<Input>, Error, Output> = internal.repeatMin1
 
 /**
  * Repeats this printer for each element of the input chunk, separated by the
@@ -513,11 +511,11 @@ export const repeatWithSeparator: {
     separator: Printer<void, Error2, Output2>
   ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
-  ) => Printer<Chunk<Input>, Error2 | Error, Output2 | Output>
+  ) => Printer<Chunk.Chunk<Input>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Error2, Output2>(
     self: Printer<Input, Error, Output>,
     separator: Printer<void, Error2, Output2>
-  ): Printer<Chunk<Input>, Error | Error2, Output | Output2>
+  ): Printer<Chunk.Chunk<Input>, Error | Error2, Output | Output2>
 } = internal.repeatWithSeparator
 
 /**
@@ -534,11 +532,11 @@ export const repeatWithSeparator1: {
     separator: Printer<void, Error2, Output2>
   ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
-  ) => Printer<NonEmptyChunk<Input>, Error2 | Error, Output2 | Output>
+  ) => Printer<Chunk.NonEmptyChunk<Input>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Error2, Output2>(
     self: Printer<Input, Error, Output>,
     separator: Printer<void, Error2, Output2>
-  ): Printer<NonEmptyChunk<Input>, Error | Error2, Output | Output2>
+  ): Printer<Chunk.NonEmptyChunk<Input>, Error | Error2, Output | Output2>
 } = internal.repeatWithSeparator1
 
 /**
@@ -553,11 +551,11 @@ export const repeatUntil: {
     stopCondition: Printer<void, Error2, Output2>
   ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
-  ) => Printer<Chunk<Input>, Error2 | Error, Output2 | Output>
+  ) => Printer<Chunk.Chunk<Input>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Error2, Output2>(
     self: Printer<Input, Error, Output>,
     stopCondition: Printer<void, Error2, Output2>
-  ): Printer<Chunk<Input>, Error | Error2, Output | Output2>
+  ): Printer<Chunk.Chunk<Input>, Error | Error2, Output | Output2>
 } = internal.repeatUntil
 
 /**
@@ -603,7 +601,7 @@ export const surroundedBy: {
  * @category constructors
  */
 export const suspend: <Input, Error, Output>(
-  printer: LazyArg<Printer<Input, Error, Output>>
+  printer: Function.LazyArg<Printer<Input, Error, Output>>
 ) => Printer<Input, Error, Output> = internal.suspend
 
 /**
@@ -616,14 +614,14 @@ export const suspend: <Input, Error, Output>(
  */
 export const transformOption: {
   <Input2, Input>(
-    from: (input: Input2) => Option<Input>
+    from: (input: Input2) => Option.Option<Input>
   ): <Error, Output>(
     self: Printer<Input, Error, Output>
-  ) => Printer<Input2, Option<Error>, Output>
+  ) => Printer<Input2, Option.Option<Error>, Output>
   <Input, Error, Output, Input2>(
     self: Printer<Input, Error, Output>,
-    from: (input: Input2) => Option<Input>
-  ): Printer<Input2, Option<Error>, Output>
+    from: (input: Input2) => Option.Option<Input>
+  ): Printer<Input2, Option.Option<Error>, Output>
 } = internal.transformOption
 
 /**
@@ -641,7 +639,7 @@ export const unit: () => Printer<void, never, never> = internal.unit
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegex: (regex: Regex) => Printer<Chunk<string>, never, string> = internal.unsafeRegex
+export const unsafeRegex: (regex: Regex) => Printer<Chunk.Chunk<string>, never, string> = internal.unsafeRegex
 
 /**
  * A `Printer` that prints a single character if matches the given `regex`.

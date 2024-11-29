@@ -1,11 +1,10 @@
 {
-    "image": "mcr.microsoft.com/vscode/devcontainers/typescript-node:16",
+    "image": "mcr.microsoft.com/vscode/devcontainers/typescript-node:22",
     "customizations": {
         "vscode": {
             "extensions": [
                 "dbaeumer.vscode-eslint"
             ]
         }
-    },
-    "initializeCommand": "npm install -g pnpm && pnpm install && pnpm run build"
+    }
 }

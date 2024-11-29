@@ -1,16 +1,13 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk, NonEmptyChunk } from "@effect/data/Chunk"
-import type { Either } from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
+
 import * as internal from "@effect/parser/internal_effect_untraced/syntax"
 import type { Parser } from "@effect/parser/Parser"
 import type { ParserError } from "@effect/parser/ParserError"
 import type { Printer } from "@effect/parser/Printer"
 import type { Regex } from "@effect/parser/Regex"
+import type { Chunk, Either, Function, Option, Predicate } from "effect"
 
 /**
  * @since 1.0.0
@@ -152,11 +149,11 @@ export const atLeast: {
     min: number
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error, Output, Chunk<Value>>
+  ) => Syntax<Input, Error, Output, Chunk.Chunk<Value>>
   <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>,
     min: number
-  ): Syntax<Input, Error, Output, Chunk<Value>>
+  ): Syntax<Input, Error, Output, Chunk.Chunk<Value>>
 } = internal.repeatMin
 
 /**
@@ -170,11 +167,11 @@ export const atMost: {
     max: number
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Error, Output, Chunk<Value>>
+  ) => Syntax<Input, Error, Output, Chunk.Chunk<Value>>
   <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>,
     max: number
-  ): Syntax<Input, Error, Output, Chunk<Value>>
+  ): Syntax<Input, Error, Output, Chunk.Chunk<Value>>
 } = internal.repeatMax
 
 /**
@@ -315,14 +312,14 @@ export const fail: <Error>(error: Error) => Syntax<unknown, Error, never, unknow
  */
 export const filter: {
   <Value, Error2>(
-    predicate: Predicate<Value>,
+    predicate: Predicate.Predicate<Value>,
     error: Error2
   ): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input, Error2 | Error, Output, Value>
   <Input, Error, Output, Value, Error2>(
     self: Syntax<Input, Error, Output, Value>,
-    predicate: Predicate<Value>,
+    predicate: Predicate.Predicate<Value>,
     error: Error2
   ): Syntax<Input, Error | Error2, Output, Value>
 } = internal.filter
@@ -334,8 +331,10 @@ export const filter: {
  * @since 1.0.0
  * @category constructors
  */
-export const filterChar: <Error>(predicate: Predicate<string>, error: Error) => Syntax<string, Error, string, string> =
-  internal.filterChar
+export const filterChar: <Error>(
+  predicate: Predicate.Predicate<string>,
+  error: Error
+) => Syntax<string, Error, string, string> = internal.filterChar
 
 /**
  * Flattens a result of parsed strings to a single string.
@@ -344,7 +343,7 @@ export const filterChar: <Error>(predicate: Predicate<string>, error: Error) => 
  * @category combinators
  */
 export const flatten: <Input, Error, Output>(
-  self: Syntax<Input, Error, Output, Chunk<string>>
+  self: Syntax<Input, Error, Output, Chunk.Chunk<string>>
 ) => Syntax<Input, Error, Output, string> = internal.flatten
 
 /**
@@ -354,7 +353,7 @@ export const flatten: <Input, Error, Output>(
  * @category combinators
  */
 export const flattenNonEmpty: <Input, Error, Output>(
-  self: Syntax<Input, Error, Output, NonEmptyChunk<string>>
+  self: Syntax<Input, Error, Output, Chunk.NonEmptyChunk<string>>
 ) => Syntax<Input, Error, Output, string> = internal.flattenNonEmpty
 
 /**
@@ -451,7 +450,7 @@ export const not: {
  */
 export const optional: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Option<Value>> = internal.optional
+) => Syntax<Input, Error, Output, Option.Option<Value>> = internal.optional
 
 /**
  * Assigns `that` syntax as a fallback of this. First this parser or printer
@@ -469,13 +468,13 @@ export const optional: <Input, Error, Output, Value>(
  */
 export const orElse: {
   <Input2, Error2, Output2, Value>(
-    that: LazyArg<Syntax<Input2, Error2, Output2, Value>>
+    that: Function.LazyArg<Syntax<Input2, Error2, Output2, Value>>
   ): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Value>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
     self: Syntax<Input, Error, Output, Value>,
-    that: LazyArg<Syntax<Input2, Error2, Output2, Value>>
+    that: Function.LazyArg<Syntax<Input2, Error2, Output2, Value>>
   ): Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 } = internal.orElse
 
@@ -493,14 +492,14 @@ export const orElse: {
  */
 export const orElseEither: {
   <Input2, Error2, Output2, Value2>(
-    that: LazyArg<Syntax<Input2, Error2, Output2, Value2>>
+    that: Function.LazyArg<Syntax<Input2, Error2, Output2, Value2>>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Either<Value, Value2>>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Either.Either<Value, Value2>>
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax<Input, Error, Output, Value>,
-    that: LazyArg<Syntax<Input2, Error2, Output2, Value2>>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Either<Value, Value2>>
+    that: Function.LazyArg<Syntax<Input2, Error2, Output2, Value2>>
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>
 } = internal.orElseEither
 
 /**
@@ -514,11 +513,11 @@ export const parseString: {
     input: string
   ): <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>
-  ) => Either<ParserError<Error>, Value>
+  ) => Either.Either<ParserError<Error>, Value>
   <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>,
     input: string
-  ): Either<ParserError<Error>, Value>
+  ): Either.Either<ParserError<Error>, Value>
 } = internal.parseString
 
 /**
@@ -534,12 +533,12 @@ export const parseStringWith: {
     implementation: Parser.Implementation
   ): <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>
-  ) => Either<ParserError<Error>, Value>
+  ) => Either.Either<ParserError<Error>, Value>
   <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>,
     input: string,
     implementation: Parser.Implementation
-  ): Either<ParserError<Error>, Value>
+  ): Either.Either<ParserError<Error>, Value>
 } = internal.parseStringWith
 
 /**
@@ -549,8 +548,8 @@ export const parseStringWith: {
  * @category execution
  */
 export const printString: {
-  <Value>(value: Value): <Input, Error>(self: Syntax<Input, Error, string, Value>) => Either<Error, string>
-  <Input, Error, Value>(self: Syntax<Input, Error, string, Value>, value: Value): Either<Error, string>
+  <Value>(value: Value): <Input, Error>(self: Syntax<Input, Error, string, Value>) => Either.Either<Error, string>
+  <Input, Error, Value>(self: Syntax<Input, Error, string, Value>, value: Value): Either.Either<Error, string>
 } = internal.printString
 
 /**
@@ -561,7 +560,8 @@ export const printString: {
  * @since 1.0.0
  * @category constructors
  */
-export const regex: <Error>(regex: Regex, error: Error) => Syntax<string, Error, string, Chunk<string>> = internal.regex
+export const regex: <Error>(regex: Regex, error: Error) => Syntax<string, Error, string, Chunk.Chunk<string>> =
+  internal.regex
 
 /**
  * Constructs a `Syntax` that during parsing executes a regular expression on
@@ -606,7 +606,7 @@ export const regexDiscard: <Error>(
  */
 export const repeat: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, Chunk<Value>> = internal.repeatMin0
+) => Syntax<Input, Error, Output, Chunk.Chunk<Value>> = internal.repeatMin0
 
 /**
  * Repeats this `Syntax` at least one time.
@@ -622,7 +622,7 @@ export const repeat: <Input, Error, Output, Value>(
  */
 export const repeat1: <Input, Error, Output, Value>(
   self: Syntax<Input, Error, Output, Value>
-) => Syntax<Input, Error, Output, NonEmptyChunk<Value>> = internal.repeatMin1
+) => Syntax<Input, Error, Output, Chunk.NonEmptyChunk<Value>> = internal.repeatMin1
 
 /**
  * Repeats this `Syntax` until the `stopCondition`, which performed after each
@@ -636,11 +636,11 @@ export const repeatUntil: {
     stopCondition: Syntax<Input2, Error2, Output2, void>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Chunk<Value>>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Chunk.Chunk<Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
     self: Syntax<Input, Error, Output, Value>,
     stopCondition: Syntax<Input2, Error2, Output2, void>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk<Value>>
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk.Chunk<Value>>
 } = internal.repeatUntil
 
 /**
@@ -655,11 +655,11 @@ export const repeatWithSeparator: {
     separator: Syntax<Input2, Error2, Output2, void>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Chunk<Value>>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Chunk.Chunk<Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
     self: Syntax<Input, Error, Output, Value>,
     separator: Syntax<Input2, Error2, Output2, void>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk<Value>>
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk.Chunk<Value>>
 } = internal.repeatWithSeparator
 
 /**
@@ -674,11 +674,11 @@ export const repeatWithSeparator1: {
     separator: Syntax<Input2, Error2, Output2, void>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, NonEmptyChunk<Value>>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Chunk.NonEmptyChunk<Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2>(
     self: Syntax<Input, Error, Output, Value>,
     separator: Syntax<Input2, Error2, Output2, void>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, NonEmptyChunk<Value>>
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Chunk.NonEmptyChunk<Value>>
 } = internal.repeatWithSeparator1
 
 /**
@@ -755,7 +755,7 @@ export const surroundedBy: {
  * @category constructors
  */
 export const suspend: <Input, Error, Output, Value>(
-  self: LazyArg<Syntax<Input, Error, Output, Value>>
+  self: Function.LazyArg<Syntax<Input, Error, Output, Value>>
 ) => Syntax<Input, Error, Output, Value> = internal.suspend
 
 /**
@@ -789,15 +789,15 @@ export const transform: {
  */
 export const transformEither: {
   <Error, Value, Value2>(
-    to: (value: Value) => Either<Error, Value2>,
-    from: (value: Value2) => Either<Error, Value>
+    to: (value: Value) => Either.Either<Error, Value2>,
+    from: (value: Value2) => Either.Either<Error, Value>
   ): <Input, Output>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input, Error, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
-    to: (value: Value) => Either<Error, Value2>,
-    from: (value: Value2) => Either<Error, Value>
+    to: (value: Value) => Either.Either<Error, Value2>,
+    from: (value: Value2) => Either.Either<Error, Value>
   ): Syntax<Input, Error, Output, Value2>
 } = internal.transformEither
 
@@ -812,16 +812,16 @@ export const transformEither: {
  */
 export const transformOption: {
   <Value, Value2>(
-    to: (value: Value) => Option<Value2>,
-    from: (value: Value2) => Option<Value>
+    to: (value: Value) => Option.Option<Value2>,
+    from: (value: Value2) => Option.Option<Value>
   ): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input, Option<Error>, Output, Value2>
+  ) => Syntax<Input, Option.Option<Error>, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
-    to: (value: Value) => Option<Value2>,
-    from: (value: Value2) => Option<Value>
-  ): Syntax<Input, Option<Error>, Output, Value2>
+    to: (value: Value) => Option.Option<Value2>,
+    from: (value: Value2) => Option.Option<Value>
+  ): Syntax<Input, Option.Option<Error>, Output, Value2>
 } = internal.transformOption
 
 /**
@@ -837,7 +837,7 @@ export const transformOption: {
 export const transformTo: {
   <Error2, Value, Value2>(
     to: (value: Value) => Value2,
-    from: (value: Value2) => Option<Value>,
+    from: (value: Value2) => Option.Option<Value>,
     error: Error2
   ): <Input, Error, Output>(
     self: Syntax<Input, Error, Output, Value>
@@ -845,7 +845,7 @@ export const transformTo: {
   <Input, Error, Output, Value, Error2, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     to: (value: Value) => Value2,
-    from: (value: Value2) => Option<Value>,
+    from: (value: Value2) => Option.Option<Value>,
     error: Error2
   ): Syntax<Input, Error | Error2, Output, Value2>
 } = internal.transformTo
@@ -865,7 +865,7 @@ export const unit: () => Syntax<unknown, never, never, void> = internal.unit
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegex: (regex: Regex) => Syntax<string, never, string, Chunk<string>> = internal.unsafeRegex
+export const unsafeRegex: (regex: Regex) => Syntax<string, never, string, Chunk.Chunk<string>> = internal.unsafeRegex
 
 /**
  * Constructs a `Syntax` that parses using a regular expression and results in

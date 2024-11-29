@@ -1,10 +1,3 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import { dual, pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import { tuple } from "@effect/data/Tuple"
 import * as _parser from "@effect/parser/internal_effect_untraced/parser"
 import * as _printer from "@effect/parser/internal_effect_untraced/printer"
 import * as _regex from "@effect/parser/internal_effect_untraced/regex"
@@ -13,6 +6,9 @@ import type * as ParserError from "@effect/parser/ParserError"
 import type * as Printer from "@effect/parser/Printer"
 import type * as Regex from "@effect/parser/Regex"
 import type * as Syntax from "@effect/parser/Syntax"
+import type { Function, Predicate } from "effect"
+import { Chunk, Either, Option } from "effect"
+import { dual } from "effect/Function"
 
 /** @internal */
 const SyntaxSymbolKey = "@effect/Syntax/Syntax"
@@ -111,20 +107,20 @@ export const optional = <Input, Error, Output, Value>(
 
 /** @internal */
 export const suspend = <Input, Error, Output, Value>(
-  self: LazyArg<Syntax.Syntax<Input, Error, Output, Value>>
+  self: Function.LazyArg<Syntax.Syntax<Input, Error, Output, Value>>
 ): Syntax.Syntax<Input, Error, Output, Value> =>
   make(_parser.suspend(() => self().parser), _printer.suspend(() => self().printer))
 
 /** @internal */
 export const orElse = dual<
   <Input2, Error2, Output2, Value>(
-    that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
+    that: Function.LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
   ) => <Input, Error, Output>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value>,
   <Input, Error, Output, Value, Input2, Error2, Output2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
+    that: Function.LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 >(2, (self, that) =>
   make(
@@ -135,13 +131,13 @@ export const orElse = dual<
 /** @internal */
 export const orElseEither = dual<
   <Input2, Error2, Output2, Value2>(
-    that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
+    that: Function.LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
   ) => <Input, Error, Output, Value>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>,
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
+    that: Function.LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>
 >(2, (self, that) =>
   make(
@@ -254,19 +250,19 @@ export const transformTo = dual<
 /** @internal */
 export const filter = dual<
   <Value, Error2>(
-    predicate: Predicate<Value>,
+    predicate: Predicate.Predicate<Value>,
     error: Error2
   ) => <Input, Error, Output>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input, Error | Error2, Output, Value>,
   <Input, Error, Output, Value, Error2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    predicate: Predicate<Value>,
+    predicate: Predicate.Predicate<Value>,
     error: Error2
   ) => Syntax.Syntax<Input, Error | Error2, Output, Value>
 >(3, <Input, Error, Output, Value, Error2>(
   self: Syntax.Syntax<Input, Error, Output, Value>,
-  predicate: Predicate<Value>,
+  predicate: Predicate.Predicate<Value>,
   error: Error2
 ) =>
   transformEither(
@@ -277,7 +273,7 @@ export const filter = dual<
 
 /** @internal */
 export const filterChar = <Error>(
-  predicate: Predicate<string>,
+  predicate: Predicate.Predicate<string>,
   error: Error
 ): Syntax.Syntax<string, Error, string, string> => regexChar(_regex.filter(predicate), error)
 
