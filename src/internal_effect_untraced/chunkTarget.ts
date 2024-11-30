@@ -1,7 +1,5 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as List from "@effect/data/List"
-import * as Cause from "@effect/io/Cause"
 import type * as ChunkTarget from "@effect/parser/Target/Chunk"
+import { Cause, Chunk, List } from "effect"
 
 /** @internal */
 export class ChunkTargetImpl<Output> implements ChunkTarget.ChunkTarget<Output> {
@@ -23,7 +21,7 @@ export class ChunkTargetImpl<Output> implements ChunkTarget.ChunkTarget<Output> 
   emit(capture: ChunkTarget.ChunkTarget.Capture<Output>): void {
     const popped = this.popCaptureFrame()
     if (popped === undefined || popped !== capture) {
-      throw Cause.RuntimeException("Target.emit called on a capture group that was not at the top of the stack")
+      throw new Cause.RuntimeException("Target.emit called on a capture group that was not at the top of the stack")
     }
     if (List.isCons(this.captureStack)) {
       this.currentBuilder = this.captureStack.head.subBuilder
@@ -38,7 +36,7 @@ export class ChunkTargetImpl<Output> implements ChunkTarget.ChunkTarget<Output> 
   drop(capture: ChunkTarget.ChunkTarget.Capture<Output>): void {
     const popped = this.popCaptureFrame()
     if (popped === undefined || popped !== capture) {
-      throw Cause.RuntimeException("Target.emit called on a capture group that was not at the top of the stack")
+      throw new Cause.RuntimeException("Target.emit called on a capture group that was not at the top of the stack")
     }
     if (List.isCons(this.captureStack)) {
       this.currentBuilder = this.captureStack.head.subBuilder

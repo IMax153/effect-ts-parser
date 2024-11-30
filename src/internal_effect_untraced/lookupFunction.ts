@@ -1,15 +1,8 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Equal from "@effect/data/Equal"
-import { pipe } from "@effect/data/Function"
-import * as Hash from "@effect/data/Hash"
-import * as HashSet from "@effect/data/HashSet"
-import * as Number from "@effect/data/Number"
-import * as Option from "@effect/data/Option"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
-import * as Cause from "@effect/io/Cause"
 import * as bitset from "@effect/parser/internal_effect_untraced/bitset"
 import * as common from "@effect/parser/internal_effect_untraced/common"
 import type * as Regex from "@effect/parser/Regex"
+import { Array as Arr, Cause, Chunk, Equal, Hash, HashSet, Number, Option } from "effect"
+import { pipe } from "effect/Function"
 
 const LookupFunctionSymbolKey = "@effect/parser/LookupFunction"
 
@@ -454,7 +447,7 @@ const compileLookupFunction = (self: Regex.Regex): LookupFunction => {
     case "OneOf": {
       if (
         self.bitset.length === bitset.all.length &&
-        ReadonlyArray.getEquivalence(Number.Equivalence)(self.bitset, bitset.all)
+        Arr.getEquivalence(Number.Equivalence)(self.bitset, bitset.all)
       ) {
         return acceptAll
       }
@@ -486,12 +479,12 @@ const compileLookupFunction = (self: Regex.Regex): LookupFunction => {
           set = HashSet.add(set, curr)
           i = i + 1
         }
-        const choices = ReadonlyArray.fromIterable(set)
+        const choices = Arr.fromIterable(set)
         const head = choices[0]!
         const rest = choices.slice(1)
-        return ReadonlyArray.reduce(rest, head, or)
+        return Arr.reduce(rest, head, or)
       }
-      throw Cause.IllegalArgumentException("Cannot compile to DFA unbounded repetition")
+      throw new Cause.IllegalArgumentException("Cannot compile to DFA unbounded repetition")
     }
   }
 }

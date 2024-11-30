@@ -173,13 +173,13 @@ export const contramap: {
  */
 export const contramapEither: {
   <Input2, Error2, Input>(
-    from: (value: Input2) => Either.Either<Error2, Input>
+    from: (value: Input2) => Either.Either<Input, Error2>
   ): <Error, Output>(
     self: Printer<Input, Error, Output>
   ) => Printer<Input2, Error2, Output>
   <Input, Error, Output, Input2, Error2>(
     self: Printer<Input, Error, Output>,
-    from: (value: Input2) => Either.Either<Error2, Input>
+    from: (value: Input2) => Either.Either<Input, Error2>
   ): Printer<Input2, Error2, Output>
 } = internal.contramapEither
 
@@ -381,11 +381,11 @@ export const orElseEither: {
     that: Function.LazyArg<Printer<Input2, Error2, Output2>>
   ): <Input, Error, Output>(
     self: Printer<Input, Error, Output>
-  ) => Printer<Either.Either<Input, Input2>, Error2 | Error, Output2 | Output>
+  ) => Printer<Either.Either<Input2, Input>, Error2 | Error, Output2 | Output>
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer<Input, Error, Output>,
     that: Function.LazyArg<Printer<Input2, Error2, Output2>>
-  ): Printer<Either.Either<Input, Input2>, Error | Error2, Output | Output2>
+  ): Printer<Either.Either<Input2, Input>, Error | Error2, Output | Output2>
 } = internal.orElseEither
 
 /**
@@ -413,8 +413,8 @@ export const outputString: (value: string) => Printer<never, never, string> = in
 export const printToChunk: {
   <Input>(
     input: Input
-  ): <Error, Output>(self: Printer<Input, Error, Output>) => Either.Either<Error, Chunk.Chunk<Output>>
-  <Input, Error, Output>(self: Printer<Input, Error, Output>, input: Input): Either.Either<Error, Chunk.Chunk<Output>>
+  ): <Error, Output>(self: Printer<Input, Error, Output>) => Either.Either<Chunk.Chunk<Output>, Error>
+  <Input, Error, Output>(self: Printer<Input, Error, Output>, input: Input): Either.Either<Chunk.Chunk<Output>, Error>
 } = internal.printToChunk
 
 /**
@@ -424,8 +424,8 @@ export const printToChunk: {
  * @category execution
  */
 export const printToString: {
-  <Input>(value: Input): <Error>(self: Printer<Input, Error, string>) => Either.Either<Error, string>
-  <Input, Error>(self: Printer<Input, Error, string>, input: Input): Either.Either<Error, string>
+  <Input>(value: Input): <Error>(self: Printer<Input, Error, string>) => Either.Either<string, Error>
+  <Input, Error>(self: Printer<Input, Error, string>, input: Input): Either.Either<string, Error>
 } = internal.printToString
 
 /**
@@ -440,12 +440,12 @@ export const printToTarget: {
     target: T
   ): <Error>(
     self: Printer<Input, Error, Output>
-  ) => Either.Either<Error, void>
+  ) => Either.Either<void, Error>
   <Input, Error, Output, T extends Target<any, Output>>(
     self: Printer<Input, Error, Output>,
     input: Input,
     target: T
-  ): Either.Either<Error, void>
+  ): Either.Either<void, Error>
 } = internal.printToTarget
 
 /**

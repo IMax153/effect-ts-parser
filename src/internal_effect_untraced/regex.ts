@@ -1,13 +1,11 @@
-import * as Chunk from "@effect/data/Chunk"
-import { dual, pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import type * as BitSet from "@effect/parser/BitSet"
 import * as bitset from "@effect/parser/internal_effect_untraced/bitset"
 import * as common from "@effect/parser/internal_effect_untraced/common"
 import * as lookupFunction from "@effect/parser/internal_effect_untraced/lookupFunction"
 import type * as Regex from "@effect/parser/Regex"
+import type { Predicate } from "effect"
+import { Array, Chunk, Option } from "effect"
+import { dual, pipe } from "effect/Function"
 
 /** @internal */
 const RegexSymbolKey = "@effect/parser/Regex"
@@ -51,11 +49,11 @@ export const charIn = (chars: Iterable<string>): Regex.Regex =>
   )
 
 /** @internal */
-export const filter = (predicate: Predicate<string>): Regex.Regex =>
+export const filter = (predicate: Predicate.Predicate<string>): Regex.Regex =>
   pipe(
     bitset.all,
     bitset.toChars,
-    ReadonlyArray.filter(predicate),
+    Array.filter(predicate),
     charIn
   )
 
@@ -115,7 +113,7 @@ export const char = (char: string): Regex.Regex => charIn([char])
 export const charNotIn = (chars: Iterable<string>): Regex.Regex =>
   pipe(
     bitset.all,
-    ReadonlyArray.difference(bitset.fromChars(chars)),
+    Array.difference(bitset.fromChars(chars)),
     oneOf
   )
 
@@ -178,69 +176,68 @@ const compileSequence = (self: Regex.Regex): Chunk.Chunk<Regex.Regex> =>
     ? Chunk.appendAll(compileSequence(self.left), compileSequence(self.right))
     : Chunk.of(self)
 
-const compileInternal = (self: Regex.Regex) =>
-  (index: number, chars: string): number => {
-    switch (self._tag) {
-      case "Succeed": {
-        return index
-      }
-      case "And": {
-        const left = compileInternal(self.left)(index, chars)
-        if (left === common.notMatched || left === common.needMoreInput) {
-          return left
-        }
-        return compileInternal(self.right)(index, chars)
-      }
-      case "Or": {
-        const left = compileInternal(self.left)(index, chars)
-        if (left === common.notMatched || left === common.needMoreInput) {
-          return compileInternal(self.right)(index, chars)
-        }
+const compileInternal = (self: Regex.Regex) => (index: number, chars: string): number => {
+  switch (self._tag) {
+    case "Succeed": {
+      return index
+    }
+    case "And": {
+      const left = compileInternal(self.left)(index, chars)
+      if (left === common.notMatched || left === common.needMoreInput) {
         return left
       }
-      case "OneOf": {
-        if (index >= chars.length) {
-          return common.needMoreInput
-        }
-        if (self.bitset.some((bit) => bit === chars[index].charCodeAt(0))) {
-          return index + 1
-        }
-        return common.notMatched
+      return compileInternal(self.right)(index, chars)
+    }
+    case "Or": {
+      const left = compileInternal(self.left)(index, chars)
+      if (left === common.notMatched || left === common.needMoreInput) {
+        return compileInternal(self.right)(index, chars)
       }
-      case "Sequence": {
-        const compiled = Chunk.map(compileSequence(self), compileInternal)
-        let i = 0
-        let idx = index
-        while (i < compiled.length) {
-          const current = Chunk.unsafeGet(compiled, i)
-          idx = current(idx, chars)
-          if (idx < 0) {
-            // Terminate loop because current parser didn't match
-            i = compiled.length
-          } else {
-            i = i + 1
-          }
-        }
-        return idx
+      return left
+    }
+    case "OneOf": {
+      if (index >= chars.length) {
+        return common.needMoreInput
       }
-      case "Repeat": {
-        const min = Option.getOrElse(self.min, () => 0)
-        const max = Option.getOrElse(self.max, () => Infinity)
-        const compiled = compileInternal(self.regex)
-        let idx = index
-        let lastIdx = index
-        let matched = 0
-        while (idx >= 0 && idx < chars.length && matched < max) {
-          idx = compiled(idx, chars)
-          if (idx >= 0) {
-            lastIdx = idx
-            matched = matched + 1
-          }
-        }
-        return matched < min ? common.needMoreInput : lastIdx
+      if (self.bitset.some((bit) => bit === chars[index].charCodeAt(0))) {
+        return index + 1
       }
+      return common.notMatched
+    }
+    case "Sequence": {
+      const compiled = Chunk.map(compileSequence(self), compileInternal)
+      let i = 0
+      let idx = index
+      while (i < compiled.length) {
+        const current = Chunk.unsafeGet(compiled, i)
+        idx = current(idx, chars)
+        if (idx < 0) {
+          // Terminate loop because current parser didn't match
+          i = compiled.length
+        } else {
+          i = i + 1
+        }
+      }
+      return idx
+    }
+    case "Repeat": {
+      const min = Option.getOrElse(self.min, () => 0)
+      const max = Option.getOrElse(self.max, () => Infinity)
+      const compiled = compileInternal(self.regex)
+      let idx = index
+      let lastIdx = index
+      let matched = 0
+      while (idx >= 0 && idx < chars.length && matched < max) {
+        idx = compiled(idx, chars)
+        if (idx >= 0) {
+          lastIdx = idx
+          matched = matched + 1
+        }
+      }
+      return matched < min ? common.needMoreInput : lastIdx
     }
   }
+}
 
 /** @internal */
 export const toLiteral = (self: Regex.Regex): Option.Option<Chunk.Chunk<string>> => {

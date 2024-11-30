@@ -1,11 +1,3 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import * as Equal from "@effect/data/Equal"
-import type { LazyArg } from "@effect/data/Function"
-import { constVoid, dual, pipe } from "@effect/data/Function"
-import * as List from "@effect/data/List"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
 import * as chunkTarget from "@effect/parser/internal_effect_untraced/chunkTarget"
 import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
 import * as _regex from "@effect/parser/internal_effect_untraced/regex"
@@ -13,6 +5,9 @@ import type * as ParserError from "@effect/parser/ParserError"
 import type * as Printer from "@effect/parser/Printer"
 import type * as Regex from "@effect/parser/Regex"
 import type * as Target from "@effect/parser/Target"
+import type { Function, Predicate } from "effect"
+import { Chunk, Either, Equal, List, Option } from "effect"
+import { constVoid, dual, pipe } from "effect/Function"
 
 /** @internal */
 const PrinterSymbolKey = "@effect/parser/Printer"
@@ -109,7 +104,7 @@ export interface MapError extends
 export interface OrElse extends
   Op<"OrElse", {
     readonly left: Primitive
-    readonly right: LazyArg<Primitive>
+    readonly right: Function.LazyArg<Primitive>
   }>
 {}
 
@@ -117,7 +112,7 @@ export interface OrElse extends
 export interface OrElseEither extends
   Op<"OrElseEither", {
     readonly left: Primitive
-    readonly right: LazyArg<Primitive>
+    readonly right: Function.LazyArg<Primitive>
   }>
 {}
 
@@ -182,7 +177,7 @@ export interface Succeed extends
 /** @internal */
 export interface Suspend extends
   Op<"Suspend", {
-    readonly printer: LazyArg<Primitive>
+    readonly printer: Function.LazyArg<Primitive>
   }>
 {}
 
@@ -257,13 +252,13 @@ export const unsafeRegex = (regex: Regex.Regex): Printer.Printer<Chunk.Chunk<str
 /** @internal */
 export const contramapEither = dual<
   <Input2, Error2, Input>(
-    from: (value: Input2) => Either.Either<Error2, Input>
+    from: (value: Input2) => Either.Either<Input, Error2>
   ) => <Error, Output>(
     self: Printer.Printer<Input, Error, Output>
   ) => Printer.Printer<Input2, Error2, Output>,
   <Input, Error, Output, Input2, Error2>(
     self: Printer.Printer<Input, Error, Output>,
-    from: (value: Input2) => Either.Either<Error2, Input>
+    from: (value: Input2) => Either.Either<Input, Error2>
   ) => Printer.Printer<Input2, Error2, Output>
 >(2, (self, from) => {
   const op = Object.create(proto)
@@ -378,14 +373,14 @@ export const failed = <Error>(error: ParserError.ParserError<Error>): Printer.Pr
 /** @internal */
 export const filterInput = dual<
   <Input, Error2>(
-    condition: Predicate<Input>,
+    condition: Predicate.Predicate<Input>,
     error: Error2
   ) => <Error, Output>(
     self: Printer.Printer<Input, Error, Output>
   ) => Printer.Printer<Input, Error | Error2, Output>,
   <Input, Error, Output, Error2>(
     self: Printer.Printer<Input, Error, Output>,
-    condition: Predicate<Input>,
+    condition: Predicate.Predicate<Input>,
     error: Error2
   ) => Printer.Printer<Input, Error | Error2, Output>
 >(3, (self, condition, error) =>
@@ -449,13 +444,13 @@ export const optional = <Input, Error, Output>(
 /** @internal */
 export const orElse = dual<
   <Input2, Error2, Output2>(
-    that: LazyArg<Printer.Printer<Input2, Error2, Output2>>
+    that: Function.LazyArg<Printer.Printer<Input2, Error2, Output2>>
   ) => <Input, Error, Output>(
     self: Printer.Printer<Input, Error, Output>
   ) => Printer.Printer<Input & Input2, Error | Error2, Output | Output2>,
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer.Printer<Input, Error, Output>,
-    that: LazyArg<Printer.Printer<Input2, Error2, Output2>>
+    that: Function.LazyArg<Printer.Printer<Input2, Error2, Output2>>
   ) => Printer.Printer<Input & Input2, Error | Error2, Output | Output2>
 >(2, (self, that) => {
   const op = Object.create(proto)
@@ -468,14 +463,14 @@ export const orElse = dual<
 /** @internal */
 export const orElseEither = dual<
   <Input2, Error2, Output2>(
-    that: LazyArg<Printer.Printer<Input2, Error2, Output2>>
+    that: Function.LazyArg<Printer.Printer<Input2, Error2, Output2>>
   ) => <Input, Error, Output>(
     self: Printer.Printer<Input, Error, Output>
-  ) => Printer.Printer<Either.Either<Input, Input2>, Error | Error2, Output | Output2>,
+  ) => Printer.Printer<Either.Either<Input2, Input>, Error | Error2, Output | Output2>,
   <Input, Error, Output, Input2, Error2, Output2>(
     self: Printer.Printer<Input, Error, Output>,
-    that: LazyArg<Printer.Printer<Input2, Error2, Output2>>
-  ) => Printer.Printer<Either.Either<Input, Input2>, Error | Error2, Output | Output2>
+    that: Function.LazyArg<Printer.Printer<Input2, Error2, Output2>>
+  ) => Printer.Printer<Either.Either<Input2, Input>, Error | Error2, Output | Output2>
 >(2, (self, that) => {
   const op = Object.create(proto)
   op._tag = "OrElseEither"
@@ -502,21 +497,21 @@ export const printToChunk = dual<
     input: Input
   ) => <Error, Output>(
     self: Printer.Printer<Input, Error, Output>
-  ) => Either.Either<Error, Chunk.Chunk<Output>>,
+  ) => Either.Either<Chunk.Chunk<Output>, Error>,
   <Input, Error, Output>(
     self: Printer.Printer<Input, Error, Output>,
     input: Input
-  ) => Either.Either<Error, Chunk.Chunk<Output>>
+  ) => Either.Either<Chunk.Chunk<Output>, Error>
 >(2, <Input, Error, Output>(self: Printer.Printer<Input, Error, Output>, input: Input) => {
   const target = chunkTarget.make<Output>()
-  return Either.mapRight(interpret(self, input, target), () => target.result())
+  return Either.map(interpret(self, input, target), () => target.result())
 })
 
 /** @internal */
 export const printToString = dual<
-  <Input>(value: Input) => <Error>(self: Printer.Printer<Input, Error, string>) => Either.Either<Error, string>,
-  <Input, Error>(self: Printer.Printer<Input, Error, string>, input: Input) => Either.Either<Error, string>
->(2, (self, value) => Either.mapRight(printToChunk(self, value), Chunk.join("")))
+  <Input>(value: Input) => <Error>(self: Printer.Printer<Input, Error, string>) => Either.Either<string, Error>,
+  <Input, Error>(self: Printer.Printer<Input, Error, string>, input: Input) => Either.Either<string, Error>
+>(2, (self, value) => Either.map(printToChunk(self, value), Chunk.join("")))
 
 /** @internal */
 export const printToTarget = dual<
@@ -525,12 +520,12 @@ export const printToTarget = dual<
     target: T
   ) => <Error>(
     self: Printer.Printer<Input, Error, Output>
-  ) => Either.Either<Error, void>,
+  ) => Either.Either<void, Error>,
   <Input, Error, Output, T extends Target.Target<any, Output>>(
     self: Printer.Printer<Input, Error, Output>,
     input: Input,
     target: T
-  ) => Either.Either<Error, void>
+  ) => Either.Either<void, Error>
 >(3, (self, value, target) => interpret(self, value, target))
 
 export const provideInput = dual<
@@ -666,7 +661,7 @@ export const succeed = <Input>(input: Input): Printer.Printer<unknown, never, ne
 }
 /** @internal */
 export const suspend = <Input, Error, Output>(
-  printer: LazyArg<Printer.Printer<Input, Error, Output>>
+  printer: Function.LazyArg<Printer.Printer<Input, Error, Output>>
 ): Printer.Printer<Input, Error, Output> => {
   const op = Object.create(proto)
   op._tag = "Suspend"
@@ -1073,5 +1068,5 @@ const interpret = <Input, Error, Output, T extends Target.Target<any, Output>>(
       }
     }
   }
-  return Either.mapRight(result, constVoid) as Either.Either<Error, void>
+  return Either.map(result, constVoid) as Either.Either<void, Error>
 }

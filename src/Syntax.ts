@@ -495,11 +495,11 @@ export const orElseEither: {
     that: Function.LazyArg<Syntax<Input2, Error2, Output2, Value2>>
   ): <Input, Error, Output, Value>(
     self: Syntax<Input, Error, Output, Value>
-  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Either.Either<Value, Value2>>
+  ) => Syntax<Input & Input2, Error2 | Error, Output2 | Output, Either.Either<Value2, Value>>
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax<Input, Error, Output, Value>,
     that: Function.LazyArg<Syntax<Input2, Error2, Output2, Value2>>
-  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>
+  ): Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value2, Value>>
 } = internal.orElseEither
 
 /**
@@ -513,11 +513,11 @@ export const parseString: {
     input: string
   ): <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>
-  ) => Either.Either<ParserError<Error>, Value>
+  ) => Either.Either<Value, ParserError<Error>>
   <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>,
     input: string
-  ): Either.Either<ParserError<Error>, Value>
+  ): Either.Either<Value, ParserError<Error>>
 } = internal.parseString
 
 /**
@@ -533,12 +533,12 @@ export const parseStringWith: {
     implementation: Parser.Implementation
   ): <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>
-  ) => Either.Either<ParserError<Error>, Value>
+  ) => Either.Either<Value, ParserError<Error>>
   <Error, Output, Value>(
     self: Syntax<string, Error, Output, Value>,
     input: string,
     implementation: Parser.Implementation
-  ): Either.Either<ParserError<Error>, Value>
+  ): Either.Either<Value, ParserError<Error>>
 } = internal.parseStringWith
 
 /**
@@ -548,8 +548,8 @@ export const parseStringWith: {
  * @category execution
  */
 export const printString: {
-  <Value>(value: Value): <Input, Error>(self: Syntax<Input, Error, string, Value>) => Either.Either<Error, string>
-  <Input, Error, Value>(self: Syntax<Input, Error, string, Value>, value: Value): Either.Either<Error, string>
+  <Value>(value: Value): <Input, Error>(self: Syntax<Input, Error, string, Value>) => Either.Either<string, Error>
+  <Input, Error, Value>(self: Syntax<Input, Error, string, Value>, value: Value): Either.Either<string, Error>
 } = internal.printString
 
 /**
@@ -789,15 +789,15 @@ export const transform: {
  */
 export const transformEither: {
   <Error, Value, Value2>(
-    to: (value: Value) => Either.Either<Error, Value2>,
-    from: (value: Value2) => Either.Either<Error, Value>
+    to: (value: Value) => Either.Either<Value2, Error>,
+    from: (value: Value2) => Either.Either<Value, Error>
   ): <Input, Output>(
     self: Syntax<Input, Error, Output, Value>
   ) => Syntax<Input, Error, Output, Value2>
   <Input, Error, Output, Value, Value2>(
     self: Syntax<Input, Error, Output, Value>,
-    to: (value: Value) => Either.Either<Error, Value2>,
-    from: (value: Value2) => Either.Either<Error, Value>
+    to: (value: Value) => Either.Either<Value2, Error>,
+    from: (value: Value2) => Either.Either<Value, Error>
   ): Syntax<Input, Error, Output, Value2>
 } = internal.transformEither
 
