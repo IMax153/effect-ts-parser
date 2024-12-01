@@ -1,9 +1,5 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as E from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
-import * as RA from "@effect/data/ReadonlyArray"
 import * as Syntax from "@effect/parser/Syntax"
+import { Array as Arr, Chunk, Either, Option, pipe } from "effect"
 
 // Parses XML without prolog and namespaces
 
@@ -59,7 +55,7 @@ const tagLabelNextLetters = pipe(
 const tagLabel = pipe(
   tagLabelFirstLetter,
   Syntax.zip(tagLabelNextLetters),
-  Syntax.transform(RA.join(""), (from) => [from[0], from.slice(1)] as const)
+  Syntax.transform(Arr.join(""), (from) => [from[0], from.slice(1)] as const)
 )
 
 interface XmlAttribute {
@@ -134,23 +130,23 @@ const xmlNode: Syntax.Syntax<string, string, string, XmlNode> = pipe(
   Syntax.transformEither(
     (to) =>
       to[0][0][0] !== to[1]
-        ? E.left(`Closing tag "${to[1]}" does not match with opening tag "${to[0][0][0]}"`)
-        : E.right({
+        ? Either.left(`Closing tag "${to[1]}" does not match with opening tag "${to[0][0][0]}"`)
+        : Either.right({
           name: to[0][0][0],
           attributes: to[0][0][1],
-          children: pipe(to[0][1], Chunk.filterMap(E.getLeft), Chunk.toReadonlyArray),
-          values: pipe(to[0][1], Chunk.filterMap(E.getRight), Chunk.toReadonlyArray)
+          children: pipe(to[0][1], Chunk.filterMap(Either.getLeft), Chunk.toReadonlyArray),
+          values: pipe(to[0][1], Chunk.filterMap(Either.getRight), Chunk.toReadonlyArray)
         } as XmlNode),
     (from) =>
-      E.right(
+      Either.right(
         [
           [
             [from.name, from.attributes] as const,
             pipe(
               from.children,
-              RA.map(E.left),
+              Arr.map(Either.left),
               Chunk.fromIterable,
-              (cs) => Chunk.appendAll(cs, pipe(from.values, RA.map(E.right), Chunk.fromIterable))
+              (cs) => Chunk.appendAll(cs, pipe(from.values, Arr.map(Either.right), Chunk.fromIterable))
             )
           ] as const,
           from.name
@@ -168,17 +164,17 @@ it("tag: label and attributes - recursive", () => {
       "recursive"
     )
   )
-  expect(result).toEqual(E.right(["element", [
+  expect(result).toEqual(Either.right(["element", [
     { name: "one", value: "1" },
     { name: "two", value: "2" },
     { name: "three", value: "'hello'" },
     { name: "four", value: "\"world\"" },
     { name: "five", value: "<test></test>" }
   ]]))
-  if (E.isRight(result)) {
+  if (Either.isRight(result)) {
     const result1 = pipe(tag, Syntax.printString(result.right))
     expect(result1).toEqual(
-      E.right(`element one="1" two="2" three="'hello'" four="'world'" five="<test></test>"`)
+      Either.right(`element one="1" two="2" three="'hello'" four="'world'" five="<test></test>"`)
     )
   }
 })
@@ -192,18 +188,18 @@ it("tag: label only - recursive", () => {
     )
   )
   expect(result).toEqual(
-    E.right(["element", []])
+    Either.right(["element", []])
   )
-  if (E.isRight(result)) {
+  if (Either.isRight(result)) {
     const result1 = pipe(tag, Syntax.printString(result.right))
-    expect(result1).toEqual(E.right("element ")) // TODO: How to deal with optional whitespace
+    expect(result1).toEqual(Either.right("element ")) // TODO: How to deal with optional whitespace
   }
 })
 
 it("xml - recursive", () => {
   const input = "<ROOT one='1'><A><B >u</B></A><C/><C/><D two='2' three='3' /> </ROOT>"
   const result = pipe(xmlNode, Syntax.parseStringWith(input, "recursive"))
-  expect(result).toEqual(E.right({
+  expect(result).toEqual(Either.right({
     name: "ROOT",
     attributes: [
       { name: "one", value: "1" }
@@ -224,10 +220,10 @@ it("xml - recursive", () => {
     ],
     values: []
   }))
-  if (E.isRight(result)) {
+  if (Either.isRight(result)) {
     const result1 = pipe(xmlNode, Syntax.printString(result.right))
     expect(result1).toEqual(
-      E.right("<ROOT one=\"1\"><A ><B >u</B></A><C ></C><C ></C><D two=\"2\" three=\"3\"></D></ROOT>")
+      Either.right("<ROOT one=\"1\"><A ><B >u</B></A><C ></C><C ></C><D two=\"2\" three=\"3\"></D></ROOT>")
     )
   }
 })

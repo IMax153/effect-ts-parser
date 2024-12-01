@@ -1,7 +1,6 @@
-import { pipe } from "@effect/data/Function"
-import type { Predicate } from "@effect/data/Predicate"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as Regex from "@effect/parser/Regex"
+import type { Predicate } from "effect"
+import { Array, pipe } from "effect"
 import * as fc from "fast-check"
 import { describe, expect, it } from "vitest"
 
@@ -57,7 +56,7 @@ const keywords: Regex.Regex.Compiled = Regex.compile(keywordsRegex)
 const singleCharTest = (
   name: string,
   regex: Regex.Regex,
-  f: Predicate<string>,
+  f: Predicate.Predicate<string>,
   charArb: fc.Arbitrary<string> = fc.char()
 ): void =>
   it(name, () => {
@@ -96,9 +95,9 @@ const multiCharFailingTest = (
     )
     fc.assert(fc.property(arbitrary, ([input, injectionPoint]) => {
       const injected = pipe(
-        ReadonlyArray.take(input, injectionPoint),
-        ReadonlyArray.append(counterexample),
-        ReadonlyArray.appendAll(ReadonlyArray.drop(input, injectionPoint))
+        Array.take(input, injectionPoint),
+        Array.append(counterexample),
+        Array.appendAll(Array.drop(input, injectionPoint))
       )
       const expected = injectionPoint === 0
         ? Regex.needMoreInput

@@ -1,8 +1,5 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
 import * as Syntax from "@effect/parser/Syntax"
+import { Chunk, Either, Option, pipe } from "effect"
 import { hexDigit, tests } from "./utils"
 
 const whitespace = pipe(

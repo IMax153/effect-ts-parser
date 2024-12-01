@@ -1,14 +1,11 @@
-/// <reference types="vitest" />
-
-import babel from "@vitejs/plugin-react"
 import path from "path"
 import { defineConfig } from "vite"
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const babelConfig = require("./.babel.mjs.json")
+import type { ViteUserConfig } from "vitest/config"
 
 export default defineConfig({
-  plugins: [babel({ babel: babelConfig })],
+  esbuild: {
+    target: "es2020"
+  },
   test: {
     include: ["./test/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     exclude: ["./test/utils/**/*.ts", "./test/**/*.init.ts"],
@@ -20,4 +17,4 @@ export default defineConfig({
       "@effect/parser": path.join(__dirname, "src")
     }
   }
-})
+} as ViteUserConfig)
