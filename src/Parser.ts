@@ -477,11 +477,11 @@ export const orElseEither: {
     that: Function.LazyArg<Parser<Input2, Error2, Result2>>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Either.Either<Result, Result2>>
+  ) => Parser<Input & Input2, Error2 | Error, Either.Either<Result2, Result>>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
     that: Function.LazyArg<Parser<Input2, Error2, Result2>>
-  ): Parser<Input & Input2, Error | Error2, Either.Either<Result, Result2>>
+  ): Parser<Input & Input2, Error | Error2, Either.Either<Result2, Result>>
 } = internal.orElseEither
 
 /**
@@ -493,8 +493,8 @@ export const orElseEither: {
 export const parseString: {
   (
     input: string
-  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either.Either<ParserError<Error>, Result>
-  <Input, Error, Result>(self: Parser<Input, Error, Result>, input: string): Either.Either<ParserError<Error>, Result>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either.Either<Result, ParserError<Error>>
+  <Input, Error, Result>(self: Parser<Input, Error, Result>, input: string): Either.Either<Result, ParserError<Error>>
 } = internal.parseString
 
 /**
@@ -508,12 +508,12 @@ export const parseStringWith: {
   (
     input: string,
     implementation: Parser.Implementation
-  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either.Either<ParserError<Error>, Result>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either.Either<Result, ParserError<Error>>
   <Input, Error, Result>(
     self: Parser<Input, Error, Result>,
     input: string,
     implementation: Parser.Implementation
-  ): Either.Either<ParserError<Error>, Result>
+  ): Either.Either<Result, ParserError<Error>>
 } = internal.parseStringWith
 
 /**
@@ -697,13 +697,13 @@ export const surroundedBy: {
  */
 export const transformEither: {
   <Result, Error2, Result2>(
-    f: (result: Result) => Either.Either<Error2, Result2>
+    f: (result: Result) => Either.Either<Result2, Error2>
   ): <Input, Error>(
     self: Parser<Input, Error, Result>
   ) => Parser<Input, Error2, Result2>
   <Input, Error, Result, Error2, Result2>(
     self: Parser<Input, Error, Result>,
-    f: (result: Result) => Either.Either<Error2, Result2>
+    f: (result: Result) => Either.Either<Result2, Error2>
   ): Parser<Input, Error2, Result2>
 } = internal.transformEither
 
