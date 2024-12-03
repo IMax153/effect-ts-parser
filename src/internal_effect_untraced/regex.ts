@@ -3,9 +3,11 @@ import * as bitset from "@effect/parser/internal_effect_untraced/bitset"
 import * as common from "@effect/parser/internal_effect_untraced/common"
 import * as lookupFunction from "@effect/parser/internal_effect_untraced/lookupFunction"
 import type * as Regex from "@effect/parser/Regex"
-import type { Predicate } from "effect"
-import { Array, Chunk, Option } from "effect"
+import * as Array from "effect/Array"
+import * as Chunk from "effect/Chunk"
 import { dual, pipe } from "effect/Function"
+import * as Option from "effect/Option"
+import type * as Predicate from "effect/Predicate"
 
 /** @internal */
 const RegexSymbolKey = "@effect/parser/Regex"

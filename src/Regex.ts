@@ -4,7 +4,9 @@
 import type { BitSet } from "@effect/parser/BitSet"
 import * as common from "@effect/parser/internal_effect_untraced/common"
 import * as internal from "@effect/parser/internal_effect_untraced/regex"
-import type { Chunk, Option, Predicate } from "effect"
+import type * as Chunk from "effect/Chunk"
+import type * as Option from "effect/Option"
+import type * as Predicate from "effect/Predicate"
 
 /**
  * @since 1.0.0

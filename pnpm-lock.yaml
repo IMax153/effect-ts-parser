@@ -10,31 +10,31 @@ importers:
     dependencies:
       effect:
         specifier: ^3.10.19
-        version: 3.10.19
+        version: 3.11.2
     devDependencies:
       '@babel/cli':
-        specifier: ^7.24.8
+        specifier: ^7.25.9
         version: 7.25.9(@babel/core@7.26.0)
       '@babel/core':
-        specifier: ^7.25.2
+        specifier: ^7.26.0
         version: 7.26.0
       '@babel/plugin-transform-export-namespace-from':
-        specifier: ^7.24.7
+        specifier: ^7.25.9
         version: 7.25.9(@babel/core@7.26.0)
       '@babel/plugin-transform-modules-commonjs':
-        specifier: ^7.24.8
+        specifier: ^7.25.9
         version: 7.25.9(@babel/core@7.26.0)
       '@changesets/changelog-github':
         specifier: ^0.5.0
         version: 0.5.0
       '@changesets/cli':
-        specifier: ^2.27.7
+        specifier: ^2.27.10
         version: 2.27.10
       '@edge-runtime/vm':
-        specifier: ^4.0.0
+        specifier: ^4.0.4
         version: 4.0.4
       '@effect/build-utils':
-        specifier: ^0.7.7
+        specifier: ^0.7.8
         version: 0.7.8
       '@effect/docgen':
         specifier: ^0.5.1
@@ -61,25 +61,25 @@ importers:
         specifier: ^0.11.11
         version: 0.11.11
       '@types/node':
-        specifier: ^22.9.3
+        specifier: ^22.10.1
         version: 22.10.1
       '@typescript-eslint/eslint-plugin':
-        specifier: ^7.16.0
+        specifier: ^7.18.0
         version: 7.18.0(@typescript-eslint/parser@7.18.0(eslint@9.15.0)(typescript@5.7.2))(eslint@9.15.0)(typescript@5.7.2)
       '@typescript-eslint/parser':
-        specifier: ^7.16.0
+        specifier: ^7.18.0
         version: 7.18.0(eslint@9.15.0)(typescript@5.7.2)
       '@vitest/browser':
-        specifier: ^2.1.4
+        specifier: ^2.1.6
         version: 2.1.6(@types/node@22.10.1)(playwright@1.49.0)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1))(vitest@2.1.6)
       '@vitest/coverage-v8':
-        specifier: ^2.1.4
+        specifier: ^2.1.6
         version: 2.1.6(@vitest/browser@2.1.6(@types/node@22.10.1)(playwright@1.49.0)(typescript@5.7.2)(vite@5.4.11(@types/node@22.10.1))(vitest@2.1.6))(vitest@2.1.6(@edge-runtime/vm@4.0.4)(@types/node@22.10.1)(@vitest/browser@2.1.6)(msw@2.6.6(@types/node@22.10.1)(typescript@5.7.2)))
       '@vitest/expect':
-        specifier: ^2.1.4
+        specifier: ^2.1.6
         version: 2.1.6
       '@vitest/web-worker':
-        specifier: ^2.1.4
+        specifier: ^2.1.6
         version: 2.1.6(vitest@2.1.6(@edge-runtime/vm@4.0.4)(@types/node@22.10.1)(@vitest/browser@2.1.6)(msw@2.6.6(@types/node@22.10.1)(typescript@5.7.2)))
       ast-types:
         specifier: ^0.14.2
@@ -88,7 +88,7 @@ importers:
         specifier: ^0.4.0
         version: 0.4.0(@babel/core@7.26.0)
       eslint:
-        specifier: ^9.9.1
+        specifier: ^9.15.0
         version: 9.15.0
       eslint-import-resolver-typescript:
         specifier: ^3.6.3
@@ -97,7 +97,7 @@ importers:
         specifier: ^0.28.0
         version: 0.28.0(eslint@9.15.0)
       eslint-plugin-import:
-        specifier: ^2.30.0
+        specifier: ^2.31.0
         version: 2.31.0(@typescript-eslint/parser@7.18.0(eslint@9.15.0)(typescript@5.7.2))(eslint-import-resolver-typescript@3.6.3)(eslint@9.15.0)
       eslint-plugin-simple-import-sort:
         specifier: ^12.1.1
@@ -106,7 +106,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0(eslint@9.15.0)
       fast-check:
-        specifier: ^3.21.0
+        specifier: ^3.23.1
         version: 3.23.1
       glob:
         specifier: ^11.0.0
@@ -118,25 +118,25 @@ importers:
         specifier: ^8.0.0
         version: 8.0.0(typescript@5.7.2)
       playwright:
-        specifier: ^1.46.0
+        specifier: ^1.49.0
         version: 1.49.0
       prettier:
-        specifier: ^3.3.3
+        specifier: ^3.4.1
         version: 3.4.1
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
       tsx:
-        specifier: ^4.17.0
+        specifier: ^4.19.2
         version: 4.19.2
       typescript:
         specifier: ^5.7.2
         version: 5.7.2
       vite:
-        specifier: ^5.4.0
+        specifier: ^5.4.11
         version: 5.4.11(@types/node@22.10.1)
       vitest:
-        specifier: ^2.1.4
+        specifier: ^2.1.6
         version: 2.1.6(@edge-runtime/vm@4.0.4)(@types/node@22.10.1)(@vitest/browser@2.1.6)(msw@2.6.6(@types/node@22.10.1)(typescript@5.7.2))
     publishDirectory: dist
 
@@ -1815,8 +1815,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  effect@3.10.19:
-    resolution: {integrity: sha512-Bc+unZVpHQ/0QkydshNk97OjDXT17Y1M4rBjDZaEPjD6YmlcZxhadEo325OfdPQKWCKEHTdRGtX8/bfQ0RLTIw==}
+  effect@3.11.2:
+    resolution: {integrity: sha512-iBdej2wiVtPijAn04uQQVZK3xtHIdiwLQHvW1KonEuDaHWKjaxbIVwz8TabfP6dWTZlm4jNR8DXUwhq56JWF+Q==}
 
   electron-to-chromium@1.5.67:
     resolution: {integrity: sha512-nz88NNBsD7kQSAGGJyp8hS6xSPtWwqNogA0mjtc2nUYeEf3nURK9qpV18TuBdDmEDgVWotS8Wkzf+V52dSQ/LQ==}
@@ -5774,7 +5774,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  effect@3.10.19:
+  effect@3.11.2:
     dependencies:
       fast-check: 3.23.1
 

@@ -4,7 +4,10 @@ import * as parserError from "@effect/parser/internal_effect_untraced/parserErro
 import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Regex from "@effect/parser/Regex"
-import { Chunk, Either, List, Option } from "effect"
+import * as Chunk from "effect/Chunk"
+import * as Either from "effect/Either"
+import * as List from "effect/List"
+import * as Option from "effect/Option"
 
 /**
  * The state of the recursive parser implementation.

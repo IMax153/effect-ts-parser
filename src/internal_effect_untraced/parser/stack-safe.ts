@@ -4,8 +4,11 @@ import * as parserError from "@effect/parser/internal_effect_untraced/parserErro
 import * as regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Regex from "@effect/parser/Regex"
-import type { Function } from "effect"
-import { Chunk, Either, List, Option } from "effect"
+import * as Chunk from "effect/Chunk"
+import * as Either from "effect/Either"
+import type * as Function from "effect/Function"
+import * as List from "effect/List"
+import * as Option from "effect/Option"
 
 /**
  * A `Parser` operation, the language that a `Parser` is precompiled to for

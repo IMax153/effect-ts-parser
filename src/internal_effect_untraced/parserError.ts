@@ -1,7 +1,7 @@
 import type * as ParserError from "@effect/parser/ParserError"
-import type { List } from "effect"
-import { Option } from "effect"
 import { dual } from "effect/Function"
+import type * as List from "effect/List"
+import * as Option from "effect/Option"
 
 /** @internal */
 const ParserErrorSymbolKey = "@effect/parser/ParserError"

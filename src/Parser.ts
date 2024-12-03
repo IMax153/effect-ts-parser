@@ -4,7 +4,12 @@
 import * as internal from "@effect/parser/internal_effect_untraced/parser"
 import type { ParserError } from "@effect/parser/ParserError"
 import type { Regex } from "@effect/parser/Regex"
-import type { Chunk, Either, Function, Option, Predicate } from "effect"
+import type * as Chunk from "effect/Chunk"
+import type * as Either from "effect/Either"
+import type * as Function from "effect/Function"
+import type * as Option from "effect/Option"
+import type * as Predicate from "effect/Predicate"
+
 /**
  * @since 1.0.0
  * @category symbols
