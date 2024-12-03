@@ -741,7 +741,7 @@ export const surroundedBy: {
  *
  * @example
  *
- * import { pipe } from "@effect/data/Function"
+ * import { pipe } from "effect"
  * import * as Syntax from "@effect/parser/Syntax"
  *
  * const recursive: Syntax.Syntax<string, string, string, string> = pipe(
