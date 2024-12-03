@@ -16,4 +16,3 @@ madge(glob.globSync(["src/**/*.ts"]), {
     process.exit(1)
   }
 })
-
