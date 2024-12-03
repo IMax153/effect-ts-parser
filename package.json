@@ -42,7 +42,7 @@
     "changeset-publish": "pnpm codemod && pnpm lint-fix && pnpm build && TEST_DIST= pnpm vitest && changeset publish"
   },
   "peerDependencies": {
-    "effect": "^3.10.19"
+    "effect": "^3.11.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.25.9",

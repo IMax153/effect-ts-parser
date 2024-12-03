@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       effect:
-        specifier: ^3.10.19
+        specifier: ^3.11.2
         version: 3.11.2
     devDependencies:
       '@babel/cli':
