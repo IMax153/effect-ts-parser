@@ -1,8 +1,8 @@
 /**
  * @since 1.0.0
  */
-import * as internal from "@effect/parser/internal_effect_untraced/chunkTarget"
 import type { Target } from "@effect/parser/Target"
+import * as internal from "../internal_effect_untraced/chunkTarget.js"
 
 /**
  * @since 1.0.0

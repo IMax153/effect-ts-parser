@@ -1,14 +1,14 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk, NonEmptyChunk } from "@effect/data/Chunk"
-import type { Either } from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import * as internal from "@effect/parser/internal_effect_untraced/parser"
 import type { ParserError } from "@effect/parser/ParserError"
 import type { Regex } from "@effect/parser/Regex"
+import type * as Chunk from "effect/Chunk"
+import type * as Either from "effect/Either"
+import type * as Function from "effect/Function"
+import type * as Option from "effect/Option"
+import type * as Predicate from "effect/Predicate"
+import * as internal from "./internal_effect_untraced/parser.js"
 
 /**
  * @since 1.0.0
@@ -140,8 +140,8 @@ export const asUnit: <Input, Error, Result>(self: Parser<Input, Error, Result>) 
  * @category combinators
  */
 export const atLeast: {
-  (min: number): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Chunk<Result>>
-  <Input, Error, Result>(self: Parser<Input, Error, Result>, min: number): Parser<Input, Error, Chunk<Result>>
+  (min: number): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Chunk.Chunk<Result>>
+  <Input, Error, Result>(self: Parser<Input, Error, Result>, min: number): Parser<Input, Error, Chunk.Chunk<Result>>
 } = internal.repeatMin
 
 /**
@@ -260,8 +260,10 @@ export const end: Parser<unknown, never, void> = internal.end
  * @category combinators
  */
 export const exactly: {
-  (times: number): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Chunk<Result>>
-  <Input, Error, Result>(self: Parser<Input, Error, Result>, times: number): Parser<Input, Error, Chunk<Result>>
+  (
+    times: number
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Parser<Input, Error, Chunk.Chunk<Result>>
+  <Input, Error, Result>(self: Parser<Input, Error, Result>, times: number): Parser<Input, Error, Chunk.Chunk<Result>>
 } = internal.repeatExactly
 
 /**
@@ -281,14 +283,14 @@ export const fail: <Error>(error: Error) => Parser<unknown, Error, never> = inte
  */
 export const filter: {
   <Result, Error2>(
-    predicate: Predicate<Result>,
+    predicate: Predicate.Predicate<Result>,
     error: Error2
   ): <Input, Error>(
     self: Parser<Input, Error, Result>
   ) => Parser<Input, Error2 | Error, Result>
   <Input, Error, Result, Error2>(
     self: Parser<Input, Error, Result>,
-    predicate: Predicate<Result>,
+    predicate: Predicate.Predicate<Result>,
     error: Error2
   ): Parser<Input, Error | Error2, Result>
 } = internal.filter
@@ -317,7 +319,7 @@ export const flatMap: {
  * @since 1.0.0
  * @category combinators
  */
-export const flatten: <Input, Error>(self: Parser<Input, Error, Chunk<string>>) => Parser<Input, Error, string> =
+export const flatten: <Input, Error>(self: Parser<Input, Error, Chunk.Chunk<string>>) => Parser<Input, Error, string> =
   internal.flatten
 
 /**
@@ -327,7 +329,7 @@ export const flatten: <Input, Error>(self: Parser<Input, Error, Chunk<string>>) 
  * @category combinators
  */
 export const flattenNonEmpty: <Input, Error>(
-  self: Parser<Input, Error, NonEmptyChunk<string>>
+  self: Parser<Input, Error, Chunk.NonEmptyChunk<string>>
 ) => Parser<Input, Error, string> = internal.flattenNonEmpty
 
 /**
@@ -434,7 +436,7 @@ export const not: {
  */
 export const optional: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, Option<Result>> = internal.optional
+) => Parser<Input, Error, Option.Option<Result>> = internal.optional
 
 /**
  * Assigns `that` parser as a fallback of this parser.
@@ -449,13 +451,13 @@ export const optional: <Input, Error, Result>(
  */
 export const orElse: {
   <Input2, Error2, Result2>(
-    that: LazyArg<Parser<Input2, Error2, Result2>>
+    that: Function.LazyArg<Parser<Input2, Error2, Result2>>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
   ) => Parser<Input & Input2, Error2 | Error, Result2 | Result>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
-    that: LazyArg<Parser<Input2, Error2, Result2>>
+    that: Function.LazyArg<Parser<Input2, Error2, Result2>>
   ): Parser<Input & Input2, Error | Error2, Result | Result2>
 } = internal.orElse
 
@@ -477,14 +479,14 @@ export const orElse: {
  */
 export const orElseEither: {
   <Input2, Error2, Result2>(
-    that: LazyArg<Parser<Input2, Error2, Result2>>
+    that: Function.LazyArg<Parser<Input2, Error2, Result2>>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Either<Result, Result2>>
+  ) => Parser<Input & Input2, Error2 | Error, Either.Either<Result2, Result>>
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser<Input, Error, Result>,
-    that: LazyArg<Parser<Input2, Error2, Result2>>
-  ): Parser<Input & Input2, Error | Error2, Either<Result, Result2>>
+    that: Function.LazyArg<Parser<Input2, Error2, Result2>>
+  ): Parser<Input & Input2, Error | Error2, Either.Either<Result2, Result>>
 } = internal.orElseEither
 
 /**
@@ -494,8 +496,10 @@ export const orElseEither: {
  * @category execution
  */
 export const parseString: {
-  (input: string): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<ParserError<Error>, Result>
-  <Input, Error, Result>(self: Parser<Input, Error, Result>, input: string): Either<ParserError<Error>, Result>
+  (
+    input: string
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either.Either<Result, ParserError<Error>>
+  <Input, Error, Result>(self: Parser<Input, Error, Result>, input: string): Either.Either<Result, ParserError<Error>>
 } = internal.parseString
 
 /**
@@ -509,12 +513,12 @@ export const parseStringWith: {
   (
     input: string,
     implementation: Parser.Implementation
-  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either<ParserError<Error>, Result>
+  ): <Input, Error, Result>(self: Parser<Input, Error, Result>) => Either.Either<Result, ParserError<Error>>
   <Input, Error, Result>(
     self: Parser<Input, Error, Result>,
     input: string,
     implementation: Parser.Implementation
-  ): Either<ParserError<Error>, Result>
+  ): Either.Either<Result, ParserError<Error>>
 } = internal.parseStringWith
 
 /**
@@ -525,7 +529,7 @@ export const parseStringWith: {
  * @since 1.0.0
  * @category constructors
  */
-export const regex: <Error>(regex: Regex, error: Error) => Parser<string, Error, Chunk<string>> = internal.regex
+export const regex: <Error>(regex: Regex, error: Error) => Parser<string, Error, Chunk.Chunk<string>> = internal.regex
 
 /**
  * Constructs a `Parser` that executes a regular expression on the input and
@@ -559,7 +563,7 @@ export const regexDiscard: <Error>(regex: Regex, error: Error) => Parser<string,
  */
 export const repeat: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, Chunk<Result>> = internal.repeatMin0
+) => Parser<Input, Error, Chunk.Chunk<Result>> = internal.repeatMin0
 
 /**
  * Repeats this parser at least once.
@@ -573,7 +577,7 @@ export const repeat: <Input, Error, Result>(
  */
 export const repeat1: <Input, Error, Result>(
   self: Parser<Input, Error, Result>
-) => Parser<Input, Error, NonEmptyChunk<Result>> = internal.repeatMin1
+) => Parser<Input, Error, Chunk.NonEmptyChunk<Result>> = internal.repeatMin1
 
 /**
  * Repeats this parser until the given `stopCondition` parser succeeds.
@@ -586,11 +590,11 @@ export const repeatUntil: {
     stopCondition: Parser<Input2, Error2, void>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Chunk<Result>>
+  ) => Parser<Input & Input2, Error2 | Error, Chunk.Chunk<Result>>
   <Input, Error, Result, Input2, Error2>(
     self: Parser<Input, Error, Result>,
     stopCondition: Parser<Input2, Error2, void>
-  ): Parser<Input & Input2, Error | Error2, Chunk<Result>>
+  ): Parser<Input & Input2, Error | Error2, Chunk.Chunk<Result>>
 } = internal.repeatUntil
 
 /**
@@ -605,11 +609,11 @@ export const repeatWithSeparator: {
     separator: Parser<Input2, Error2, void>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, Chunk<Result>>
+  ) => Parser<Input & Input2, Error2 | Error, Chunk.Chunk<Result>>
   <Input, Error, Result, Input2, Error2>(
     self: Parser<Input, Error, Result>,
     separator: Parser<Input2, Error2, void>
-  ): Parser<Input & Input2, Error | Error2, Chunk<Result>>
+  ): Parser<Input & Input2, Error | Error2, Chunk.Chunk<Result>>
 } = internal.repeatWithSeparator
 
 /**
@@ -624,11 +628,11 @@ export const repeatWithSeparator1: {
     separator: Parser<Input2, Error2, void>
   ): <Input, Error, Result>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input & Input2, Error2 | Error, NonEmptyChunk<Result>>
+  ) => Parser<Input & Input2, Error2 | Error, Chunk.NonEmptyChunk<Result>>
   <Input, Error, Result, Input2, Error2>(
     self: Parser<Input, Error, Result>,
     separator: Parser<Input2, Error2, void>
-  ): Parser<Input & Input2, Error | Error2, NonEmptyChunk<Result>>
+  ): Parser<Input & Input2, Error | Error2, Chunk.NonEmptyChunk<Result>>
 } = internal.repeatWithSeparator1
 
 /**
@@ -667,7 +671,7 @@ export const succeed: <Result>(result: Result) => Parser<unknown, never, Result>
  * @category constructors
  */
 export const suspend: <Input, Error, Result>(
-  parser: LazyArg<Parser<Input, Error, Result>>
+  parser: Function.LazyArg<Parser<Input, Error, Result>>
 ) => Parser<Input, Error, Result> = internal.suspend
 
 /**
@@ -698,13 +702,13 @@ export const surroundedBy: {
  */
 export const transformEither: {
   <Result, Error2, Result2>(
-    f: (result: Result) => Either<Error2, Result2>
+    f: (result: Result) => Either.Either<Result2, Error2>
   ): <Input, Error>(
     self: Parser<Input, Error, Result>
   ) => Parser<Input, Error2, Result2>
   <Input, Error, Result, Error2, Result2>(
     self: Parser<Input, Error, Result>,
-    f: (result: Result) => Either<Error2, Result2>
+    f: (result: Result) => Either.Either<Result2, Error2>
   ): Parser<Input, Error2, Result2>
 } = internal.transformEither
 
@@ -718,14 +722,14 @@ export const transformEither: {
  */
 export const transformOption: {
   <Result, Result2>(
-    pf: (result: Result) => Option<Result2>
+    pf: (result: Result) => Option.Option<Result2>
   ): <Input, Error>(
     self: Parser<Input, Error, Result>
-  ) => Parser<Input, Option<Error>, Result2>
+  ) => Parser<Input, Option.Option<Error>, Result2>
   <Input, Error, Result, Result2>(
     self: Parser<Input, Error, Result>,
-    pf: (result: Result) => Option<Result2>
-  ): Parser<Input, Option<Error>, Result2>
+    pf: (result: Result) => Option.Option<Result2>
+  ): Parser<Input, Option.Option<Error>, Result2>
 } = internal.transformOption
 
 /**
@@ -744,7 +748,7 @@ export const unit: () => Parser<unknown, never, void> = internal.unit
  * @since 1.0.0
  * @category constructors
  */
-export const unsafeRegex: (regex: Regex) => Parser<string, never, Chunk<string>> = internal.unsafeRegex
+export const unsafeRegex: (regex: Regex) => Parser<string, never, Chunk.Chunk<string>> = internal.unsafeRegex
 
 /**
  * Constructs a `Parser` that executes a regular expression on the input and

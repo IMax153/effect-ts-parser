@@ -1,13 +1,13 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import * as List from "@effect/data/List"
-import * as Option from "@effect/data/Option"
-import * as common from "@effect/parser/internal_effect_untraced/common"
-import type * as parser from "@effect/parser/internal_effect_untraced/parser"
-import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Regex from "@effect/parser/Regex"
+import * as Chunk from "effect/Chunk"
+import * as Either from "effect/Either"
+import * as List from "effect/List"
+import * as Option from "effect/Option"
+import * as common from "../common.js"
+import type * as parser from "../parser.js"
+import * as parserError from "../parserError.js"
+import * as _regex from "../regex.js"
 
 /**
  * The state of the recursive parser implementation.

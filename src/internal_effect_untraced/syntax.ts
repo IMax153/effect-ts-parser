@@ -1,18 +1,18 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import { dual, pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import { tuple } from "@effect/data/Tuple"
-import * as _parser from "@effect/parser/internal_effect_untraced/parser"
-import * as _printer from "@effect/parser/internal_effect_untraced/printer"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as Parser from "@effect/parser/Parser"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Printer from "@effect/parser/Printer"
 import type * as Regex from "@effect/parser/Regex"
 import type * as Syntax from "@effect/parser/Syntax"
+import * as Chunk from "effect/Chunk"
+import * as Either from "effect/Either"
+import type * as Function from "effect/Function"
+import { dual, pipe } from "effect/Function"
+import * as Option from "effect/Option"
+import type * as Predicate from "effect/Predicate"
+import * as Tuple from "effect/Tuple"
+import * as _parser from "../internal_effect_untraced/parser.js"
+import * as _printer from "../internal_effect_untraced/printer.js"
+import * as _regex from "../internal_effect_untraced/regex.js"
 
 /** @internal */
 const SyntaxSymbolKey = "@effect/Syntax/Syntax"
@@ -111,20 +111,20 @@ export const optional = <Input, Error, Output, Value>(
 
 /** @internal */
 export const suspend = <Input, Error, Output, Value>(
-  self: LazyArg<Syntax.Syntax<Input, Error, Output, Value>>
+  self: Function.LazyArg<Syntax.Syntax<Input, Error, Output, Value>>
 ): Syntax.Syntax<Input, Error, Output, Value> =>
   make(_parser.suspend(() => self().parser), _printer.suspend(() => self().printer))
 
 /** @internal */
 export const orElse = dual<
   <Input2, Error2, Output2, Value>(
-    that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
+    that: Function.LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
   ) => <Input, Error, Output>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value>,
   <Input, Error, Output, Value, Input2, Error2, Output2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
+    that: Function.LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value>>
   ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Value>
 >(2, (self, that) =>
   make(
@@ -135,14 +135,14 @@ export const orElse = dual<
 /** @internal */
 export const orElseEither = dual<
   <Input2, Error2, Output2, Value2>(
-    that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
+    that: Function.LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
   ) => <Input, Error, Output, Value>(
     self: Syntax.Syntax<Input, Error, Output, Value>
-  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>,
+  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value2, Value>>,
   <Input, Error, Output, Value, Input2, Error2, Output2, Value2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    that: LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
-  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value, Value2>>
+    that: Function.LazyArg<Syntax.Syntax<Input2, Error2, Output2, Value2>>
+  ) => Syntax.Syntax<Input & Input2, Error | Error2, Output | Output2, Either.Either<Value2, Value>>
 >(2, (self, that) =>
   make(
     _parser.orElseEither(self.parser, () => that().parser),
@@ -171,15 +171,15 @@ export const transform = dual<
 /** @internal */
 export const transformEither = dual<
   <Error, Value, Value2>(
-    to: (value: Value) => Either.Either<Error, Value2>,
-    from: (value: Value2) => Either.Either<Error, Value>
+    to: (value: Value) => Either.Either<Value2, Error>,
+    from: (value: Value2) => Either.Either<Value, Error>
   ) => <Input, Output>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input, Error, Output, Value2>,
   <Input, Error, Output, Value, Value2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    to: (value: Value) => Either.Either<Error, Value2>,
-    from: (value: Value2) => Either.Either<Error, Value>
+    to: (value: Value) => Either.Either<Value2, Error>,
+    from: (value: Value2) => Either.Either<Value, Error>
   ) => Syntax.Syntax<Input, Error, Output, Value2>
 >(3, (self, to, from) =>
   make(
@@ -254,19 +254,19 @@ export const transformTo = dual<
 /** @internal */
 export const filter = dual<
   <Value, Error2>(
-    predicate: Predicate<Value>,
+    predicate: Predicate.Predicate<Value>,
     error: Error2
   ) => <Input, Error, Output>(
     self: Syntax.Syntax<Input, Error, Output, Value>
   ) => Syntax.Syntax<Input, Error | Error2, Output, Value>,
   <Input, Error, Output, Value, Error2>(
     self: Syntax.Syntax<Input, Error, Output, Value>,
-    predicate: Predicate<Value>,
+    predicate: Predicate.Predicate<Value>,
     error: Error2
   ) => Syntax.Syntax<Input, Error | Error2, Output, Value>
 >(3, <Input, Error, Output, Value, Error2>(
   self: Syntax.Syntax<Input, Error, Output, Value>,
-  predicate: Predicate<Value>,
+  predicate: Predicate.Predicate<Value>,
   error: Error2
 ) =>
   transformEither(
@@ -277,7 +277,7 @@ export const filter = dual<
 
 /** @internal */
 export const filterChar = <Error>(
-  predicate: Predicate<string>,
+  predicate: Predicate.Predicate<string>,
   error: Error
 ): Syntax.Syntax<string, Error, string, string> => regexChar(_regex.filter(predicate), error)
 
@@ -465,7 +465,7 @@ export const repeatWithSeparator = dual<
       (a) =>
         Chunk.isNonEmpty(a) ?
           Option.some(
-            tuple(
+            Tuple.make(
               Chunk.headNonEmpty(a),
               Chunk.drop(a, 1)
             )
@@ -498,7 +498,7 @@ export const repeatWithSeparator1 = dual<
     // readonly [Value, readonly Value[]] => => readonly Value[]
     ([head, tail]) => Chunk.prepend(tail, head) as Chunk.NonEmptyChunk<V<typeof self>>,
     (a) =>
-      tuple(
+      Tuple.make(
         Chunk.headNonEmpty(a),
         Chunk.tailNonEmpty(a)
       )
@@ -665,11 +665,11 @@ export const parseString = dual<
     input: string
   ) => <Error, Output, Value>(
     self: Syntax.Syntax<string, Error, Output, Value>
-  ) => Either.Either<ParserError.ParserError<Error>, Value>,
+  ) => Either.Either<Value, ParserError.ParserError<Error>>,
   <Error, Output, Value>(
     self: Syntax.Syntax<string, Error, Output, Value>,
     input: string
-  ) => Either.Either<ParserError.ParserError<Error>, Value>
+  ) => Either.Either<Value, ParserError.ParserError<Error>>
 >(2, (self, input) => _parser.parseString(self.parser, input))
 
 /** @internal */
@@ -679,12 +679,12 @@ export const parseStringWith = dual<
     implementation: Parser.Parser.Implementation
   ) => <Error, Output, Value>(
     self: Syntax.Syntax<string, Error, Output, Value>
-  ) => Either.Either<ParserError.ParserError<Error>, Value>,
+  ) => Either.Either<Value, ParserError.ParserError<Error>>,
   <Error, Output, Value>(
     self: Syntax.Syntax<string, Error, Output, Value>,
     input: string,
     implementation: Parser.Parser.Implementation
-  ) => Either.Either<ParserError.ParserError<Error>, Value>
+  ) => Either.Either<Value, ParserError.ParserError<Error>>
 >(3, (self, input, implementation) => _parser.parseStringWith(self.parser, input, implementation))
 
 /** @internal */
@@ -693,9 +693,9 @@ export const printString = dual<
     value: Value
   ) => <Input, Error>(
     self: Syntax.Syntax<Input, Error, string, Value>
-  ) => Either.Either<Error, string>,
+  ) => Either.Either<string, Error>,
   <Input, Error, Value>(
     self: Syntax.Syntax<Input, Error, string, Value>,
     value: Value
-  ) => Either.Either<Error, string>
+  ) => Either.Either<string, Error>
 >(2, (self, value) => _printer.printToString(self.printer, value))

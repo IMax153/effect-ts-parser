@@ -1,12 +1,12 @@
 /**
  * @since 1.0.0
  */
-import type { Chunk } from "@effect/data/Chunk"
-import type { Option } from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
 import type { BitSet } from "@effect/parser/BitSet"
-import * as common from "@effect/parser/internal_effect_untraced/common"
-import * as internal from "@effect/parser/internal_effect_untraced/regex"
+import type * as Chunk from "effect/Chunk"
+import type * as Option from "effect/Option"
+import type * as Predicate from "effect/Predicate"
+import * as common from "./internal_effect_untraced/common.js"
+import * as internal from "./internal_effect_untraced/regex.js"
 
 /**
  * @since 1.0.0
@@ -114,8 +114,8 @@ export interface Sequence extends Regex.Proto {
 export interface Repeat extends Regex.Proto {
   readonly _tag: "Repeat"
   readonly regex: Regex
-  readonly min: Option<number>
-  readonly max: Option<number>
+  readonly min: Option.Option<number>
+  readonly max: Option.Option<number>
 }
 
 /**
@@ -286,7 +286,7 @@ export const empty: Regex = internal.succeed
  * @since 1.0.0
  * @category combinators
  */
-export const filter: (predicate: Predicate<string>) => Regex = internal.filter
+export const filter: (predicate: Predicate.Predicate<string>) => Regex = internal.filter
 
 /**
  * A `Regex` that matches one or more letter characters.
@@ -334,7 +334,7 @@ export const string: (string: string) => Regex = internal.string
  * @since 1.0.0
  * @category getters
  */
-export const toLiteral: (self: Regex) => Option<Chunk<string>> = internal.toLiteral
+export const toLiteral: (self: Regex) => Option.Option<Chunk.Chunk<string>> = internal.toLiteral
 
 /**
  * A `Regex` that matches zero or more whitespace characters.

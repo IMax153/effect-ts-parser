@@ -1,9 +1,9 @@
 /**
  * @since 1.0.0
  */
-import type { List } from "@effect/data/List"
-import type { Option } from "@effect/data/Option"
-import * as internal from "@effect/parser/internal_effect_untraced/parserError"
+import type * as List from "effect/List"
+import type * as Option from "effect/Option"
+import * as internal from "./internal_effect_untraced/parserError.js"
 
 /**
  * @since 1.0.0
@@ -30,7 +30,13 @@ export type ParserError<Error> =
   | UnexpectedEndOfInput
   | UnknownFailure
 
+/**
+ * @since 1.0.0
+ */
 export declare namespace ParserError {
+  /**
+   * @since 1.0.0
+   */
   export interface Proto {
     readonly [ParserErrorTypeId]: ParserErrorTypeId
   }
@@ -68,7 +74,7 @@ export interface Failure<Error> extends ParserError.Proto {
   /**
    * The stack of named parsers until reaching the failure.
    */
-  readonly nameStack: List<string>
+  readonly nameStack: List.List<string>
   /**
    * The current input stream position.
    */
@@ -91,7 +97,7 @@ export interface NotConsumedAll<Error> extends ParserError.Proto {
   /**
    * The last failure encountered in the `Parser`, if any.
    */
-  readonly lastFailure: Option<ParserError<Error>>
+  readonly lastFailure: Option.Option<ParserError<Error>>
 }
 
 /**
@@ -119,7 +125,7 @@ export interface UnknownFailure extends ParserError.Proto {
   /**
    * The stack of named parsers until reaching the failure.
    */
-  readonly nameStack: List<string>
+  readonly nameStack: List.List<string>
   /**
    * The current input stream position.
    */
@@ -146,7 +152,7 @@ export const allBranchesFailed: <Error, Error2>(
  * @since 1.0.0
  * @category constructors
  */
-export const failure: <Error>(nameStack: List<string>, position: number, failure: Error) => ParserError<Error> =
+export const failure: <Error>(nameStack: List.List<string>, position: number, failure: Error) => ParserError<Error> =
   internal.failure
 
 /**
@@ -156,7 +162,7 @@ export const failure: <Error>(nameStack: List<string>, position: number, failure
  * @since 1.0.0
  * @category constructors
  */
-export const notConsumedAll: <Error>(lastFailure: Option<ParserError<Error>>) => ParserError<Error> =
+export const notConsumedAll: <Error>(lastFailure: Option.Option<ParserError<Error>>) => ParserError<Error> =
   internal.notConsumedAll
 
 /**
@@ -177,7 +183,8 @@ export const unexpectedEndOfInput: ParserError<never> = internal.unexpectedEndOf
  * @since 1.0.0
  * @category constructors
  */
-export const unknownFailure: (nameStack: List<string>, position: number) => ParserError<Error> = internal.unknownFailure
+export const unknownFailure: (nameStack: List.List<string>, position: number) => ParserError<Error> =
+  internal.unknownFailure
 
 /**
  * Returns `true` if the value is a `ParserError`, `false` otherwise.

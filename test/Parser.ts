@@ -1,11 +1,6 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
-import * as List from "@effect/data/List"
-import * as Option from "@effect/data/Option"
-import * as ReadonlyArray from "@effect/data/ReadonlyArray"
 import * as ParserError from "@effect/parser/ParserError"
 import * as Syntax from "@effect/parser/Syntax"
+import { Array as Arr, Chunk, Either, List, Option, pipe } from "effect"
 import { describe, expect, it } from "vitest"
 
 const charA = Syntax.as(Syntax.char("a"), "a")
@@ -15,7 +10,7 @@ const recursive: Syntax.Syntax<string, string, string, string> = pipe(
   Syntax.zip(
     pipe(Syntax.suspend(() => recursive), Syntax.orElse(() => Syntax.letter))
   ),
-  Syntax.transform(ReadonlyArray.join(""), (from) => [from[0], from.slice(1)] as const)
+  Syntax.transform(Arr.join(""), (from) => [from[0], from.slice(1)] as const)
 )
 
 // TODO : not working
@@ -40,7 +35,7 @@ const parserTest = <Error, Result>(
   name: string,
   syntax: Syntax.Syntax<string, Error, string, Result>,
   input: string,
-  assertion: Either.Either<ParserError.ParserError<Error>, Result>
+  assertion: Either.Either<Result, ParserError.ParserError<Error>>
 ): void => {
   it(`${name} - stack-safe`, () => {
     const result = Syntax.parseStringWith(syntax, input, "stack-safe")

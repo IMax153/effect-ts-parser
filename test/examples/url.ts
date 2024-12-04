@@ -1,9 +1,6 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import { pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
 import * as Syntax from "@effect/parser/Syntax"
 import { tests } from "@effect/parser/test/examples/utils"
+import { Chunk, Either, Option, pipe } from "effect"
 
 // TODO: percent encoding ie replacing spaces " " with "%20"
 

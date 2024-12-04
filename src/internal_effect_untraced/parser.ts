@@ -1,16 +1,16 @@
-import * as Chunk from "@effect/data/Chunk"
-import * as Either from "@effect/data/Either"
-import type { LazyArg } from "@effect/data/Function"
-import { dual, pipe } from "@effect/data/Function"
-import * as Option from "@effect/data/Option"
-import type { Predicate } from "@effect/data/Predicate"
-import * as recursive from "@effect/parser/internal_effect_untraced/parser/recursive"
-import * as stackSafe from "@effect/parser/internal_effect_untraced/parser/stack-safe"
-import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as Parser from "@effect/parser/Parser"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Regex from "@effect/parser/Regex"
+import * as Chunk from "effect/Chunk"
+import * as Either from "effect/Either"
+import type * as Function from "effect/Function"
+import { dual, pipe } from "effect/Function"
+import * as Option from "effect/Option"
+import type * as Predicate from "effect/Predicate"
+import * as recursive from "../internal_effect_untraced/parser/recursive.js"
+import * as stackSafe from "../internal_effect_untraced/parser/stack-safe.js"
+import * as parserError from "../internal_effect_untraced/parserError.js"
+import * as _regex from "../internal_effect_untraced/regex.js"
 
 /** @internal */
 const ParserSymbolKey = "@effect/parser/Parser"
@@ -149,7 +149,7 @@ export interface Optional extends
 export interface OrElse extends
   Op<"OrElse", {
     readonly left: Primitive
-    readonly right: LazyArg<Primitive>
+    readonly right: Function.LazyArg<Primitive>
   }>
 {}
 
@@ -157,7 +157,7 @@ export interface OrElse extends
 export interface OrElseEither extends
   Op<"OrElseEither", {
     readonly left: Primitive
-    readonly right: LazyArg<Primitive>
+    readonly right: Function.LazyArg<Primitive>
   }>
 {}
 
@@ -215,7 +215,7 @@ export interface Succeed extends
 /** @internal */
 export interface Suspend extends
   Op<"Suspend", {
-    readonly parser: LazyArg<Primitive>
+    readonly parser: Function.LazyArg<Primitive>
   }>
 {}
 
@@ -391,14 +391,14 @@ export const fail = <Error>(error: Error): Parser.Parser<unknown, Error, never> 
 /** @internal */
 export const filter = dual<
   <Result, Error2>(
-    predicate: Predicate<Result>,
+    predicate: Predicate.Predicate<Result>,
     error: Error2
   ) => <Input, Error>(
     self: Parser.Parser<Input, Error, Result>
   ) => Parser.Parser<Input, Error | Error2, Result>,
   <Input, Error, Result, Error2>(
     self: Parser.Parser<Input, Error, Result>,
-    predicate: Predicate<Result>,
+    predicate: Predicate.Predicate<Result>,
     error: Error2
   ) => Parser.Parser<Input, Error | Error2, Result>
 >(3, (self, predicate, error) =>
@@ -543,13 +543,13 @@ export const optional = <Input, Error, Result>(
 /** @internal */
 export const orElse = dual<
   <Input2, Error2, Result2>(
-    that: LazyArg<Parser.Parser<Input2, Error2, Result2>>
+    that: Function.LazyArg<Parser.Parser<Input2, Error2, Result2>>
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
   ) => Parser.Parser<Input & Input2, Error | Error2, Result | Result2>,
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser.Parser<Input, Error, Result>,
-    that: LazyArg<Parser.Parser<Input2, Error2, Result2>>
+    that: Function.LazyArg<Parser.Parser<Input2, Error2, Result2>>
   ) => Parser.Parser<Input & Input2, Error | Error2, Result | Result2>
 >(2, (self, that) => {
   const op = Object.create(proto)
@@ -562,14 +562,14 @@ export const orElse = dual<
 /** @internal */
 export const orElseEither = dual<
   <Input2, Error2, Result2>(
-    that: LazyArg<Parser.Parser<Input2, Error2, Result2>>
+    that: Function.LazyArg<Parser.Parser<Input2, Error2, Result2>>
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
-  ) => Parser.Parser<Input & Input2, Error | Error2, Either.Either<Result, Result2>>,
+  ) => Parser.Parser<Input & Input2, Error | Error2, Either.Either<Result2, Result>>,
   <Input, Error, Result, Input2, Error2, Result2>(
     self: Parser.Parser<Input, Error, Result>,
-    that: LazyArg<Parser.Parser<Input2, Error2, Result2>>
-  ) => Parser.Parser<Input & Input2, Error | Error2, Either.Either<Result, Result2>>
+    that: Function.LazyArg<Parser.Parser<Input2, Error2, Result2>>
+  ) => Parser.Parser<Input & Input2, Error | Error2, Either.Either<Result2, Result>>
 >(2, (self, that) => {
   const op = Object.create(proto)
   op._tag = "OrElseEither"
@@ -773,7 +773,7 @@ export const succeed = <Result>(result: Result): Parser.Parser<unknown, never, R
 
 /** @internal */
 export const suspend = <Input, Error, Result>(
-  parser: LazyArg<Parser.Parser<Input, Error, Result>>
+  parser: Function.LazyArg<Parser.Parser<Input, Error, Result>>
 ): Parser.Parser<Input, Error, Result> => {
   const op = Object.create(proto)
   op._tag = "Suspend"
@@ -783,13 +783,13 @@ export const suspend = <Input, Error, Result>(
 /** @internal */
 export const transformEither = dual<
   <Result, Error2, Result2>(
-    f: (result: Result) => Either.Either<Error2, Result2>
+    f: (result: Result) => Either.Either<Result2, Error2>
   ) => <Input, Error>(
     self: Parser.Parser<Input, Error, Result>
   ) => Parser.Parser<Input, Error2, Result2>,
   <Input, Error, Result, Error2, Result2>(
     self: Parser.Parser<Input, Error, Result>,
-    f: (result: Result) => Either.Either<Error2, Result2>
+    f: (result: Result) => Either.Either<Result2, Error2>
   ) => Parser.Parser<Input, Error2, Result2>
 >(2, (self, f) => {
   const op = Object.create(proto)
@@ -961,12 +961,12 @@ export const parseStringWith = dual<
     implementation: Parser.Parser.Implementation
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
-  ) => Either.Either<ParserError.ParserError<Error>, Result>,
+  ) => Either.Either<Result, ParserError.ParserError<Error>>,
   <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>,
     input: string,
     implementation: Parser.Parser.Implementation
-  ) => Either.Either<ParserError.ParserError<Error>, Result>
+  ) => Either.Either<Result, ParserError.ParserError<Error>>
 >(3, <Input, Error, Result>(
   self: Parser.Parser<Input, Error, Result>,
   input: string,
@@ -977,7 +977,7 @@ export const parseStringWith = dual<
       return stackSafe.charParserExecutor(
         stackSafe.compile(optimize(self) as Primitive),
         input
-      ) as Either.Either<ParserError.ParserError<Error>, Result>
+      ) as Either.Either<Result, ParserError.ParserError<Error>>
     }
     case "recursive": {
       const state = new StringParserState(input)
@@ -996,11 +996,11 @@ export const parseString = dual<
     input: string
   ) => <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>
-  ) => Either.Either<ParserError.ParserError<Error>, Result>,
+  ) => Either.Either<Result, ParserError.ParserError<Error>>,
   <Input, Error, Result>(
     self: Parser.Parser<Input, Error, Result>,
     input: string
-  ) => Either.Either<ParserError.ParserError<Error>, Result>
+  ) => Either.Either<Result, ParserError.ParserError<Error>>
 >(2, (self, input) => parseStringWith(self, input, "recursive"))
 
 // -----------------------------------------------------------------------------
@@ -1079,7 +1079,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.mapRight(inner.to(result), () => self.to)
+        op.to = (result: unknown) => Either.map(inner.to(result), () => self.to)
       } else if (inner._tag === "CaptureString" || inner._tag === "Ignore" || inner._tag === "Transform") {
         op._tag = "Ignore"
         op.parser = inner.parser
@@ -1210,7 +1210,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.mapRight(inner.to(result), self.to)
+        op.to = (result: unknown) => Either.map(inner.to(result), self.to)
       } else if (inner._tag === "Transform") {
         op._tag = "Transform"
         op.parser = inner.parser
@@ -1229,7 +1229,7 @@ const optimizeNode = (
       if (inner._tag === "TransformEither") {
         op._tag = "TransformEither"
         op.parser = inner.parser
-        op.to = (result: unknown) => Either.mapRight(inner.to(result), self.to)
+        op.to = (result: unknown) => Either.map(inner.to(result), self.to)
       } else if (inner._tag === "Transform") {
         op._tag = "TransformEither"
         op.parser = inner.parser

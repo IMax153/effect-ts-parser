@@ -1,7 +1,7 @@
 /**
  * @since 1.0.0
  */
-import * as internal from "@effect/parser/internal_effect_untraced/bitset"
+import * as internal from "./internal_effect_untraced/bitset.js"
 
 /**
  * @since 1.0.0

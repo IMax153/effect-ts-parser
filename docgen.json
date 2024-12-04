@@ -1,28 +1,19 @@
 {
+  "$schema": "node_modules/@effect/docgen/schema.json",
   "exclude": ["src/internal_effect_untraced/**/*.ts"],
-  "theme": "mikearnaldi/just-the-docs",
-  "parseCompilerOptions": {
-    "strict": true,
-    "noEmit": true,
-    "target": "ES2021",
-    "lib": ["ES2021"],
-    "paths": {
-      "@effect/parser": ["./src/index.ts"],
-      "@effect/parser/test/*": ["./test/*"],
-      "@effect/parser/examples/*": ["./examples/*"],
-      "@effect/parser/*": ["./src/*"]
-    }
-  },
   "examplesCompilerOptions": {
-    "strict": true,
     "noEmit": true,
-    "target": "ES2021",
-    "lib": ["ES2021"],
+    "strict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "module": "ES2022",
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "paths": {
-      "@effect/parser": ["../../src/index.ts"],
-      "@effect/parser/test/*": ["../../test/*"],
-      "@effect/parser/examples/*": ["../../examples/*"],
-      "@effect/parser/*": ["../../src/*"]
+      "@effect/parser": ["../../src/index.js"],
+      "@effect/parser/test/*": ["../../test/*.js"],
+      "@effect/parser/examples/*": ["../../examples/*.js"],
+      "@effect/parser/*": ["../../src/*.js"]
     }
   }
 }
