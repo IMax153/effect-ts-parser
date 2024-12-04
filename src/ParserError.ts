@@ -1,9 +1,9 @@
 /**
  * @since 1.0.0
  */
-import * as internal from "@effect/parser/internal_effect_untraced/parserError"
 import type * as List from "effect/List"
 import type * as Option from "effect/Option"
+import * as internal from "./internal_effect_untraced/parserError"
 
 /**
  * @since 1.0.0

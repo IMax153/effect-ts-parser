@@ -1,7 +1,6 @@
 /**
  * @since 1.0.0
  */
-import * as internal from "@effect/parser/internal_effect_untraced/printer"
 import type { Regex } from "@effect/parser/Regex"
 import type { Target } from "@effect/parser/Target"
 import type * as Chunk from "effect/Chunk"
@@ -9,6 +8,7 @@ import type * as Either from "effect/Either"
 import type * as Function from "effect/Function"
 import type * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
+import * as internal from "./internal_effect_untraced/printer"
 
 /**
  * @since 1.0.0

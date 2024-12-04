@@ -1,5 +1,3 @@
-import * as bitset from "@effect/parser/internal_effect_untraced/bitset"
-import * as common from "@effect/parser/internal_effect_untraced/common"
 import type * as Regex from "@effect/parser/Regex"
 import * as Arr from "effect/Array"
 import * as Cause from "effect/Cause"
@@ -10,6 +8,8 @@ import * as Hash from "effect/Hash"
 import * as HashSet from "effect/HashSet"
 import * as Number from "effect/Number"
 import * as Option from "effect/Option"
+import * as bitset from "../internal_effect_untraced/bitset"
+import * as common from "../internal_effect_untraced/common"
 
 const LookupFunctionSymbolKey = "@effect/parser/LookupFunction"
 

@@ -1,7 +1,3 @@
-import * as recursive from "@effect/parser/internal_effect_untraced/parser/recursive"
-import * as stackSafe from "@effect/parser/internal_effect_untraced/parser/stack-safe"
-import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as Parser from "@effect/parser/Parser"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Regex from "@effect/parser/Regex"
@@ -11,6 +7,10 @@ import type * as Function from "effect/Function"
 import { dual, pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
+import * as recursive from "../internal_effect_untraced/parser/recursive"
+import * as stackSafe from "../internal_effect_untraced/parser/stack-safe"
+import * as parserError from "../internal_effect_untraced/parserError"
+import * as _regex from "../internal_effect_untraced/regex"
 
 /** @internal */
 const ParserSymbolKey = "@effect/parser/Parser"

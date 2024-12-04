@@ -1,13 +1,13 @@
-import * as common from "@effect/parser/internal_effect_untraced/common"
-import type * as parser from "@effect/parser/internal_effect_untraced/parser"
-import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Regex from "@effect/parser/Regex"
 import * as Chunk from "effect/Chunk"
 import * as Either from "effect/Either"
 import * as List from "effect/List"
 import * as Option from "effect/Option"
+import * as common from "../common"
+import type * as parser from "../parser"
+import * as parserError from "../parserError"
+import * as _regex from "../regex"
 
 /**
  * The state of the recursive parser implementation.

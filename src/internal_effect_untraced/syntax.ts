@@ -1,6 +1,3 @@
-import * as _parser from "@effect/parser/internal_effect_untraced/parser"
-import * as _printer from "@effect/parser/internal_effect_untraced/printer"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as Parser from "@effect/parser/Parser"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Printer from "@effect/parser/Printer"
@@ -13,6 +10,9 @@ import { dual, pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
 import * as Tuple from "effect/Tuple"
+import * as _parser from "../internal_effect_untraced/parser"
+import * as _printer from "../internal_effect_untraced/printer"
+import * as _regex from "../internal_effect_untraced/regex"
 
 /** @internal */
 const SyntaxSymbolKey = "@effect/Syntax/Syntax"

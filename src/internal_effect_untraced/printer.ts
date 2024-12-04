@@ -1,6 +1,3 @@
-import * as chunkTarget from "@effect/parser/internal_effect_untraced/chunkTarget"
-import * as parserError from "@effect/parser/internal_effect_untraced/parserError"
-import * as _regex from "@effect/parser/internal_effect_untraced/regex"
 import type * as ParserError from "@effect/parser/ParserError"
 import type * as Printer from "@effect/parser/Printer"
 import type * as Regex from "@effect/parser/Regex"
@@ -13,6 +10,9 @@ import { constVoid, dual, pipe } from "effect/Function"
 import * as List from "effect/List"
 import * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
+import * as chunkTarget from "../internal_effect_untraced/chunkTarget"
+import * as parserError from "../internal_effect_untraced/parserError"
+import * as _regex from "../internal_effect_untraced/regex"
 
 /** @internal */
 const PrinterSymbolKey = "@effect/parser/Printer"
