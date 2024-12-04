@@ -48,7 +48,7 @@ jobs:
       - run: pnpm run circular
       - run: pnpm run test --coverage
       - run: pnpm run lint
-      - run: pnpm run docs
+      - run: pnpm run docgen
       # Disabling until out of active development
       # - name: Create Release Pull Request or Publish
       #   id: changesets
