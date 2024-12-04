@@ -11,7 +11,7 @@ import type * as Either from "effect/Either"
 import type * as Function from "effect/Function"
 import type * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
-import * as internal from "./internal_effect_untraced/syntax"
+import * as internal from "./internal_effect_untraced/syntax.js"
 
 /**
  * @since 1.0.0

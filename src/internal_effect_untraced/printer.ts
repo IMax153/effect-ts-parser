@@ -10,9 +10,9 @@ import { constVoid, dual, pipe } from "effect/Function"
 import * as List from "effect/List"
 import * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
-import * as chunkTarget from "../internal_effect_untraced/chunkTarget"
-import * as parserError from "../internal_effect_untraced/parserError"
-import * as _regex from "../internal_effect_untraced/regex"
+import * as chunkTarget from "../internal_effect_untraced/chunkTarget.js"
+import * as parserError from "../internal_effect_untraced/parserError.js"
+import * as _regex from "../internal_effect_untraced/regex.js"
 
 /** @internal */
 const PrinterSymbolKey = "@effect/parser/Printer"

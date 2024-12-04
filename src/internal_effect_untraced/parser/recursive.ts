@@ -4,10 +4,10 @@ import * as Chunk from "effect/Chunk"
 import * as Either from "effect/Either"
 import * as List from "effect/List"
 import * as Option from "effect/Option"
-import * as common from "../common"
-import type * as parser from "../parser"
-import * as parserError from "../parserError"
-import * as _regex from "../regex"
+import * as common from "../common.js"
+import type * as parser from "../parser.js"
+import * as parserError from "../parserError.js"
+import * as _regex from "../regex.js"
 
 /**
  * The state of the recursive parser implementation.

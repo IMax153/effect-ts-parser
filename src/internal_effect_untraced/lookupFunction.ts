@@ -8,8 +8,8 @@ import * as Hash from "effect/Hash"
 import * as HashSet from "effect/HashSet"
 import * as Number from "effect/Number"
 import * as Option from "effect/Option"
-import * as bitset from "../internal_effect_untraced/bitset"
-import * as common from "../internal_effect_untraced/common"
+import * as bitset from "../internal_effect_untraced/bitset.js"
+import * as common from "../internal_effect_untraced/common.js"
 
 const LookupFunctionSymbolKey = "@effect/parser/LookupFunction"
 

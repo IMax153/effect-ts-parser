@@ -5,8 +5,8 @@ import type { BitSet } from "@effect/parser/BitSet"
 import type * as Chunk from "effect/Chunk"
 import type * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
-import * as common from "./internal_effect_untraced/common"
-import * as internal from "./internal_effect_untraced/regex"
+import * as common from "./internal_effect_untraced/common.js"
+import * as internal from "./internal_effect_untraced/regex.js"
 
 /**
  * @since 1.0.0

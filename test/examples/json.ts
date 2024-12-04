@@ -1,6 +1,6 @@
 import * as Syntax from "@effect/parser/Syntax"
 import { Chunk, Either, Option, pipe } from "effect"
-import { hexDigit, tests } from "./utils"
+import { hexDigit, tests } from "./utils.js"
 
 const whitespace = pipe(
   Syntax.charIn([" ", "\n", "\r", "\t"]),

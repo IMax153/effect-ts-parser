@@ -5,9 +5,9 @@ import * as Chunk from "effect/Chunk"
 import { dual, pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
-import * as bitset from "../internal_effect_untraced/bitset"
-import * as common from "../internal_effect_untraced/common"
-import * as lookupFunction from "../internal_effect_untraced/lookupFunction"
+import * as bitset from "../internal_effect_untraced/bitset.js"
+import * as common from "../internal_effect_untraced/common.js"
+import * as lookupFunction from "../internal_effect_untraced/lookupFunction.js"
 
 /** @internal */
 const RegexSymbolKey = "@effect/parser/Regex"

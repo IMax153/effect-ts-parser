@@ -10,9 +10,9 @@ import { dual, pipe } from "effect/Function"
 import * as Option from "effect/Option"
 import type * as Predicate from "effect/Predicate"
 import * as Tuple from "effect/Tuple"
-import * as _parser from "../internal_effect_untraced/parser"
-import * as _printer from "../internal_effect_untraced/printer"
-import * as _regex from "../internal_effect_untraced/regex"
+import * as _parser from "../internal_effect_untraced/parser.js"
+import * as _printer from "../internal_effect_untraced/printer.js"
+import * as _regex from "../internal_effect_untraced/regex.js"
 
 /** @internal */
 const SyntaxSymbolKey = "@effect/Syntax/Syntax"
